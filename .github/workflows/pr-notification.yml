@@ -2,7 +2,7 @@ name: PR Notification
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 jobs:
   notify-discord:
@@ -86,8 +86,50 @@ jobs:
             const reviewers = pr.requested_reviewers.map(r => r.login);
             
             // Get GitHub to Discord ID mapping from secrets
-            const idMapping = JSON.parse(process.env.USERNAME_DISCORD_MAPPING);
-            const authorReviewerMapping = JSON.parse(process.env.AUTHOR_REVIEWER_MAPPING);
+            let idMapping = {};
+            let authorReviewerMapping = {};
+            
+            console.log('USERNAME_DISCORD_MAPPING:', process.env.USERNAME_DISCORD_MAPPING);
+            try {
+              if (!process.env.USERNAME_DISCORD_MAPPING) {
+                throw new Error('USERNAME_DISCORD_MAPPING 시크릿이 설정되지 않았습니다.');
+              }
+              // 쉼표로 구분된 매핑 문자열을 파싱
+              const mappings = process.env.USERNAME_DISCORD_MAPPING.split(',');
+              for (const mapping of mappings) {
+                const [githubUsername, discordId] = mapping.split(':').map(s => s.trim());
+                if (githubUsername && discordId) {
+                  idMapping[githubUsername] = discordId;
+                }
+              }
+              if (Object.keys(idMapping).length === 0) {
+                throw new Error('USERNAME_DISCORD_MAPPING이 올바른 형식이 아닙니다.');
+              }
+            } catch (error) {
+              console.error('시크릿 파싱 에러:', error.message);
+              throw new Error(`시크릿 파싱 에러: ${error.message}`);
+            }
+            
+            console.log('AUTHOR_REVIEWER_MAPPING:', process.env.AUTHOR_REVIEWER_MAPPING);
+            try {
+              if (!process.env.AUTHOR_REVIEWER_MAPPING) {
+                throw new Error('AUTHOR_REVIEWER_MAPPING 시크릿이 설정되지 않았습니다.');
+              }
+              // 쉼표로 구분된 매핑 문자열을 파싱
+              const mappings = process.env.AUTHOR_REVIEWER_MAPPING.split(',');
+              for (const mapping of mappings) {
+                const [author, reviewer] = mapping.split(':').map(s => s.trim());
+                if (author && reviewer) {
+                  authorReviewerMapping[author] = reviewer;
+                }
+              }
+              if (Object.keys(authorReviewerMapping).length === 0) {
+                throw new Error('AUTHOR_REVIEWER_MAPPING이 올바른 형식이 아닙니다.');
+              }
+            } catch (error) {
+              console.error('시크릿 파싱 에러:', error.message);
+              throw new Error(`시크릿 파싱 에러: ${error.message}`);
+            }
             
             // Set PR author as assignee
             await github.rest.issues.addAssignees({
