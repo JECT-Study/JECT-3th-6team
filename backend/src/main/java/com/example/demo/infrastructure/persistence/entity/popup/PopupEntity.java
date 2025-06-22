@@ -21,7 +21,7 @@ public class PopupEntity extends BaseEntity {
     private String title;
 
     @Column(name = "slot_interval_minutes", nullable = false)
-    private Integer slotIntervalMinutes;
+    private int slotIntervalMinutes;
 
     // TODO: model에서 enum 도입 후 타입 교체 예정
     @Column(name = "type", nullable = false)

@@ -19,10 +19,10 @@ public class PopupContentEntity{
     @Column(name = "popup_id", nullable = false)
     private Long popupId;
 
-    @Column(name = "content_text", columnDefinition = "TEXT")
+    @Column(name = "content_text", columnDefinition = "TEXT", nullable = false)
     private String contentText;
 
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder; // 섹션 순서
+    private int sortOrder; // 섹션 순서
 }
 

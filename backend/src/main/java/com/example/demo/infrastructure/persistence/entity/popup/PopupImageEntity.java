@@ -23,10 +23,10 @@ public class PopupImageEntity{
     @Column(name = "type", nullable = false)
     private String type; // ex: MAIN, DESCRIPTION
 
-    @Column(name = "url", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "url", nullable = false)
     private String url;
 
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder; // 0, 1, 2 등으로 정렬
+    private int sortOrder; // 0, 1, 2 등으로 정렬
 }
 

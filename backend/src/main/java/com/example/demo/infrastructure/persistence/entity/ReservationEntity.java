@@ -30,7 +30,7 @@ public class ReservationEntity extends BaseEntity {
     private String reserverName;
 
     @Column(name = "number_of_people", nullable = false)
-    private Integer numberOfPeople;
+    private int numberOfPeople;
 
     @Column(name = "email", nullable = false)
     private String email;

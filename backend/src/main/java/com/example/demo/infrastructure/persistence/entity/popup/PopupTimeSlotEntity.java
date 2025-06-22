@@ -29,6 +29,6 @@ public class PopupTimeSlotEntity extends BaseEntity {
     private LocalTime slotTime;
 
     @Column(name = "available_count", nullable = false)
-    private Integer availableCount;
+    private int availableCount;
 
 }

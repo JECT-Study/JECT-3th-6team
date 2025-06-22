@@ -26,5 +26,5 @@ public class PopupSocialEntity {
     private String linkUrl;
 
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
+    private int sortOrder;
 }
