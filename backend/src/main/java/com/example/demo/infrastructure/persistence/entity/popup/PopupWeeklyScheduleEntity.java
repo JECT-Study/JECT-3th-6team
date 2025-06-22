@@ -1,6 +1,5 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
-import com.example.demo.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +10,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "popup_weekly_schedules")
-public class PopupWeeklyScheduleEntity extends BaseEntity {
+public class PopupWeeklyScheduleEntity {
     // 요일별 오픈시간 + 마감시간을 갖고 있는 테이블
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

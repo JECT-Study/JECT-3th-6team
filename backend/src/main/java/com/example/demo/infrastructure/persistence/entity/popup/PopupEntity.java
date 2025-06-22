@@ -1,6 +1,5 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
-import com.example.demo.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +10,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "popups")
-public class PopupEntity extends BaseEntity {
+public class PopupEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false)

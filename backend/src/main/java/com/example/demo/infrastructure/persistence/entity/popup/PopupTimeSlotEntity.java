@@ -1,6 +1,5 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
-import com.example.demo.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +11,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "popup_time_slots")
-public class PopupTimeSlotEntity extends BaseEntity {
+public class PopupTimeSlotEntity {
     // 각 요일 + 시간대 + 예약가능 인원수를 갖고 있는 테이블
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
