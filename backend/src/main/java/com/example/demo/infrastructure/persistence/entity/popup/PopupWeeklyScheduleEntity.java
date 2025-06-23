@@ -2,6 +2,8 @@ package com.example.demo.infrastructure.persistence.entity.popup;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,9 +22,9 @@ public class PopupWeeklyScheduleEntity {
     @Column(name = "popup_id", nullable = false)
     private Long popupId;
 
-    // TODO: model에서 enum 도입 후 타입 교체 예정
+    @Enumerated(EnumType.STRING)
     @Column(name = "day_of_week", nullable = false)
-    private String dayOfWeek;
+    private DayOfWeek dayOfWeek;
 
     @Column(name = "open_time", nullable = false)
     private LocalTime openTime;

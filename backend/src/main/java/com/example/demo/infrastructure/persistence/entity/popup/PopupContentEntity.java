@@ -23,6 +23,6 @@ public class PopupContentEntity{
     private String contentText;
 
     @Column(name = "sort_order", nullable = false)
-    private int sortOrder; // 섹션 순서
+    private int sortOrder;
 }
 
