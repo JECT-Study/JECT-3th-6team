@@ -3,6 +3,8 @@ package com.example.demo.infrastructure.persistence.entity;
 import com.example.demo.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,7 +37,7 @@ public class ReservationEntity extends BaseEntity {
     @Column(name = "email", nullable = false)
     private String email;
 
-    // TODO: model에서 enum 도입 후 타입 교체 예정
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status; // ex: RESERVED, VISITED
+    private ReservationStatus status;
 }
