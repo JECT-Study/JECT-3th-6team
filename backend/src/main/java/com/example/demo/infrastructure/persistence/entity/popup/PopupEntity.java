@@ -21,6 +21,9 @@ public class PopupEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "popup_location_id", nullable = false)
+    private Long popupLocationId;
+
     @Column(name = "slot_interval_minutes", nullable = false)
     private int slotIntervalMinutes;
 
