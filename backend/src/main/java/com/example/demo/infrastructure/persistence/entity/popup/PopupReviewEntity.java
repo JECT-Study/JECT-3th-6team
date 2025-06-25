@@ -23,9 +23,6 @@ public class PopupReviewEntity extends BaseEntity {
     @Column(name = "member_id", nullable = false)
     private Long memberId;
 
-    @Column(name = "reservation_id", nullable = false)
-    private Long reservationId;
-
     @Column(name = "rating", nullable = false)
     private int rating;
 
