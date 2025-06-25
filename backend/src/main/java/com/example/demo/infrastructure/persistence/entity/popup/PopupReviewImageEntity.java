@@ -2,8 +2,6 @@ package com.example.demo.infrastructure.persistence.entity.popup;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,10 +17,6 @@ public class PopupReviewImageEntity {
 
     @Column(name = "popup_review_id", nullable = false)
     private Long popupReviewId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private PopupImageType type;
 
     @Column(name = "url", nullable = false)
     private String url;
