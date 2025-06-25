@@ -28,10 +28,10 @@ public class PopupLocationEntity {
     @Column(name = "region_3depth_name")
     private String region3DepthName;
 
-    @Column(name = "x", nullable = false, precision = 15, scale = 10)
-    private Double x;
+    @Column(name = "longitude", nullable = false)
+    private Double longitude;
 
-    @Column(name = "y", nullable = false, precision = 15, scale = 10)
-    private Double y;
+    @Column(name = "latitude", nullable = false)
+    private Double latitude;
 }
 
