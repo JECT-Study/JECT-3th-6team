@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import lombok.Getter;
 
 @Entity
 @Table(name = "popups")

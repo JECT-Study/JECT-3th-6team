@@ -10,9 +10,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import lombok.Getter;
 
 @Entity
 @Table(name = "popup_weekly_schedules")
+@Getter
 public class PopupWeeklyScheduleEntity {
     // 요일별 오픈시간 + 마감시간을 갖고 있는 테이블
     @Id
