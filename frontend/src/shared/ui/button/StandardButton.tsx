@@ -25,12 +25,11 @@ export default function StandardButton({
 
   const style = colorMap[color] + ' ' + sizeMap[size] + ' ' + shadowStyle;
 
-  // TODO : 디자인 시안 완료시 Disabled 된 상태의 UI 추가
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`text-normal font-medium cursor-pointer active:bg-main-active transition-colors duration-250 ${style} ${customClass}`}
+      className={`text-normal font-medium cursor-pointer active:bg-main-active active:text-white disabled:bg-gray40 disabled:text-gray80 transition-colors duration-250 ${style} ${customClass}`}
     >
       {children}
     </button>
