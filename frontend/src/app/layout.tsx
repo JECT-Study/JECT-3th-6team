@@ -23,7 +23,18 @@ export default function RootLayout({
   return (
       <html lang="kr" className={`${pretendard.variable}`}>
       <body className={`${pretendard.className} `}>
-        {children}
+        <div className="min-h-screen bg-gray40">
+          <div className="w-full min-w-[320px] max-w-[430px] mx-auto bg-white min-h-screen">
+            {/* <Header /> */}
+            
+            {/* 메인 콘텐츠 영역 */}
+            <main className="flex-1">
+              {children}
+            </main>
+
+            {/* <BottomNav /> */}
+          </div>
+        </div>
       </body>
     </html>
   );

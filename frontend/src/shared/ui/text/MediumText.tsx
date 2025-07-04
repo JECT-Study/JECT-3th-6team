@@ -1,14 +1,17 @@
 import { TextProps } from './types';
 
-export function RegularText({ 
+export function MediumText({ 
   children, 
   className = '', 
   onClick,
+  color,
   ...props 
 }: TextProps) {
+  const textColorClass = color || 'text-text-color';
+  
   return (
     <p 
-      className={`text-[28px] font-normal text-[var(--color-text-color)] font-pretendard leading-normal ${className}`}
+      className={`text-[16px] font-medium ${textColorClass} leading-normal ${className}`}
       onClick={onClick}
       {...props}
     >

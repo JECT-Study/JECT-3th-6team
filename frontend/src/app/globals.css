@@ -180,3 +180,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .fill-main {
+    filter: brightness(0) saturate(100%) invert(58%) sepia(100%) saturate(1000%) hue-rotate(0deg) brightness(1) contrast(1);
+  }
+}

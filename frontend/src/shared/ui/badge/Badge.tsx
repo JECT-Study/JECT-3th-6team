@@ -11,7 +11,7 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         main: "bg-main",
-        gray: "bg-[var(--color-gray80)]",
+        gray: "bg-gray80",
       },
     },
     defaultVariants: {
@@ -39,11 +39,11 @@ export function Badge({
   const Comp = asChild ? Slot : "span"
 
   const renderContent = () => {
-    if (iconPosition === 'none' || !icon) {
+    if (!icon && iconPosition === 'none') {
       return children
     }
 
-    if (iconPosition === 'left') {
+    if (!icon && iconPosition === 'left') {
       const clockIcon = (
         <Image
           src="/icons/Normal/Icon_Clock.svg"
@@ -53,7 +53,7 @@ export function Badge({
           className="w-3 h-3 brightness-0 invert"
         />
       )
-      
+
       return (
         <>
           {clockIcon}
@@ -75,5 +75,3 @@ export function Badge({
     </Comp>
   )
 }
-
-
