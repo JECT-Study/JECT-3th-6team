@@ -1,1 +1,1 @@
-export { default as BasicPopupCard } from './ui/BasicPopupCard';
+export { default as BadgedPopupCard } from './ui/BadgedPopupCard';

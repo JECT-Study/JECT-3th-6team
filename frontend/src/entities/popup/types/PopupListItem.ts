@@ -1,7 +1,11 @@
-type ratingType = {
+import React from 'react';
+
+export type ratingType = {
   averageStar: number;
   reviewCount: number;
 };
+
+export type statusType = 'RESERVED' | 'COMPLETED';
 
 // 팝업 리스트 조회시
 export interface PopupListItemType {
@@ -27,12 +31,23 @@ export interface PopupListItemType {
 // 방문 내역 조회시
 export interface VisitedPopupListItemType {
   waitingId: number;
+  popupId: number; //✅
+  popupName: string; //✅
+  popupImageUrl: string; //✅
+  location: string; //✅
+  rating: ratingType; //✅
+  period: string; //✅
+  waitingNumber: number;
+  status: statusType;
+}
+
+export interface PopupCardViewProps {
   popupId: number;
   popupName: string;
-  popupImageUrl: 'https://example.com/images/seogu_design.jpg';
+  popupImageUrl: string;
   location: string;
   rating: ratingType;
   period: string;
-  waitingNumber: number;
-  status: 'RESERVED' | 'COMPLETED';
+  hasRightBar?: boolean;
+  Badge?: React.ReactElement;
 }
