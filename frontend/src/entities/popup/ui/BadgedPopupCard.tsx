@@ -71,6 +71,7 @@ const mapToCardProps = (data: PopupItemType): PopupCardViewProps => {
       location: data.location.address_name,
       rating: data.rating,
       period: periodStr,
+      linkTo: `/detail/${data.id}`,
       Badge: renderedBadge,
     };
   }
@@ -84,6 +85,7 @@ const mapToCardProps = (data: PopupItemType): PopupCardViewProps => {
     rating: data.rating,
     period: data.period,
     hasRightBar: data.status === 'RESERVED',
+    linkTo: data.status === 'RESERVED' ? '/waiting' : `/detail/${data.popupId}`,
     Badge: renderedBadge,
   };
 };

@@ -11,12 +11,12 @@ import IconBracketRight from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
 
 const PopupCardLink = ({
   children,
-  popupId,
+  linkTo,
 }: {
   children: React.ReactNode;
-  popupId: number;
+  linkTo: string;
 }) => (
-  <Link href={`/popup/detail/${popupId}`}>
+  <Link href={linkTo}>
     <div className="relative w-full flex rounded-2xl bg-white overflow-hidden shadow-card">
       {children}
     </div>
@@ -82,7 +82,7 @@ const PopupCardRightBar = () => (
 
 export default function PopupCardView(props: PopupCardViewProps) {
   return (
-    <PopupCardLink popupId={props.popupId}>
+    <PopupCardLink linkTo={props.linkTo}>
       <PopupCardImage
         image={props.popupImageUrl}
         popupName={props.popupName}

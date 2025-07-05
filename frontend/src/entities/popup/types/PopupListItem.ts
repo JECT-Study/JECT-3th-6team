@@ -48,6 +48,7 @@ export interface PopupCardViewProps {
   location: string;
   rating: ratingType;
   period: string;
+  linkTo: string;
   hasRightBar?: boolean;
   Badge?: React.ReactElement;
 }
