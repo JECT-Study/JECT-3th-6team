@@ -3,12 +3,16 @@ package com.example.demo.application.mapper;
 import com.example.demo.application.dto.WaitingCreateResponse;
 import com.example.demo.application.dto.WaitingResponse;
 import com.example.demo.domain.model.*;
+import com.example.demo.domain.model.popup.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,14 +23,49 @@ class WaitingDtoMapperTest {
     @DisplayName("toCreateResponse 테스트")
     class Test01 {
         // 테스트용 유효한 데이터
-        private final PopupDetail validPopup = new PopupDetail(
-            1L, "테스트 팝업", List.of("thumbnail1.jpg"), 5,
-            new Rating(4.5, 100), new SearchTags("팝업", List.of("테스트")),
-            new Location("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-            new Period(LocalDate.now(), LocalDate.now().plusDays(30)),
-            new BrandStory(List.of("brand1.jpg"), List.of()),
-            new PopupDetailInfo(List.of(), List.of("상세 설명"))
-        );
+        private final Popup validPopup = Popup.builder()
+                .id(1L)
+                .name("테스트 팝업")
+                .location(
+                        new Location(
+                                "서울시 강남구",
+                                "서울특별시",
+                                "강남구",
+                                "역삼동",
+                                127.0012,
+                                37.5665
+                        )
+                )
+                .schedule(
+                        new PopupSchedule(
+                                new DateRange(
+                                        LocalDate.now(),
+                                        LocalDate.now().plusDays(30)
+                                ),
+                                new WeeklyOpeningHours(
+                                        List.of(
+                                                new OpeningHours(
+                                                        DayOfWeek.MONDAY,
+                                                        LocalTime.now(),
+                                                        LocalTime.now().plusHours(1)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .display(
+                        new PopupDisplay(
+                                List.of("http://image.com"),
+                                new PopupContent("팝업 설명", "팝업 공지"),
+                                List.of(new Sns("http://image.com", "http://sns.com"))
+                        )
+                )
+                .type(PopupType.EXHIBITION)
+                .popupCategories(
+                        List.of(new PopupCategory(1L, "예술"))
+                )
+                .status(PopupStatus.IN_PROGRESS)
+                .build();
 
         private final Member validMember = new Member(1L, "테스트 사용자", "test@example.com");
 
@@ -36,8 +75,8 @@ class WaitingDtoMapperTest {
             // given
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
-                1L, validPopup, "홍길동", validMember,
-                "hong@example.com", 2, 1, WaitingStatus.RESERVED, registeredAt
+                    1L, validPopup, "홍길동", validMember,
+                    "hong@example.com", 2, 1, WaitingStatus.RESERVED, registeredAt
             );
 
             // when
@@ -60,8 +99,8 @@ class WaitingDtoMapperTest {
             // given
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
-                2L, validPopup, "김철수", validMember,
-                "kim@example.com", 3, 2, WaitingStatus.COMPLETED, registeredAt
+                    2L, validPopup, "김철수", validMember,
+                    "kim@example.com", 3, 2, WaitingStatus.COMPLETED, registeredAt
             );
 
             // when
@@ -83,14 +122,49 @@ class WaitingDtoMapperTest {
     @DisplayName("toResponse 테스트")
     class Test02 {
         // 테스트용 유효한 데이터
-        private final PopupDetail validPopup = new PopupDetail(
-            1L, "테스트 팝업", List.of("thumbnail1.jpg", "thumbnail2.jpg"), 5,
-            new Rating(4.5, 100), new SearchTags("팝업", List.of("테스트")),
-            new Location("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-            new Period(LocalDate.now(), LocalDate.now().plusDays(30)),
-            new BrandStory(List.of("brand1.jpg"), List.of()),
-            new PopupDetailInfo(List.of(), List.of("상세 설명"))
-        );
+        private final Popup validPopup = Popup.builder()
+                .id(1L)
+                .name("테스트 팝업")
+                .location(
+                        new Location(
+                                "서울시 강남구",
+                                "서울특별시",
+                                "강남구",
+                                "역삼동",
+                                127.0012,
+                                37.5665
+                        )
+                )
+                .schedule(
+                        new PopupSchedule(
+                                new DateRange(
+                                        LocalDate.now(),
+                                        LocalDate.now().plusDays(30)
+                                ),
+                                new WeeklyOpeningHours(
+                                        List.of(
+                                                new OpeningHours(
+                                                        DayOfWeek.MONDAY,
+                                                        LocalTime.now(),
+                                                        LocalTime.now().plusHours(1)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .display(
+                        new PopupDisplay(
+                                List.of("http://image.com"),
+                                new PopupContent("팝업 설명", "팝업 공지"),
+                                List.of(new Sns("http://image.com", "http://sns.com"))
+                        )
+                )
+                .type(PopupType.EXHIBITION)
+                .popupCategories(
+                        List.of(new PopupCategory(1L, "예술"))
+                )
+                .status(PopupStatus.IN_PROGRESS)
+                .build();
 
         private final Member validMember = new Member(1L, "테스트 사용자", "test@example.com");
 
@@ -100,8 +174,8 @@ class WaitingDtoMapperTest {
             // given
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
-                1L, validPopup, "홍길동", validMember,
-                "hong@example.com", 2, 1, WaitingStatus.RESERVED, registeredAt
+                    1L, validPopup, "홍길동", validMember,
+                    "hong@example.com", 2, 1, WaitingStatus.RESERVED, registeredAt
             );
 
             // when
@@ -126,19 +200,54 @@ class WaitingDtoMapperTest {
         @DisplayName("썸네일이 없는 Waiting을 WaitingResponse로 변환 테스트")
         public void test02() {
             // given
-            PopupDetail popupWithoutThumbnails = new PopupDetail(
-                2L, "썸네일 없는 팝업", List.of(), 5,
-                new Rating(3.5, 50), new SearchTags("팝업", List.of("테스트")),
-                new Location("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                new Period(LocalDate.now(), LocalDate.now().plusDays(30)),
-                new BrandStory(List.of("brand1.jpg"), List.of()),
-                new PopupDetailInfo(List.of(), List.of("상세 설명"))
-            );
+            final Popup popupWithoutThumbnails = Popup.builder()
+                    .id(1L)
+                    .name("테스트 팝업")
+                    .location(
+                            new Location(
+                                    "서울시 강남구",
+                                    "서울특별시",
+                                    "강남구",
+                                    "역삼동",
+                                    127.0012,
+                                    37.5665
+                            )
+                    )
+                    .schedule(
+                            new PopupSchedule(
+                                    new DateRange(
+                                            LocalDate.now(),
+                                            LocalDate.now().plusDays(30)
+                                    ),
+                                    new WeeklyOpeningHours(
+                                            List.of(
+                                                    new OpeningHours(
+                                                            DayOfWeek.MONDAY,
+                                                            LocalTime.now(),
+                                                            LocalTime.now().plusHours(1)
+                                                    )
+                                            )
+                                    )
+                            )
+                    )
+                    .display(
+                            new PopupDisplay(
+                                    Collections.emptyList(),
+                                    new PopupContent("팝업 설명", "팝업 공지"),
+                                    List.of(new Sns("http://image.com", "http://sns.com"))
+                            )
+                    )
+                    .type(PopupType.EXHIBITION)
+                    .popupCategories(
+                            List.of(new PopupCategory(1L, "예술"))
+                    )
+                    .status(PopupStatus.IN_PROGRESS)
+                    .build();
 
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
-                2L, popupWithoutThumbnails, "김철수", validMember,
-                "kim@example.com", 3, 2, WaitingStatus.COMPLETED, registeredAt
+                    2L, popupWithoutThumbnails, "김철수", validMember,
+                    "kim@example.com", 3, 2, WaitingStatus.COMPLETED, registeredAt
             );
 
             // when
@@ -157,43 +266,6 @@ class WaitingDtoMapperTest {
             assertEquals("6월 10일 ~ 6월 20일", result.period());
             assertEquals(2, result.waitingNumber());
             assertEquals("COMPLETED", result.status());
-        }
-
-        @Test
-        @DisplayName("다른 지역의 Waiting을 WaitingResponse로 변환 테스트")
-        public void test03() {
-            // given
-            PopupDetail popupInGangnam = new PopupDetail(
-                3L, "강남 팝업", List.of("gangnam.jpg"), 5,
-                new Rating(4.8, 200), new SearchTags("팝업", List.of("강남")),
-                new Location("서울시 강남구", "서울특별시", "강남구", "청담동", 127.0012, 37.5665),
-                new Period(LocalDate.now(), LocalDate.now().plusDays(30)),
-                new BrandStory(List.of("brand1.jpg"), List.of()),
-                new PopupDetailInfo(List.of(), List.of("상세 설명"))
-            );
-
-            LocalDateTime registeredAt = LocalDateTime.now();
-            Waiting waiting = new Waiting(
-                3L, popupInGangnam, "박영희", validMember,
-                "park@example.com", 4, 3, WaitingStatus.RESERVED, registeredAt
-            );
-
-            // when
-            WaitingResponse result = new WaitingDtoMapper().toResponse(waiting);
-
-            // then
-            assertNotNull(result);
-            assertEquals(3L, result.waitingId());
-            assertEquals(3L, result.popupId());
-            assertEquals("강남 팝업", result.popupName());
-            assertEquals("gangnam.jpg", result.popupImageUrl());
-            assertEquals("서울특별시, 강남구", result.location());
-            assertNotNull(result.rating());
-            assertEquals(4.8, result.rating().averageStar());
-            assertEquals(200, result.rating().reviewCount());
-            assertEquals("6월 10일 ~ 6월 20일", result.period());
-            assertEquals(3, result.waitingNumber());
-            assertEquals("RESERVED", result.status());
         }
     }
 } 

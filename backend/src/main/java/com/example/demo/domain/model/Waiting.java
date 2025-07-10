@@ -10,30 +10,30 @@ import java.util.regex.Pattern;
  * 팝업에 대한 대기 정보를 나타낸다.
  */
 public record Waiting(
-    Long id,
-    PopupDetail popup,
-    String waitingPersonName,
-    Member member,
-    @Email(message = "대기자 이메일이 형식에 맞지 않습니다.")
-    String contactEmail,
-    Integer peopleCount,
-    Integer waitingNumber,
-    WaitingStatus status,
-    LocalDateTime registeredAt
+        Long id,
+        com.example.demo.domain.model.popup.Popup popup,
+        String waitingPersonName,
+        Member member,
+        @Email(message = "대기자 이메일이 형식에 맞지 않습니다.")
+        String contactEmail,
+        Integer peopleCount,
+        Integer waitingNumber,
+        WaitingStatus status,
+        LocalDateTime registeredAt
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
     /**
      * 대기 정보를 생성한다.
      *
-     * @param id 대기 ID
-     * @param popup 팝업 정보
+     * @param id                대기 ID
+     * @param popup             팝업 정보
      * @param waitingPersonName 대기자 이름
-     * @param peopleCount 대기 인원수
-     * @param contactEmail 대기자 이메일
-     * @param waitingNumber 대기 번호
-     * @param status 대기 상태
-     * @param registeredAt 등록 시간
+     * @param peopleCount       대기 인원수
+     * @param contactEmail      대기자 이메일
+     * @param waitingNumber     대기 번호
+     * @param status            대기 상태
+     * @param registeredAt      등록 시간
      * @throws IllegalArgumentException 유효하지 않은 인원수인 경우
      */
     public Waiting {

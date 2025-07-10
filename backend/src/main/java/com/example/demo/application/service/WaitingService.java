@@ -35,7 +35,7 @@ public class WaitingService {
     @Transactional
     public WaitingCreateResponse createWaiting(WaitingCreateRequest request) {
         // 1. 팝업 존재 여부 확인
-        var popup = popupPort.findDetailById(request.popupId())
+        var popup = popupPort.findById(request.popupId())
                 .orElseThrow(() -> new IllegalArgumentException("팝업을 찾을 수 없습니다: " + request.popupId()));
 
         // 2. 다음 대기 번호 조회
