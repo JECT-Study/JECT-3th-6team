@@ -1,7 +1,7 @@
 package com.example.demo.domain.port;
 
-import com.example.demo.domain.model.Waiting;
-import com.example.demo.domain.model.WaitingQuery;
+import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingQuery;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
-import com.example.demo.domain.model.Waiting;
-import com.example.demo.domain.model.WaitingQuery;
-import com.example.demo.domain.model.WaitingStatus;
+import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingQuery;
+import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.WaitingPort;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import com.example.demo.infrastructure.persistence.mapper.WaitingEntityMapper;

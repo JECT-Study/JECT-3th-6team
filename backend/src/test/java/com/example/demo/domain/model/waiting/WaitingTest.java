@@ -1,5 +1,8 @@
-package com.example.demo.domain.model;
+package com.example.demo.domain.model.waiting;
 
+import com.example.demo.domain.model.DateRange;
+import com.example.demo.domain.model.Location;
+import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.popup.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

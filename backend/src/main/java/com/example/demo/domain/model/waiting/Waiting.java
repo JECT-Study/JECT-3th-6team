@@ -1,5 +1,7 @@
-package com.example.demo.domain.model;
+package com.example.demo.domain.model.waiting;
 
+import com.example.demo.domain.model.Member;
+import com.example.demo.domain.model.popup.Popup;
 import jakarta.validation.constraints.Email;
 
 import java.time.LocalDateTime;
@@ -11,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public record Waiting(
         Long id,
-        com.example.demo.domain.model.popup.Popup popup,
+        Popup popup,
         String waitingPersonName,
         Member member,
         @Email(message = "대기자 이메일이 형식에 맞지 않습니다.")

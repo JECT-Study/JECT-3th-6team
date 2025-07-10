@@ -4,8 +4,8 @@ import com.example.demo.application.dto.RatingResponse;
 import com.example.demo.application.dto.WaitingCreateResponse;
 import com.example.demo.application.dto.WaitingResponse;
 import com.example.demo.domain.model.DateRange;
-import com.example.demo.domain.model.Waiting;
 import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.waiting.Waiting;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

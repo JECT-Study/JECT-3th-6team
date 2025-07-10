@@ -1,8 +1,8 @@
 package com.example.demo.infrastructure.persistence.mapper;
 
 import com.example.demo.domain.model.Member;
-import com.example.demo.domain.model.Waiting;
 import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import org.springframework.stereotype.Component;
 

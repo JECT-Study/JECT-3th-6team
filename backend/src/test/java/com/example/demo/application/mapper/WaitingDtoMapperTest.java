@@ -2,8 +2,12 @@ package com.example.demo.application.mapper;
 
 import com.example.demo.application.dto.WaitingCreateResponse;
 import com.example.demo.application.dto.WaitingResponse;
-import com.example.demo.domain.model.*;
+import com.example.demo.domain.model.DateRange;
+import com.example.demo.domain.model.Location;
+import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.popup.*;
+import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
