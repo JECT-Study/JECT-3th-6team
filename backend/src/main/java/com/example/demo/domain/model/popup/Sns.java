@@ -1,4 +1,4 @@
-package com.example.demo.domain.model;
+package com.example.demo.domain.model.popup;
 
 /**
  * SNS 정보 도메인 모델.
@@ -7,4 +7,4 @@ package com.example.demo.domain.model;
 public record Sns(
     String icon,
     String url
-) {}
+) {} 
