@@ -8,7 +8,7 @@
  * @returns 포맷된 기간 문자열 예: "7월 5일 ~ 7월 10일"
  */
 
-export const dateToPeriodStr = (startDate: Date, endDate: Date) => {
+export const dateToPeriodString = (startDate: Date, endDate: Date) => {
   const startMonth = startDate.getMonth() + 1;
   const startDay = startDate.getDate();
   const endMonth = endDate.getMonth() + 1;
