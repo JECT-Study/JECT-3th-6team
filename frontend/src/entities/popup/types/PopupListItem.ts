@@ -5,13 +5,15 @@ export type ratingType = {
   reviewCount: number;
 };
 export type statusType = 'RESERVED' | 'COMPLETED';
-
+export type tagType = 'DEFAULT' | 'HISTORY';
+interface TaggedItem<T extends tagType> {
+  tag: T;
+}
 // 태그가 부착된 타입
 export type PopupItemType = PopupListItemType | PopupHistoryListItemType;
-export type PopupListItemType = { tag: 'DEFAULT' } & RawPopupListItemType;
-export type PopupHistoryListItemType = {
-  tag: 'HISTORY';
-} & RawPopupHistoryListItemType;
+export type PopupListItemType = TaggedItem<'DEFAULT'> & RawPopupListItemType;
+export type PopupHistoryListItemType = TaggedItem<'HISTORY'> &
+  RawPopupHistoryListItemType;
 
 // 태그가 부착되지 않은 raw data union 타입
 export type RawPopupItemType =

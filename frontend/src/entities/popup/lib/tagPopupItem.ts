@@ -2,11 +2,12 @@
 import {
   PopupItemType,
   RawPopupItemType,
+  tagType,
 } from '@/entities/popup/types/PopupListItem';
 
 export const tagPopupItem = (
   data: RawPopupItemType,
-  tag: 'DEFAULT' | 'HISTORY'
+  tag: tagType
 ): PopupItemType => {
   return {
     ...data,
