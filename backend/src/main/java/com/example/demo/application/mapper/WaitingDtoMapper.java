@@ -6,6 +6,7 @@ import com.example.demo.application.dto.WaitingResponse;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -15,20 +16,26 @@ import java.time.format.DateTimeFormatter;
  * Waiting 도메인 모델과 DTO 간의 변환을 담당하는 Mapper.
  */
 @Component
+@RequiredArgsConstructor
 public class WaitingDtoMapper {
+
+    private final PopupDtoMapper popupDtoMapper;
 
     /**
      * Waiting 도메인 모델을 WaitingCreateResponse DTO로 변환
      */
     public WaitingCreateResponse toCreateResponse(Waiting waiting) {
+        Popup popup = waiting.popup();
         return new WaitingCreateResponse(
                 waiting.id(),
-                waiting.popup().getName(),
+                popup.getName(),
                 waiting.waitingPersonName(),
                 waiting.peopleCount(),
                 waiting.contactEmail(),
                 waiting.waitingNumber(),
-                waiting.registeredAt()
+                waiting.registeredAt(),
+                popupDtoMapper.toLocationResponse(popup.getLocation()),
+                popup.getDisplay().imageUrls().getFirst()
         );
     }
 

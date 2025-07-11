@@ -84,7 +84,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingCreateResponse result = new WaitingDtoMapper().toCreateResponse(waiting);
+            WaitingCreateResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toCreateResponse(waiting);
 
             // then
             assertNotNull(result);
@@ -108,7 +108,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingCreateResponse result = new WaitingDtoMapper().toCreateResponse(waiting);
+            WaitingCreateResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toCreateResponse(waiting);
 
             // then
             assertNotNull(result);
@@ -183,7 +183,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingResponse result = new WaitingDtoMapper().toResponse(waiting);
+            WaitingResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toResponse(waiting);
 
             // then
             assertNotNull(result);
@@ -255,7 +255,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingResponse result = new WaitingDtoMapper().toResponse(waiting);
+            WaitingResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toResponse(waiting);
 
             // then
             assertNotNull(result);

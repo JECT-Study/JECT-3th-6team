@@ -42,8 +42,10 @@ public class WaitingService {
         Integer nextWaitingNumber = waitingPort.getNextWaitingNumber(request.popupId());
 
         // 3. 회원 정보 조회
-        Member member = memberPort.findById(request.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + request.memberId()));
+//        Member member = memberPort.findById(request.memberId())
+//                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + request.memberId()));
+
+        Member member = new Member(request.memberId(), "dd", "robin@naver.com");
 
         // 4. 대기 정보 생성
         Waiting waiting = new Waiting(

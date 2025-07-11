@@ -4,6 +4,7 @@ import com.example.demo.application.dto.VisitHistoryCursorResponse;
 import com.example.demo.application.dto.WaitingCreateRequest;
 import com.example.demo.application.dto.WaitingCreateResponse;
 import com.example.demo.application.dto.WaitingResponse;
+import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
@@ -117,9 +118,18 @@ class WaitingServiceTest {
                     "hong@example.com", 2, nextWaitingNumber,
                     WaitingStatus.RESERVED, registeredAt
             );
+            Location location = validPopup.getLocation();
+            LocationResponse locationResponse = new LocationResponse(
+                    location.addressName(),
+                    location.region1depthName(),
+                    location.region2depthName(),
+                    location.region3depthName(),
+                    location.longitude(),
+                    location.latitude()
+            );
 
             WaitingCreateResponse expectedResponse = new WaitingCreateResponse(
-                    1L, "테스트 팝업", "홍길동", 2, "hong@example.com", nextWaitingNumber, registeredAt
+                    1L, "테스트 팝업", "홍길동", 2, "hong@example.com", nextWaitingNumber, registeredAt, locationResponse, validPopup.getDisplay().imageUrls().getFirst()
             );
 
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
