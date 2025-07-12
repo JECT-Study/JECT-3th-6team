@@ -2,8 +2,8 @@ package com.example.demo.domain.port;
 
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
-
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 대기 저장소 포트 인터페이스.
@@ -34,4 +34,5 @@ public interface WaitingPort {
      * @return 다음 대기 번호
      */
     Integer getNextWaitingNumber(Long popupId);
+    Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
 } 

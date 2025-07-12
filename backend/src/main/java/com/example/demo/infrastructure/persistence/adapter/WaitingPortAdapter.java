@@ -8,11 +8,11 @@ import com.example.demo.domain.port.WaitingPort;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import com.example.demo.infrastructure.persistence.mapper.WaitingEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.WaitingJpaRepository;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -52,5 +52,12 @@ public class WaitingPortAdapter implements WaitingPort {
     @Override
     public Integer getNextWaitingNumber(Long popupId) {
         return waitingJpaRepository.findMaxWaitingNumberByPopupId(popupId).orElse(0) + 1;
+    }
+
+    @Override
+    public Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId) {
+        return waitingJpaRepository
+            .findByMemberIdAndPopupId(memberId, popupId)
+            .map(waitingEntityMapper::toDomain);
     }
 } 
