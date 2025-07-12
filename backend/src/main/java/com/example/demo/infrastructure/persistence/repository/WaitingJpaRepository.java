@@ -41,4 +41,6 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
      */
     @Query("SELECT MAX(w.waitingNumber) FROM WaitingEntity w WHERE w.popupId = :popupId")
     Optional<Integer> findMaxWaitingNumberByPopupId(@Param("popupId") Long popupId);
+
+    Optional<WaitingEntity> findByMemberIdAndPopupId(Long memberId, Long popupId);
 } 

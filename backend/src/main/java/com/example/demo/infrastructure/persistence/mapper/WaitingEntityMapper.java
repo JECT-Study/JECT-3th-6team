@@ -51,4 +51,18 @@ public class WaitingEntityMapper {
                 .status(waiting.status())
                 .build();
     }
+
+    public Waiting toDomain(WaitingEntity entity) {
+        return new Waiting(
+            entity.getId(),
+            null, // popup 생략
+            entity.getWaitingPersonName(),
+            null, // member 생략
+            entity.getContactEmail(),
+            entity.getPeopleCount(),
+            entity.getWaitingNumber(),
+            entity.getStatus(),
+            entity.getCreatedAt()
+        );
+    }
 } 

@@ -4,7 +4,6 @@ import com.example.demo.application.dto.popup.*;
 import com.example.demo.domain.model.BrandStory;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
-import com.example.demo.domain.model.Rating;
 import com.example.demo.domain.model.popup.OpeningHours;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.popup.PopupCategory;
@@ -74,11 +73,6 @@ public class PopupDtoMapper {
                 brandStory.sns().stream().map(this::toSnsResponse).collect(Collectors.toList()) :
                 Collections.emptyList();
         return new BrandStoryResponse(brandStory.imageUrls(), snsResponses);
-    }
-
-    public RatingResponse toRatingResponse(Rating rating) {
-        if (rating == null) return null;
-        return new RatingResponse(rating.averageStar(), rating.reviewCount());
     }
 
     public SearchTagsResponse toSearchTagsResponse(Popup popup) {
