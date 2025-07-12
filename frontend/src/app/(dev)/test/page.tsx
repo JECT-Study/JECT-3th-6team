@@ -19,7 +19,7 @@ export default function Page() {
     <>
       <h1> 캘린더 컴포넌트 </h1>
       <MonthlyCalendar
-        mode={'single'}
+        mode={'range'}
         selected={selected}
         onSelected={handleSelect}
       />

@@ -8,7 +8,7 @@ import {
   startOfYear,
 } from 'date-fns';
 
-const getMonthlyCalendarData = (selectedDate: Date) => {
+export const getMonthlyCalendarData = (selectedDate: Date) => {
   const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
   const allMonth = [];
   const startMonth = startOfYear(selectedDate);
@@ -30,4 +30,17 @@ const getMonthlyCalendarData = (selectedDate: Date) => {
   return { weekDays, currentMonthAllDates, allMonth };
 };
 
-export default getMonthlyCalendarData;
+export const isSameMonth = (date1: Date, date2: Date) => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth()
+  );
+};
+
+export const isSameDay = (date1: Date, date2: Date) => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getDate() === date2.getDate() &&
+    date1.getMonth() === date2.getMonth()
+  );
+};
