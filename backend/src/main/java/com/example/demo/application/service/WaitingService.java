@@ -56,7 +56,7 @@ public class WaitingService {
                 request.contactEmail(),
                 request.peopleCount(),
                 nextWaitingNumber,
-                WaitingStatus.RESERVED,
+                WaitingStatus.WAITING,
                 LocalDateTime.now()
         );
 

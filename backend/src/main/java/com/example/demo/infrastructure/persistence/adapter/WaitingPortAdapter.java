@@ -1,5 +1,6 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
+import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
@@ -7,23 +8,19 @@ import com.example.demo.domain.port.WaitingPort;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import com.example.demo.infrastructure.persistence.mapper.WaitingEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.WaitingJpaRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class WaitingPortAdapter implements WaitingPort {
 
     private final WaitingJpaRepository waitingJpaRepository;
     private final WaitingEntityMapper waitingEntityMapper;
-
-    public WaitingPortAdapter(
-            WaitingJpaRepository waitingJpaRepository,
-            WaitingEntityMapper waitingEntityMapper) {
-        this.waitingJpaRepository = waitingJpaRepository;
-        this.waitingEntityMapper = waitingEntityMapper;
-    }
+    private final PopupPortAdapter popupPortAdapter; // 아키텍처 관점에선 다른 어뎁터를 참조하는게 별로 좋지 않지만, 중복 구현을 방지하려면 어쩔 수 없음
 
     @Override
     public Waiting save(Waiting waiting) {
@@ -37,29 +34,17 @@ public class WaitingPortAdapter implements WaitingPort {
 
     @Override
     public List<Waiting> findByQuery(WaitingQuery query) {
-        List<WaitingEntity> entities;
+        // TODO 다른 기술을 활용한 동적 쿼리 작성 필요
+        List<WaitingEntity> waitingEntities = switch (query.sortOrder()) {
+            case RESERVED_FIRST_THEN_DATE_DESC ->
+                    waitingJpaRepository.findByMemberIdOrderByStatusReservedFirstThenCreatedAtDesc(
+                            query.memberId(), WaitingStatus.WAITING, PageRequest.of(0, query.size()));
+        };
 
-        // 정렬 조건에 따라 다른 쿼리 메서드 사용
-        switch (query.sortOrder()) {
-            case RESERVED_FIRST_THEN_DATE_DESC:
-                entities = waitingJpaRepository.findByMemberIdOrderByStatusReservedFirstThenCreatedAtDesc(
-                        query.memberId(), WaitingStatus.RESERVED, PageRequest.of(0, query.size()));
-                break;
-            case DATE_DESC:
-                entities = waitingJpaRepository.findByMemberIdOrderByCreatedAtDesc(
-                        query.memberId(), PageRequest.of(0, query.size()));
-                break;
-            default:
-                // 기본값은 RESERVED_FIRST_THEN_DATE_DESC
-                entities = waitingJpaRepository.findByMemberIdOrderByStatusReservedFirstThenCreatedAtDesc(
-                        query.memberId(), WaitingStatus.RESERVED, PageRequest.of(0, query.size()));
-        }
-
-        return entities.stream()
+        // TODO 성능 고려 해야 함.
+        return waitingEntities.parallelStream()
                 .map(entity -> {
-                    // 엔티티에서 기본 정보만 추출하여 임시 도메인 모델 생성
-                    // 실제 사용 시에는 필요한 정보를 별도로 조회해야 함
-                    return waitingEntityMapper.toDomain(entity, null, null);
+                    return waitingEntityMapper.toDomain(entity, popupPortAdapter.findById(entity.getPopupId()).orElse(null), new Member(1L, "mock", "mock@mock.com"));
                 })
                 .toList();
     }

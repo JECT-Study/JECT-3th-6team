@@ -80,7 +80,7 @@ class WaitingDtoMapperTest {
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
-                    "hong@example.com", 2, 1, WaitingStatus.RESERVED, registeredAt
+                    "hong@example.com", 2, 1, WaitingStatus.WAITING, registeredAt
             );
 
             // when
@@ -104,7 +104,7 @@ class WaitingDtoMapperTest {
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     2L, validPopup, "김철수", validMember,
-                    "kim@example.com", 3, 2, WaitingStatus.COMPLETED, registeredAt
+                    "kim@example.com", 3, 2, WaitingStatus.VISITED, registeredAt
             );
 
             // when
@@ -142,8 +142,8 @@ class WaitingDtoMapperTest {
                 .schedule(
                         new PopupSchedule(
                                 new DateRange(
-                                        LocalDate.now(),
-                                        LocalDate.now().plusDays(30)
+                                        LocalDate.of(2025, 7, 12),
+                                        LocalDate.of(2025, 7, 12).plusDays(30)
                                 ),
                                 new WeeklyOpeningHours(
                                         List.of(
@@ -179,7 +179,7 @@ class WaitingDtoMapperTest {
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
-                    "hong@example.com", 2, 1, WaitingStatus.RESERVED, registeredAt
+                    "hong@example.com", 2, 1, WaitingStatus.WAITING, registeredAt
             );
 
             // when
@@ -194,7 +194,7 @@ class WaitingDtoMapperTest {
             assertEquals("서울시 강남구", result.popup().location().addressName());
             assertEquals("2025-07-12 ~ 2025-08-11", result.popup().period());
             assertEquals(1, result.waitingNumber());
-            assertEquals("RESERVED", result.status());
+            assertEquals("WAITING", result.status());
         }
 
         @Test
@@ -217,8 +217,8 @@ class WaitingDtoMapperTest {
                     .schedule(
                             new PopupSchedule(
                                     new DateRange(
-                                            LocalDate.now(),
-                                            LocalDate.now().plusDays(30)
+                                            LocalDate.of(2025, 7, 12),
+                                            LocalDate.of(2025, 7, 12).plusDays(30)
                                     ),
                                     new WeeklyOpeningHours(
                                             List.of(
@@ -248,7 +248,7 @@ class WaitingDtoMapperTest {
             LocalDateTime registeredAt = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     2L, popupWithoutThumbnails, "김철수", validMember,
-                    "kim@example.com", 3, 2, WaitingStatus.COMPLETED, registeredAt
+                    "kim@example.com", 3, 2, WaitingStatus.VISITED, registeredAt
             );
 
             // when
@@ -263,7 +263,7 @@ class WaitingDtoMapperTest {
             assertEquals("서울시 강남구", result.popup().location().addressName());
             assertEquals("2025-07-12 ~ 2025-08-11", result.popup().period());
             assertEquals(2, result.waitingNumber());
-            assertEquals("COMPLETED", result.status());
+            assertEquals("VISITED", result.status());
         }
     }
 } 

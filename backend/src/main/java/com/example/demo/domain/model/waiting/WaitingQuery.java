@@ -22,11 +22,6 @@ public record WaitingQuery(
          * RESERVED 상태가 먼저, 그 다음 날짜 최신순
          */
         RESERVED_FIRST_THEN_DATE_DESC,
-
-        /**
-         * 날짜 최신순
-         */
-        DATE_DESC
     }
 
     /**

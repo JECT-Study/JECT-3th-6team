@@ -1,11 +1,7 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
-import com.example.demo.application.dto.waiting.WaitingCreateRequest;
-import com.example.demo.application.dto.waiting.WaitingCreateResponse;
-import com.example.demo.application.dto.waiting.WaitingResponse;
-import com.example.demo.application.dto.waiting.PopupDtoForWaitingResponse;
 import com.example.demo.application.dto.popup.LocationResponse;
+import com.example.demo.application.dto.waiting.*;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
@@ -118,7 +114,7 @@ class WaitingServiceTest {
             Waiting savedWaiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, nextWaitingNumber,
-                    WaitingStatus.RESERVED, registeredAt
+                    WaitingStatus.WAITING, registeredAt
             );
             Location location = validPopup.getLocation();
             LocationResponse locationResponse = new LocationResponse(
@@ -310,13 +306,13 @@ class WaitingServiceTest {
             Waiting waiting1 = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 1,
-                    WaitingStatus.RESERVED, LocalDateTime.now()
+                    WaitingStatus.WAITING, LocalDateTime.now()
             );
 
             Waiting waiting2 = new Waiting(
                     2L, validPopup, "김철수", validMember,
                     "kim@example.com", 3, 2,
-                    WaitingStatus.COMPLETED, LocalDateTime.now().minusDays(1));
+                    WaitingStatus.VISITED, LocalDateTime.now().minusDays(1));
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
@@ -367,8 +363,8 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = null;
 
-            Waiting waiting1 = new Waiting(1L, validPopup, "홍길동", validMember, "hong@example.com", 2, 1, WaitingStatus.RESERVED, LocalDateTime.now());
-            Waiting waiting2 = new Waiting(2L, validPopup, "김철수", validMember, "kim@example.com", 3, 2, WaitingStatus.COMPLETED, LocalDateTime.now().minusDays(1));
+            Waiting waiting1 = new Waiting(1L, validPopup, "홍길동", validMember, "hong@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now());
+            Waiting waiting2 = new Waiting(2L, validPopup, "김철수", validMember, "kim@example.com", 3, 2, WaitingStatus.VISITED, LocalDateTime.now().minusDays(1));
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
@@ -378,7 +374,7 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일"
             );
             WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1);
-            
+
             PopupDtoForWaitingResponse popupDto2 = new PopupDtoForWaitingResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
@@ -437,12 +433,12 @@ class WaitingServiceTest {
             // given
             Integer size = 10;
             Long lastWaitingId = null;
-            String status = "RESERVED";
+            String status = "WAITING";
 
             Waiting waiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 1,
-                    WaitingStatus.RESERVED, LocalDateTime.now()
+                    WaitingStatus.WAITING, LocalDateTime.now()
             );
 
             List<Waiting> waitings = List.of(waiting);
@@ -454,7 +450,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto
+                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -466,7 +462,7 @@ class WaitingServiceTest {
             // then
             assertNotNull(response);
             assertEquals(1, response.content().size());
-            assertEquals("RESERVED", response.content().getFirst().status());
+            assertEquals("WAITING", response.content().getFirst().status());
 
             // verify
             verify(waitingPort).findByQuery(any(WaitingQuery.class));
@@ -484,7 +480,7 @@ class WaitingServiceTest {
             Waiting waiting = new Waiting(
                     6L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 6,
-                    WaitingStatus.RESERVED, LocalDateTime.now()
+                    WaitingStatus.WAITING, LocalDateTime.now()
             );
 
             List<Waiting> waitings = List.of(waiting);

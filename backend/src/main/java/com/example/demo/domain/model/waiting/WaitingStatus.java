@@ -5,9 +5,10 @@ package com.example.demo.domain.model.waiting;
  * 대기의 현재 상태를 나타낸다.
  */
 public enum WaitingStatus {
-    RESERVED,    // 예약/대기중
-    COMPLETED,   // 방문완료
-    CANCELED;    // 취소됨
+    WAITING,    // 예약/대기중
+    VISITED,   // 방문완료
+    CANCELED,  // 취소됨
+    NONE;
 
     /**
      * 문자열을 WaitingStatus로 파싱한다.

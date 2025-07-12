@@ -19,16 +19,6 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
 
     /**
      * 회원 ID로 대기 목록을 조회한다.
-     * 생성일 기준 내림차순으로 정렬한다.
-     *
-     * @param memberId 회원 ID
-     * @param pageable 페이징 정보
-     * @return 대기 엔티티 목록
-     */
-    List<WaitingEntity> findByMemberIdOrderByCreatedAtDesc(Long memberId, Pageable pageable);
-
-    /**
-     * 회원 ID로 대기 목록을 조회한다.
      * RESERVED 상태가 먼저, 그 다음 생성일 기준 내림차순으로 정렬한다.
      *
      * @param memberId 회원 ID

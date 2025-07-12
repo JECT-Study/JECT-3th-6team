@@ -71,7 +71,7 @@ class WaitingTest {
         String contactEmail = "hong@example.com";
         Integer peopleCount = 2;
         Integer waitingNumber = 1;
-        WaitingStatus status = WaitingStatus.RESERVED;
+        WaitingStatus status = WaitingStatus.WAITING;
         LocalDateTime registeredAt = LocalDateTime.now();
         // when & then
         assertDoesNotThrow(() -> new Waiting(
@@ -97,7 +97,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, nullName, validMember,
-                        "test@example.com", 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: null", exception.getMessage());
@@ -113,7 +113,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, emptyName, validMember,
-                        "test@example.com", 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: ", exception.getMessage());
@@ -129,7 +129,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, shortName, validMember,
-                        "test@example.com", 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: 홍", exception.getMessage());
@@ -145,7 +145,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, longName, validMember,
-                        "test@example.com", 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: 가나다라마바사아자차카타파하가나다라마바사아자차카타파하", exception.getMessage());
@@ -161,7 +161,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, specialCharName, validMember,
-                        "test@example.com", 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기자 이름에 특수문자는 포함될 수 없습니다. 현재: 홍길동!", exception.getMessage());
@@ -177,7 +177,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, "홍길동", validMember,
-                        "test@example.com", nullPeopleCount, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", nullPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: null", exception.getMessage());
@@ -193,7 +193,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, "홍길동", validMember,
-                        "test@example.com", zeroPeopleCount, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", zeroPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: 0", exception.getMessage());
@@ -209,7 +209,7 @@ class WaitingTest {
                 IllegalArgumentException.class,
                 () -> new Waiting(
                         1L, validPopup, "홍길동", validMember,
-                        "test@example.com", sevenPeopleCount, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                        "test@example.com", sevenPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
         assertEquals("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: 7", exception.getMessage());
@@ -223,7 +223,7 @@ class WaitingTest {
         // when & then
         assertDoesNotThrow(() -> new Waiting(
                 1L, validPopup, "홍길동", validMember,
-                "test@example.com", onePeopleCount, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                "test@example.com", onePeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
         ));
     }
 
@@ -235,7 +235,7 @@ class WaitingTest {
         // when & then
         assertDoesNotThrow(() -> new Waiting(
                 1L, validPopup, "홍길동", validMember,
-                "test@example.com", sixPeopleCount, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                "test@example.com", sixPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
         ));
     }
 
@@ -247,7 +247,7 @@ class WaitingTest {
         // when & then
         assertDoesNotThrow(() -> new Waiting(
                 1L, validPopup, "홍길동", validMember,
-                validEmail, 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                validEmail, 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
         ));
     }
 
@@ -259,7 +259,7 @@ class WaitingTest {
         // when & then
         assertDoesNotThrow(() -> new Waiting(
                 1L, validPopup, "홍길동", validMember,
-                validEmail, 2, 1, WaitingStatus.RESERVED, LocalDateTime.now()
+                validEmail, 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
         ));
     }
 }
