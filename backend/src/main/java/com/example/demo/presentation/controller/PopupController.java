@@ -19,7 +19,8 @@ public class PopupController {
 
     @GetMapping("/{popupId}")
     public ResponseEntity<ApiResponse<PopupDetailResponse>> getPopupDetail(@PathVariable Long popupId) {
-        PopupDetailResponse popupDetail = popupDetailService.getPopupDetail(popupId);
+        // TODO 로그인한 유저의 정보를 넘길 예정
+        PopupDetailResponse popupDetail = popupDetailService.getPopupDetail(popupId, 1000L);
         return ResponseEntity.ok(new ApiResponse<>("팝업 상세 조회가 성공했습니다.", popupDetail));
     }
 }
