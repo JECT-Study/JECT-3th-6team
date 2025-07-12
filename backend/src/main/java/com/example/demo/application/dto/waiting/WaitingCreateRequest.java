@@ -1,4 +1,4 @@
-package com.example.demo.application.dto;
+package com.example.demo.application.dto.waiting;
 
 /**
  * 현장 대기 신청 요청 DTO (popupId 포함)

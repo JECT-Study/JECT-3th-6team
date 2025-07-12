@@ -1,4 +1,4 @@
-package com.example.demo.application.dto;
+package com.example.demo.application.dto.waiting;
 
 import java.util.List;
 

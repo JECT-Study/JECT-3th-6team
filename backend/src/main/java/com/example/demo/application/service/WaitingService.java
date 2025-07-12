@@ -1,9 +1,9 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.dto.VisitHistoryCursorResponse;
-import com.example.demo.application.dto.WaitingCreateRequest;
-import com.example.demo.application.dto.WaitingCreateResponse;
-import com.example.demo.application.dto.WaitingResponse;
+import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
+import com.example.demo.application.dto.waiting.WaitingCreateRequest;
+import com.example.demo.application.dto.waiting.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.waiting.Waiting;

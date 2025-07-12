@@ -1,8 +1,8 @@
 package com.example.demo.presentation.controller;
 
-import com.example.demo.application.dto.VisitHistoryCursorResponse;
-import com.example.demo.application.dto.WaitingCreateRequest;
-import com.example.demo.application.dto.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
+import com.example.demo.application.dto.waiting.WaitingCreateRequest;
+import com.example.demo.application.dto.waiting.WaitingCreateResponse;
 import com.example.demo.application.service.WaitingService;
 import com.example.demo.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;

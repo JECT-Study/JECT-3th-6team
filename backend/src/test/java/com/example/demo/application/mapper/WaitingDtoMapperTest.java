@@ -1,7 +1,7 @@
 package com.example.demo.application.mapper;
 
-import com.example.demo.application.dto.WaitingCreateResponse;
-import com.example.demo.application.dto.WaitingResponse;
+import com.example.demo.application.dto.waiting.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
@@ -188,14 +188,11 @@ class WaitingDtoMapperTest {
             // then
             assertNotNull(result);
             assertEquals(1L, result.waitingId());
-            assertEquals(1L, result.popupId());
-            assertEquals("테스트 팝업", result.popupName());
-            assertEquals("thumbnail1.jpg", result.popupImageUrl()); // 첫 번째 썸네일
-            assertEquals("서울특별시, 강남구", result.location());
-            assertNotNull(result.rating());
-            assertEquals(4.5, result.rating().averageStar());
-            assertEquals(100, result.rating().reviewCount());
-            assertEquals("6월 10일 ~ 6월 20일", result.period()); // 하드코딩된 값
+            assertEquals(1L, result.popup().popupId());
+            assertEquals("테스트 팝업", result.popup().popupName());
+            assertEquals("http://image.com", result.popup().popupImageUrl()); // 첫 번째 썸네일
+            assertEquals("서울시 강남구", result.popup().location().addressName());
+            assertEquals("2025-07-12 ~ 2025-08-11", result.popup().period());
             assertEquals(1, result.waitingNumber());
             assertEquals("RESERVED", result.status());
         }
@@ -260,14 +257,11 @@ class WaitingDtoMapperTest {
             // then
             assertNotNull(result);
             assertEquals(2L, result.waitingId());
-            assertEquals(2L, result.popupId());
-            assertEquals("썸네일 없는 팝업", result.popupName());
-            assertNull(result.popupImageUrl()); // 썸네일이 없으므로 null
-            assertEquals("서울특별시, 강남구", result.location());
-            assertNotNull(result.rating());
-            assertEquals(3.5, result.rating().averageStar());
-            assertEquals(50, result.rating().reviewCount());
-            assertEquals("6월 10일 ~ 6월 20일", result.period());
+            assertEquals(1L, result.popup().popupId());
+            assertEquals("테스트 팝업", result.popup().popupName());
+            assertNull(result.popup().popupImageUrl()); // 썸네일이 없으므로 null
+            assertEquals("서울시 강남구", result.popup().location().addressName());
+            assertEquals("2025-07-12 ~ 2025-08-11", result.popup().period());
             assertEquals(2, result.waitingNumber());
             assertEquals("COMPLETED", result.status());
         }
