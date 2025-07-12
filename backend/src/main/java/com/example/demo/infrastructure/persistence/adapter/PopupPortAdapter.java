@@ -3,7 +3,7 @@ package com.example.demo.infrastructure.persistence.adapter;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
-import com.example.demo.infrastructure.persistence.mapper.PopupMapper;
+import com.example.demo.infrastructure.persistence.mapper.PopupEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class PopupPortAdapter implements PopupPort {
     private final PopupContentRepository popupContentRepository;
     private final PopupSocialRepository popupSocialRepository;
     private final PopupCategoryRepository popupCategoryRepository;
-    private final PopupMapper popupMapper;
+    private final PopupEntityMapper popupEntityMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class PopupPortAdapter implements PopupPort {
         var socialEntities = popupSocialRepository.findAllByPopupIdOrderBySortOrderAsc(popupId);
         var categoryEntities = popupCategoryRepository.findAllByPopupId(popupId);
 
-        Popup domain = popupMapper.toDomain(popupEntity, locationEntity, scheduleEntities, imageEntities, contentEntities, socialEntities, categoryEntities);
+        Popup domain = popupEntityMapper.toDomain(popupEntity, locationEntity, scheduleEntities, imageEntities, contentEntities, socialEntities, categoryEntities);
         return Optional.of(domain);
     }
 

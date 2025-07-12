@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class PopupMapper {
+public class PopupEntityMapper {
 
     // Entity List -> Domain
     public Popup toDomain(
@@ -54,11 +54,11 @@ public class PopupMapper {
         List<Sns> sns = socialEntities.stream().map(e -> new Sns(e.getIconUrl(), e.getLinkUrl())).collect(Collectors.toList());
         return new PopupDisplay(imageUrls, content, sns);
     }
-    
+
     private List<PopupCategory> toCategoriesDomain(List<PopupCategoryEntity> categoryEntities) {
         return categoryEntities.stream()
-            .map(e -> new PopupCategory(e.getCategoryId(), e.getName()))
-            .collect(Collectors.toList());
+                .map(e -> new PopupCategory(e.getCategoryId(), e.getName()))
+                .collect(Collectors.toList());
     }
 
     // Domain -> Entity
@@ -72,7 +72,7 @@ public class PopupMapper {
                 .endDate(popup.getSchedule().dateRange().endDate())
                 .build();
     }
-    
+
     // Type conversion methods
     private com.example.demo.domain.model.popup.PopupType toDomain(com.example.demo.infrastructure.persistence.entity.popup.PopupType entityType) {
         if (entityType == null) return null;
@@ -83,6 +83,6 @@ public class PopupMapper {
         if (domainType == null) return null;
         return com.example.demo.infrastructure.persistence.entity.popup.PopupType.valueOf(domainType.name());
     }
-    
+
     // ... 다른 도메인 -> 엔티티 매핑 메서드들
 } 
