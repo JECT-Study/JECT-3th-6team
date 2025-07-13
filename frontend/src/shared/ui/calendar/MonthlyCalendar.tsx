@@ -11,26 +11,26 @@ import {
 } from '@/shared/ui/calendar/lib/calendarStyleVariants';
 
 export type DateRange = {
-  start: Date | null;
+  start: Date;
   end: Date | null;
 };
-export interface MonthlyCalendarProps {
-  mode: 'single' | 'range';
-  selected: Date | DateRange | null;
-  onSelected: (value: Date | DateRange) => void;
+export interface SingleModeProps {
+  mode: 'single';
+  selected: Date;
+  onSelected: (value: Date) => void;
 }
 
-export default function MonthlyCalendar({
-  mode,
-  selected,
-  onSelected,
-}: MonthlyCalendarProps) {
+export interface RangeModeProps {
+  mode: 'range';
+  selected: DateRange;
+  onSelected: (value: DateRange) => void;
+}
+
+export type MonthlyCalendarProps = SingleModeProps | RangeModeProps;
+
+export default function MonthlyCalendar(props: MonthlyCalendarProps) {
   const { browsingDate, prevMonth, nextMonth, onChangeDate, getDateState } =
-    useCalendar({
-      mode,
-      selected,
-      onSelected,
-    });
+    useCalendar({ ...props });
   const { currentMonthAllDates, weekDays } =
     getMonthlyCalendarData(browsingDate);
   const { year, month } = dateFormatter(browsingDate);
