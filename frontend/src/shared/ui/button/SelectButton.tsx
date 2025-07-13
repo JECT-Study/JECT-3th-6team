@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import IconBracketDown from '@/assets/icons/Normal/Icon_Bracket_Down.svg';
+
 interface SelectButtonProps extends React.HTMLAttributes<HTMLDivElement> {
   Icon: React.ReactNode;
   onClick?: () => void;
@@ -25,7 +26,9 @@ export default function SelectButton({
       )}
     >
       <>{Icon}</>
-      <span className="text-gray60 font-semibold text-sm flex-1 ">{label}</span>
+      <span className="text-gray60 font-semibold text-[12px] flex-1 ">
+        {label}
+      </span>
       <IconBracketDown width={22} height={22} fill={'var(--color-gray60)'} />
     </div>
   );
