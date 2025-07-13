@@ -1,17 +1,25 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
 import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.popup.PopupQuery;
 import com.example.demo.domain.port.PopupPort;
+import com.example.demo.infrastructure.persistence.entity.popup.PopupEntity;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
 import com.example.demo.infrastructure.persistence.mapper.PopupEntityMapper;
-import com.example.demo.infrastructure.persistence.repository.*;
+import com.example.demo.infrastructure.persistence.repository.PopupCategoryRepository;
+import com.example.demo.infrastructure.persistence.repository.PopupContentRepository;
+import com.example.demo.infrastructure.persistence.repository.PopupImageRepository;
+import com.example.demo.infrastructure.persistence.repository.PopupJpaRepository;
+import com.example.demo.infrastructure.persistence.repository.PopupLocationRepository;
+import com.example.demo.infrastructure.persistence.repository.PopupSocialRepository;
+import com.example.demo.infrastructure.persistence.repository.PopupWeeklyScheduleRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -57,10 +65,30 @@ public class PopupPortAdapter implements PopupPort {
         throw new UnsupportedOperationException("Save operation is not yet implemented");
     }
 
-    @Override
-    public List<Popup> findByQuery(com.example.demo.domain.model.popup.PopupQuery query) {
-        // TODO: QueryDSL 등을 사용하여 동적 쿼리 구현 필요
-        return List.of();
+    public List<Popup> findByQuery(PopupQuery query) {
+        var pageable = PageRequest.of(query.page() - 1, query.size());
+
+        List<PopupEntity> popupEntities = popupJpaRepository.findFilteredPopups(
+            query.popupId(),
+            query.startDate(),
+            query.endDate(),
+            query.types().isEmpty() ? null : query.types(),
+            query.categories().isEmpty() ? null : query.categories(),
+            query.region1DepthName(),
+            pageable
+        );
+
+        return popupEntities.stream()
+            .map(entity -> {
+                var location = popupLocationRepository.findById(entity.getPopupLocationId()).orElse(null);
+                var schedules = popupWeeklyScheduleRepository.findAllByPopupId(entity.getId());
+                var images = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(entity.getId(), PopupImageType.MAIN);
+                var contents = popupContentRepository.findAllByPopupIdOrderBySortOrderAsc(entity.getId());
+                var socials = popupSocialRepository.findAllByPopupIdOrderBySortOrderAsc(entity.getId());
+                var categories = popupCategoryRepository.findAllByPopupId(entity.getId());
+                return popupEntityMapper.toDomain(entity, location, schedules, images, contents, socials, categories);
+            })
+            .toList();
     }
 
     @Override
