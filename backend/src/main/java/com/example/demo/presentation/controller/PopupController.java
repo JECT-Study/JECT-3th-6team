@@ -1,8 +1,12 @@
 package com.example.demo.presentation.controller;
 
 import com.example.demo.application.dto.PopupDetailResponse;
+import com.example.demo.application.dto.popup.PopupFilterRequest;
+import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.service.PopupService;
 import com.example.demo.presentation.ApiResponse;
+import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PopupController {
 
     private final PopupService popupService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<PopupSummaryResponse>>> getPopups(@Valid PopupFilterRequest request){
+        List<PopupSummaryResponse> popups = popupService.getFilteredPopups(request);
+        return ResponseEntity.ok(new ApiResponse<>("팝업 상세 조회가 성공했습니다.", popups));
+    }
 
     @GetMapping("/{popupId}")
     public ResponseEntity<ApiResponse<PopupDetailResponse>> getPopupDetail(@PathVariable Long popupId) {
