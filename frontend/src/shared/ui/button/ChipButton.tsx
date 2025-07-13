@@ -19,19 +19,17 @@ export default function ChipButton({
   color = 'transparent',
   ...props
 }: ChipButtonProps) {
-  console.log('ChipButton: ', isChecked);
   const buttonStyle = tv({
     base: ' text-base font-regular',
     variants: {
       color: {
         primary: 'bg-main text-white',
         secondary: 'bg-sub-pale text-black',
-        white: 'bg-white text-gray80 border border-gray40',
+        white: 'bg-white text-gray60 border border-gray40',
         transparent: 'bg-transparent text-black ',
       },
       shape: {
-        round:
-          'rounded-full py-[3px] px-3.5 w-[78px] h-[36px] border border-gray40',
+        round: 'rounded-full py-[3px] px-3.5  h-[36px] border border-gray40',
         square:
           'rounded-[4px] w-[76px] h-[40px] flex justify-center items-center',
       },
@@ -42,6 +40,13 @@ export default function ChipButton({
         true: 'bg-gray40 text-gray80',
       },
     },
+    compoundVariants: [
+      {
+        shape: 'round',
+        isChecked: true,
+        class: 'shadow-none',
+      },
+    ],
   });
 
   return (
