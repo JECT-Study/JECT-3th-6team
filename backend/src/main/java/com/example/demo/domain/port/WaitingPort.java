@@ -1,5 +1,6 @@
 package com.example.demo.domain.port;
 
+import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import java.util.List;
@@ -34,5 +35,5 @@ public interface WaitingPort {
      * @return 다음 대기 번호
      */
     Integer getNextWaitingNumber(Long popupId);
-    Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
+    Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId, Popup popup);
 } 

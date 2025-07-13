@@ -3,6 +3,7 @@ package com.example.demo.application.service;
 import com.example.demo.application.dto.PopupDetailResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
 import com.example.demo.domain.model.BrandStory;
+import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.BrandStoryPort;
@@ -17,11 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class PopupDetailService {
+public class PopupService {
 
     private final PopupPort popupPort;
     private final BrandStoryPort brandStoryPort;
-    // private final RatingPort ratingPort; // 주석 처리
     private final PopupDtoMapper popupDtoMapper;
     private final WaitingPort waitingPort;
 
@@ -33,7 +33,7 @@ public class PopupDetailService {
         var brandStory = brandStoryPort.findByPopupId(popupId)
                 .orElse(new BrandStory(Collections.emptyList(), Collections.emptyList()));
         long dDay = ChronoUnit.DAYS.between(LocalDate.now(), popup.getSchedule().dateRange().startDate());
-        WaitingStatus status = calculateReservationStatus(popupId, memberId);
+        WaitingStatus status = calculateReservationStatus(popup, memberId);
 
         return new PopupDetailResponse(
                 popup.getId(),
@@ -48,10 +48,10 @@ public class PopupDetailService {
                 status
         );
     }
-    private WaitingStatus calculateReservationStatus(Long popupId, Long memberId) {
+    private WaitingStatus calculateReservationStatus(Popup popup, Long memberId) {
         if (memberId == null) return WaitingStatus.NONE;
 
-        return waitingPort.findByMemberIdAndPopupId(memberId, popupId)
+        return waitingPort.findByMemberIdAndPopupId(memberId, popup.getId(), popup)
             .map(Waiting::status)
             .orElse(WaitingStatus.NONE);
     }
