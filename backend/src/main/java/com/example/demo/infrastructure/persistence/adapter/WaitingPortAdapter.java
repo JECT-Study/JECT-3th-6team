@@ -1,7 +1,6 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
 import com.example.demo.domain.model.Member;
-import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
@@ -57,11 +56,12 @@ public class WaitingPortAdapter implements WaitingPort {
     }
 
     @Override
-    public Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId, Popup popup) {
+    public Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId) {
         return waitingJpaRepository.findByMemberIdAndPopupId(memberId, popupId)
             .flatMap(entity -> {
-                var member = memberPortAdapter.findById(memberId).orElse(null);
-                if (member == null) return Optional.empty();
+                var popup = popupPortAdapter.findById(entity.getPopupId()).orElse(null);
+                var member = memberPortAdapter.findById(entity.getMemberId()).orElse(null);
+                if (popup == null || member == null) return Optional.empty();
                 return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
             });
     }

@@ -3,7 +3,6 @@ package com.example.demo.application.service;
 import com.example.demo.application.dto.PopupDetailResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
 import com.example.demo.domain.model.BrandStory;
-import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.BrandStoryPort;
@@ -33,7 +32,7 @@ public class PopupService {
         var brandStory = brandStoryPort.findByPopupId(popupId)
                 .orElse(new BrandStory(Collections.emptyList(), Collections.emptyList()));
         long dDay = ChronoUnit.DAYS.between(LocalDate.now(), popup.getSchedule().dateRange().startDate());
-        WaitingStatus status = calculateReservationStatus(popup, memberId);
+        WaitingStatus status = calculateReservationStatus(popupId, memberId);
 
         return new PopupDetailResponse(
                 popup.getId(),
@@ -48,10 +47,10 @@ public class PopupService {
                 status
         );
     }
-    private WaitingStatus calculateReservationStatus(Popup popup, Long memberId) {
+    private WaitingStatus calculateReservationStatus(Long popupId, Long memberId) {
         if (memberId == null) return WaitingStatus.NONE;
 
-        return waitingPort.findByMemberIdAndPopupId(memberId, popup.getId(), popup)
+        return waitingPort.findByMemberIdAndPopupId(memberId, popupId)
             .map(Waiting::status)
             .orElse(WaitingStatus.NONE);
     }
