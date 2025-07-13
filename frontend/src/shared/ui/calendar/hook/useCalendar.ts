@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { addMonths, isSameMonth, subMonths } from 'date-fns';
 import {
   DateRange,
@@ -6,14 +6,22 @@ import {
 } from '@/shared/ui/calendar/MonthlyCalendar';
 import { isSameDay } from '@/shared/ui/calendar/lib/calendarUtils';
 
-export default function useCalendar({
-  mode,
-  selected,
-  onSelected,
-}: MonthlyCalendarProps) {
+type TempRangeType = {
+  start: Date | null;
+  end: Date | null;
+};
+
+export default function useCalendar(props: MonthlyCalendarProps) {
+  const { mode, selected, onSelected } = props;
   const today = new Date();
-  const [tempRange, setTempRange] = useState<DateRange | null>(null);
+  const [tempRange, setTempRange] = useState<TempRangeType | null>({
+    ...(selected as DateRange),
+  });
   const [browsingDate, setBrowsingDate] = useState(today);
+
+  useEffect(() => {
+    if (mode === 'range') setTempRange(selected as DateRange);
+  }, [selected, mode]);
 
   // 선택한 날짜로 Date 변경
   const onChangeDate = (date: Date) => {
@@ -29,16 +37,17 @@ export default function useCalendar({
         end: null,
       };
       setTempRange(next);
+      onSelected(next as DateRange);
       return;
     } else {
       // 두번째로 클릭된 경우, date와 start를 비교
       const { start } = tempRange;
-      const next: DateRange =
+      const next =
         start! < date
           ? { start: start, end: date }
           : { start: date, end: start };
       setTempRange(next);
-      onSelected(next);
+      onSelected(next as DateRange);
       return;
     }
   };
