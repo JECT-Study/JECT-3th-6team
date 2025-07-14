@@ -8,6 +8,7 @@ on:
       - 'backend/**'
 
 env:
+  REGISTRY: ghcr.io
   IMAGE_NAME: spotit-backend
   PROJECT_NAME: spotit
 
@@ -33,26 +34,19 @@ jobs:
         run: ./gradlew build -x test
         working-directory: ./backend
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
-        working-directory: ./backend
-
-      - name: Save Docker image to tar
-        run: docker save -o ${{ env.IMAGE_NAME }}.tar ${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Transfer Docker image to EC2
-        uses: appleboy/scp-action@v1.0.0
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          port: 22
-          source: "${{ env.IMAGE_NAME }}.tar"
-          target: "/home/${{ secrets.EC2_USERNAME }}/${{ env.PROJECT_NAME }}"
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.UPDATE_PROJECT_V2_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.2.2
@@ -64,12 +58,16 @@ jobs:
           script: |
             cd /home/${{ secrets.EC2_USERNAME }}/${{ env.PROJECT_NAME }}
             
-            docker load < ${{ env.IMAGE_NAME }}.tar
+            # Login to GHCR to pull private packages
+            echo "${{ secrets.GHCR_PAT }}" | docker login ${{ env.REGISTRY }} -u ${{ github.repository_owner }} --password-stdin
             
+            # Create .env file for docker-compose
             echo "IMAGE_TAG=${{ github.sha }}" > .env
-            
+            echo "IMAGE_REGISTRY=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" >> .env
+
+            # Pull the latest image and restart the service
+            docker-compose pull backend
             docker-compose up -d --remove-orphans
             
-            rm ${{ env.IMAGE_NAME }}.tar
-            
+            # Clean up
             docker image prune -af 
