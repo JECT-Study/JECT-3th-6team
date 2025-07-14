@@ -14,8 +14,8 @@ import { KeywordType } from '@/features/filtering/hook/useFilter';
  */
 type statusType = 'unselect' | 'select';
 export type KeywordChip = {
-  label: string; // 예: "디저트", "브랜드 팝업"
-  type: keyof KeywordType; // 'popupType' | 'category'
+  label: string;
+  type: keyof KeywordType;
 };
 
 interface KeywordFilterPreviewProps {
