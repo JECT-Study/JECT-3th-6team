@@ -1,0 +1,75 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'backend/**'
+
+env:
+  IMAGE_NAME: spotit-backend
+  PROJECT_NAME: spotit
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+        working-directory: ./backend
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        working-directory: ./backend
+
+      - name: Save Docker image to tar
+        run: docker save -o ${{ env.IMAGE_NAME }}.tar ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Transfer Docker image to EC2
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          port: 22
+          source: "${{ env.IMAGE_NAME }}.tar"
+          target: "/home/${{ secrets.EC2_USERNAME }}/${{ env.PROJECT_NAME }}"
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /home/${{ secrets.EC2_USERNAME }}/${{ env.PROJECT_NAME }}
+            
+            docker load < ${{ env.IMAGE_NAME }}.tar
+            
+            echo "IMAGE_TAG=${{ github.sha }}" > .env
+            
+            docker-compose up -d --remove-orphans
+            
+            rm ${{ env.IMAGE_NAME }}.tar
+            
+            docker image prune -af 
