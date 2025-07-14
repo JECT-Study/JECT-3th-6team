@@ -25,48 +25,31 @@ export default function KeywordOption({
     ...toKeywordChips(category, 'category'),
   ];
 
-  // TODO : 하나의 핸들러로 합치기
-  const handleCategoryClick = (category: string) => {
-    // 삭제
-    if (selected.category.includes(category)) {
-      const next = {
+  const handleKeywordClick = (type: keyof KeywordType, value: string) => {
+    const current = selected[type];
+
+    // 이미 선택된 경우 → 제거
+    if (current.includes(value)) {
+      onSelect({
         ...selected,
-        category: selected.category.filter(type => type !== category),
-      };
-      onSelect(next);
+        [type]: current.filter(item => item !== value),
+      });
       return;
     }
 
-    // 추가
-    if (selected.category.length >= 3) {
+    // 카테고리는 최대 3개 제한
+    if (type === 'category' && current.length >= 3) {
       toast.info('카테고리는 최대 3개까지 선택가능해요');
       return;
     }
 
-    const next = {
+    // 추가
+    onSelect({
       ...selected,
-      category: [...selected.category, category],
-    };
-    onSelect(next);
+      [type]: [...current, value],
+    });
   };
 
-  const handlePopupTypeClick = (popupType: string) => {
-    // 삭제
-    if (selected.popupType.includes(popupType)) {
-      const next = {
-        ...selected,
-        popupType: selected.popupType.filter(type => type !== popupType),
-      };
-      onSelect(next);
-      return;
-    }
-
-    const next = {
-      ...selected,
-      popupType: [...selected.popupType, popupType],
-    };
-    onSelect(next);
-  };
   return (
     <div className={'w-full mb-14 flex flex-col gap-y-[24px]'}>
       <KeywordFilterPreview
@@ -77,7 +60,8 @@ export default function KeywordOption({
         keywords={keywords}
         onDelete={onDelete}
       />
-      {/* 최대 3개 선택 */}
+
+      {/*팝업 타입 선택*/}
       <div className={'flex flex-col gap-y-[12px]'}>
         <h3 className={'text-[16px] text-black'}>팝업 유형</h3>
         <div className={'flex gap-x-2 items-center flex-wrap'}>
@@ -88,13 +72,13 @@ export default function KeywordOption({
               label={option}
               disabled={false}
               isChecked={selected.popupType.includes(option)}
-              onChipClick={() => handlePopupTypeClick(option)}
+              onChipClick={() => handleKeywordClick('popupType', option)}
             />
           ))}
         </div>
       </div>
 
-      {/*최대 3개 선택*/}
+      {/*팝업 카테고리 선택*/}
       <div className={'w-full flex flex-col gap-y-[12px]'}>
         <h3 className={'text-[16px] text-black'}>카테고리</h3>
         <div className={'w-full flex gap-x-2 gap-y-2 flex-wrap'}>
@@ -105,7 +89,7 @@ export default function KeywordOption({
               label={option}
               disabled={false}
               isChecked={selected.category.includes(option)}
-              onChipClick={() => handleCategoryClick(option)}
+              onChipClick={() => handleKeywordClick('category', option)}
             />
           ))}
         </div>
