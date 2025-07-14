@@ -14,22 +14,11 @@ export default function HomeLayout({
           <span className={'font-gangwon text-[17px] text-white font-regular'}>
             Spot it
           </span>
+          {/*TODO : 알림기능 구현시 BellIcon을 제거*/}
           <BellIcon fill={'var(--color-main)'} width={28} height={28} />
         </div>
       </div>
       {children}
-      <div
-        className={'flex flex-col gap-y-2 px-5 pt-4.5 rounded-[20px] bg-white'}
-      >
-        {/*<KeywordFilterPreview*/}
-        {/*  initialStatus={'unselect'}*/}
-        {/*  onClick={() => handleOpen('keyword')}*/}
-        {/*  keywords={keywords}*/}
-        {/*  onDelete={({ label, type }) =>*/}
-        {/*    handleDeleteKeyword(label, type, 'filter')*/}
-        {/*  }*/}
-        {/*/>*/}
-      </div>
       <Navbar />
     </div>
   );

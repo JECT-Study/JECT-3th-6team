@@ -73,7 +73,7 @@ export default function useFilter(initialFilter: FilterState) {
         setIsApplyDisabled(false);
       }
     }
-  }, [tempState, tempState.date]);
+  }, [tempState, tempState.date, openType]);
 
   return {
     filter,
