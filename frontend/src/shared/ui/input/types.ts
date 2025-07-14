@@ -20,3 +20,12 @@ export interface TextInputProps {
   inputMode?: TextInputModeType;
   isEditable?: boolean;
 }
+
+export interface NumberInputProps {
+  value: number;
+  label: string;
+  max: number;
+  min: number;
+  onChange: (value: number) => void;
+  errorMessage?: string;
+}

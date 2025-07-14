@@ -1,14 +1,8 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
+
 /**
  * 팝업 이미지 엔티티.
  * 팝업의 메인 및 설명 이미지를 저장한다.
@@ -16,7 +10,10 @@ import lombok.Getter;
 @Entity
 @Table(name = "popup_images")
 @Getter
-public class PopupImageEntity{
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PopupImageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

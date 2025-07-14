@@ -1,14 +1,14 @@
 import React from 'react';
 
-export type colorType = 'primary' | 'secondary' | 'white';
-export type sizeType = 'fit' | 'full';
+export type ColorType = 'primary' | 'secondary' | 'white';
+export type SizeType = 'fit' | 'full';
 
-export interface ButtonProps {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   onClick: () => void;
   disabled: boolean;
-  color?: colorType;
-  size?: sizeType;
-  customClass?: string;
+  color?: ColorType;
+  size?: SizeType;
   hasShadow?: boolean;
 }
