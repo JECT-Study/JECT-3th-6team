@@ -11,6 +11,7 @@ import { MediumText } from '@/shared/ui/text/MediumText';
 import Image from 'next/image';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
+import KakaoMap from '@/shared/ui/map/KaKaoMap';
 
 export default function ProductDetail() {
   const images = [
@@ -73,6 +74,10 @@ export default function ProductDetail() {
           <MediumText color="color-black">위치</MediumText>
           <MediumText color="color-black">|</MediumText>
           <MediumText color="color-black">서울, 용산구 한남동 61-2</MediumText>
+        </div>
+        {/* Map */}
+        <div className="mt-2.5">
+          <KakaoMap />
         </div>
       </div>
 
