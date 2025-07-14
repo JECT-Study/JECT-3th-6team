@@ -26,7 +26,7 @@ interface KeywordFilterPreviewProps {
 }
 
 const filterIcons = tv({
-  base: 'absolute rounded-full w-[40px] h-[40px] flex justify-center items-center z-10',
+  base: 'absolute rounded-full w-[40px] h-[40px] flex justify-center items-center z-10 cursor-pointer',
   variants: {
     status: {
       unselect: 'bg-sub2 border border-main',
@@ -43,6 +43,39 @@ export default function KeywordFilterPreview({
 }: KeywordFilterPreviewProps) {
   const [status, setStatus] = useState<statusType>(initialStatus);
 
+  const renderIcon = () => (
+    <div className={filterIcons({ status })} onClick={onClick}>
+      {status === 'unselect' ? (
+        <IconFilterMain width={20} height={20} />
+      ) : (
+        <IconFilterWhite width={20} height={20} />
+      )}
+    </div>
+  );
+
+  const renderPlaceholder = () => (
+    <p className="w-full min-w-[200px] text-[14px] text-gray60 font-light select-none">
+      원하는 조건을 선택해 보세요!
+    </p>
+  );
+
+  const renderChips = () => (
+    <div
+      className="w-full flex items-center gap-x-[10px] overflow-x-scroll"
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+    >
+      {keywords.map((chip, index) => (
+        <Chip
+          iconPosition="right"
+          key={index}
+          className="py-[7px] text-main"
+          onClickRightIcon={() => onDelete?.(chip)}
+        >
+          {chip.label}
+        </Chip>
+      ))}
+    </div>
+  );
   useEffect(() => {
     // 예외 케이스 : 선택사항이 없어도 select 상태의 ui 표시
     if (initialStatus === 'select' && keywords && keywords.length === 0) {
@@ -56,55 +89,13 @@ export default function KeywordFilterPreview({
     } else {
       setStatus('unselect');
     }
-  }, [keywords]);
-  return (
-    // wrapper
-    <div className={'relative w-full h-[40px]'}>
-      <div className={filterIcons({ status })} onClick={onClick}>
-        {status === 'unselect' ? (
-          <IconFilterMain width={20} height={20} />
-        ) : (
-          <IconFilterWhite width={20} height={20} />
-        )}
-      </div>
-      <div
-        className={
-          'absolute top-0 left-0 w-full h-[40px] border border-sub rounded-full z-0 pl-[50px] pr-[15px] flex items-center'
-        }
-      >
-        {status === 'unselect' && (
-          <p
-            className={
-              'w-full min-w-[200px] text-[14px] text-gray60 font-light  '
-            }
-          >
-            원하는 조건을 선택해 보세요!
-          </p>
-        )}
+  }, [keywords, initialStatus]);
 
-        <div
-          className={'w-full flex items-center gap-x-[10px]  overflow-x-scroll'}
-          style={{
-            scrollbarWidth: 'none', // Firefox
-            msOverflowStyle: 'none', // IE
-          }}
-        >
-          {status === 'select' &&
-            keywords &&
-            keywords.length > 0 &&
-            keywords.map((chip, index) => {
-              return (
-                <Chip
-                  iconPosition={'right'}
-                  key={index}
-                  className={'py-[7px] text-main'}
-                  onClickRightIcon={() => onDelete?.(chip)}
-                >
-                  {chip.label}
-                </Chip>
-              );
-            })}
-        </div>
+  return (
+    <div className="relative w-full h-[40px]">
+      {renderIcon()}
+      <div className="absolute top-0 left-0 w-full h-[40px] border border-sub rounded-full z-0 pl-[50px] pr-[15px] flex items-center">
+        {status === 'unselect' ? renderPlaceholder() : renderChips()}
       </div>
     </div>
   );
