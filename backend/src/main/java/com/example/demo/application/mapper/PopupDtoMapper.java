@@ -111,7 +111,7 @@ public class PopupDtoMapper {
             request.category(),
             request.startDate(),
             request.endDate(),
-            request.region1DepthName()
+            (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName()
         );
     }
     public PopupSummaryResponse toPopupSummaryResponse(Popup popup) {
