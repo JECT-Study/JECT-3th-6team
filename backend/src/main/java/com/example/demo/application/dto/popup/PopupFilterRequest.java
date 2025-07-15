@@ -10,8 +10,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 public record PopupFilterRequest(
     Long popupId,
     @Min(1)
-    Integer page,
-    @Min(1)
     Integer size,
     @Size(max = 3)
     List<String> type,
@@ -21,5 +19,6 @@ public record PopupFilterRequest(
     LocalDate startDate,
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate endDate,
-    String region1DepthName
+    String region1DepthName,
+    Long lastPopupId
 ) {}

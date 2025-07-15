@@ -66,7 +66,7 @@ public class PopupPortAdapter implements PopupPort {
     }
 
     public List<Popup> findByQuery(PopupQuery query) {
-        var pageable = PageRequest.of(query.page() - 1, query.size());
+        var pageable = PageRequest.of(0, query.size());
 
         List<PopupEntity> popupEntities = popupJpaRepository.findFilteredPopups(
             query.popupId(),
@@ -75,6 +75,7 @@ public class PopupPortAdapter implements PopupPort {
             query.types().isEmpty() ? null : query.types(),
             query.categories().isEmpty() ? null : query.categories(),
             query.region1DepthName(),
+            query.lastPopupId(),
             pageable
         );
 

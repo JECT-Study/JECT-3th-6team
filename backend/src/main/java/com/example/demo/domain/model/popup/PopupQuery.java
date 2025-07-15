@@ -10,37 +10,37 @@ import java.util.Optional;
  */
 public record PopupQuery(
     Long popupId,
-    int page,
     int size,
     List<String> types,
     List<String> categories,
     LocalDate startDate,
     LocalDate endDate,
-    String region1DepthName
+    String region1DepthName,
+    Long lastPopupId
 ) {
 
     public static PopupQuery directPopupId(Long popupId) {
-        return new PopupQuery(popupId, 1, 1, List.of(), List.of(), null, null, null);
+        return new PopupQuery(popupId, 1, List.of(), List.of(), null, null, null, null);
     }
 
     public static PopupQuery withFilters(
-        int page,
         int size,
         List<String> types,
         List<String> categories,
         LocalDate startDate,
         LocalDate endDate,
-        String region1DepthName
+        String region1DepthName,
+        Long lastPopupId
     ) {
         return new PopupQuery(
             null,
-            page,
             size,
             Optional.ofNullable(types).orElse(List.of()),
             Optional.ofNullable(categories).orElse(List.of()),
             startDate,
             endDate,
-            region1DepthName
+            region1DepthName,
+            lastPopupId
         );
     }
 }

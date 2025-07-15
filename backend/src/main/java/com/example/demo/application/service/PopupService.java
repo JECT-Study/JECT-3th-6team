@@ -3,6 +3,7 @@ package com.example.demo.application.service;
 import com.example.demo.application.dto.PopupDetailResponse;
 import com.example.demo.application.dto.popup.PopupFilterRequest;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
+import com.example.demo.application.dto.popup.PopupCursorResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
 import com.example.demo.domain.model.BrandStory;
 import com.example.demo.domain.model.popup.Popup;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +32,17 @@ public class PopupService {
     private final WaitingPort waitingPort;
 
     @Transactional(readOnly = true)
-    public List<PopupSummaryResponse> getFilteredPopups(PopupFilterRequest request) {
+    public PopupCursorResponse getFilteredPopups(PopupFilterRequest request) {
         PopupQuery query = popupDtoMapper.toQuery(request);
+        int size = Optional.ofNullable(request.size()).orElse(10);
         List<Popup> popups = popupPort.findByQuery(query);
-        return popups.stream()
+        boolean hasNext = popups.size() > size;
+        List<PopupSummaryResponse> content = popups.stream()
+            .limit(size)
             .map(popupDtoMapper::toPopupSummaryResponse)
             .toList();
+        Long lastPopupId = content.isEmpty() ? null : content.get(content.size() - 1).popupId();
+        return new PopupCursorResponse(content, lastPopupId, hasNext);
     }
 
     @Transactional(readOnly = true)

@@ -3,6 +3,7 @@ package com.example.demo.presentation.controller;
 import com.example.demo.application.dto.PopupDetailResponse;
 import com.example.demo.application.dto.popup.PopupFilterRequest;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
+import com.example.demo.application.dto.popup.PopupCursorResponse;
 import com.example.demo.application.service.PopupService;
 import com.example.demo.presentation.ApiResponse;
 import jakarta.validation.Valid;
@@ -22,9 +23,9 @@ public class PopupController {
     private final PopupService popupService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PopupSummaryResponse>>> getPopups(@Valid PopupFilterRequest request){
-        List<PopupSummaryResponse> popups = popupService.getFilteredPopups(request);
-        return ResponseEntity.ok(new ApiResponse<>("팝업 목록 조회에 성공했습니다.", popups));
+    public ResponseEntity<ApiResponse<PopupCursorResponse>> getPopups(@Valid PopupFilterRequest request){
+        PopupCursorResponse response = popupService.getFilteredPopups(request);
+        return ResponseEntity.ok(new ApiResponse<>("팝업 목록 조회에 성공했습니다.", response));
     }
 
     @GetMapping("/{popupId}")

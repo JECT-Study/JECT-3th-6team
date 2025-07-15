@@ -118,13 +118,13 @@ public class PopupDtoMapper {
         }
 
         return PopupQuery.withFilters(
-            Optional.ofNullable(request.page()).orElse(1),
             Optional.ofNullable(request.size()).orElse(10),
             mappedTypes,
             request.category(),
             request.startDate(),
             request.endDate(),
-            (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName()
+            (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName(),
+            request.lastPopupId()
         );
     }
     public PopupSummaryResponse toPopupSummaryResponse(Popup popup) {
