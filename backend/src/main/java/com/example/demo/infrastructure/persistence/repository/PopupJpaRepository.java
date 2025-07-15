@@ -37,6 +37,7 @@ public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
             SELECT 1 FROM PopupLocationEntity l
             WHERE l.id = p.popupLocationId AND (:region1DepthName IS NULL OR l.region1DepthName = :region1DepthName)
         )
+        ORDER BY p.startDate ASC
     """)
     List<PopupEntity> findFilteredPopups(
         @Param("popupId") Long popupId,
