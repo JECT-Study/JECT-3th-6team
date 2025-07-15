@@ -71,7 +71,7 @@ interface RawPopupHistoryListItemType {
       longitude: number;
       latitude: number;
     };
-    dDay: string;
+    dDay: number;
     period: string; // "2025-06-01 ~ 2025-06-25"
   };
 }

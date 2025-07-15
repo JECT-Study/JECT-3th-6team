@@ -6,6 +6,7 @@ import {
 } from '@/entities/popup/types/PopupListItem';
 import { PopupBadge } from '@/entities/popup/ui/PopupBadge';
 import { dateToPeriodString, periodStringToDate } from './dateToPeriodString';
+import { region1DepthShortMap } from '@/entities/popup/constants/region1DepthNameShort';
 
 type PopupItemMapperMap = {
   DEFAULT: (data: PopupListItemType) => PopupCardViewProps;
@@ -29,11 +30,14 @@ const mapPopupListItemToViewProps = (
     new Date(data.period.endDate)
   );
 
+  const { region_1depth_name, region_2depth_name } = data.location;
+  const renderLocation = `${region1DepthShortMap[region_1depth_name]}, ${region_2depth_name}`;
+
   return {
     popupId: data.id,
     popupName: data.name,
     popupImageUrl: data.imageUrl,
-    location: data.location.address_name,
+    location: renderLocation,
     period: periodStr,
     linkTo: `/detail/${data.id}`,
     Badge: renderedBadge,
@@ -50,11 +54,14 @@ const mapHistoryItemToViewProps = (
   const { startDate, endDate } = periodStringToDate(data.popup.period);
   const renderedPeriod = dateToPeriodString(startDate, endDate);
 
+  const { region1depthName, region2depthName } = data.popup.location;
+  const renderLocation = `${region1DepthShortMap[region1depthName]}, ${region2depthName}`;
+
   return {
     popupId: data.popup.popupId,
     popupName: data.popup.popupName,
     popupImageUrl: data.popup.popupImageUrl,
-    location: data.popup.location.addressName,
+    location: renderLocation,
     period: renderedPeriod,
     hasRightBar: data.status === 'WAITING',
     linkTo:

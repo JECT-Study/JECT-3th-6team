@@ -18,7 +18,7 @@ export const PopupBadge = ({ data }: Props): React.ReactElement => {
     );
   }
 
-  if (data.status === 'COMPLETED') {
+  if (data.status === 'VISITED') {
     return (
       <Badge variant="gray" className={BADGE_POSITION_STYLE}>
         방문완료
@@ -26,7 +26,7 @@ export const PopupBadge = ({ data }: Props): React.ReactElement => {
     );
   }
 
-  if (data.status === 'RESERVED') {
+  if (data.status === 'WAITING') {
     return (
       <Badge variant="main" className={BADGE_POSITION_STYLE}>
         예약 중
