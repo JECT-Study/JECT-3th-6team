@@ -24,7 +24,7 @@ public class PopupController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<PopupSummaryResponse>>> getPopups(@Valid PopupFilterRequest request){
         List<PopupSummaryResponse> popups = popupService.getFilteredPopups(request);
-        return ResponseEntity.ok(new ApiResponse<>("팝업 상세 조회가 성공했습니다.", popups));
+        return ResponseEntity.ok(new ApiResponse<>("팝업 목록 조회에 성공했습니다.", popups));
     }
 
     @GetMapping("/{popupId}")

@@ -27,8 +27,7 @@ public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
     @Query("""
         SELECT p FROM PopupEntity p
         WHERE (:popupId IS NULL OR p.id = :popupId)
-        AND (:startDate IS NULL OR p.startDate >= :startDate)
-        AND (:endDate IS NULL OR p.endDate <= :endDate)
+        AND ((:startDate IS NULL OR :endDate IS NULL) OR (p.endDate >= :startDate AND p.startDate <= :endDate))
         AND (:types IS NULL OR p.type IN :types)
         AND EXISTS (
             SELECT 1 FROM PopupCategoryEntity c
