@@ -11,7 +11,7 @@ export const PopupBadge = ({ data }: Props): React.ReactElement => {
   const BADGE_POSITION_STYLE = 'absolute top-[12px] left-[8px]';
   if (data.tag === 'DEFAULT') {
     const { dDay } = data;
-    const renderedDay = dDay <= 0 ? '0일 남음' : `${dDay} 남음`;
+    const renderedDay = dDay <= 0 ? '0일 남음' : `${dDay}일 남음`;
     return (
       <Badge className={BADGE_POSITION_STYLE}>
         <IconClock width={12} height={12} fill={'var(--color-white)'} />
