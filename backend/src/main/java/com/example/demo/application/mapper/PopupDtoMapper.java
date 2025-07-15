@@ -17,6 +17,7 @@ import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.popup.PopupCategory;
 import com.example.demo.domain.model.popup.PopupQuery;
 import com.example.demo.domain.model.popup.Sns;
+import com.example.demo.domain.model.popup.PopupType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -108,11 +109,12 @@ public class PopupDtoMapper {
         List<String> mappedTypes = null;
         if (request.type() != null) {
             mappedTypes = request.type().stream()
-                .map(type -> switch (type) {
-                    case "체험형" -> "EXPERIENTIAL";
-                    case "전시형" -> "EXHIBITION";
-                    case "판매형" -> "SALES";
-                    default -> type; // 이미 영어면 그대로
+                .map(type -> {
+                    try {
+                        return PopupType.fromKorean(type).name();
+                    } catch (Exception e) {
+                        return type; // 예외 발생 시 원본 반환(혹시 모를 확장성)
+                    }
                 })
                 .toList();
         }
