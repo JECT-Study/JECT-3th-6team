@@ -104,10 +104,23 @@ public class PopupDtoMapper {
             return PopupQuery.directPopupId(request.popupId());
         }
 
+        // 한글 타입명을 영어 Enum 값으로 매핑
+        List<String> mappedTypes = null;
+        if (request.type() != null) {
+            mappedTypes = request.type().stream()
+                .map(type -> switch (type) {
+                    case "체험형" -> "EXPERIENTIAL";
+                    case "전시형" -> "EXHIBITION";
+                    case "판매형" -> "SALES";
+                    default -> type; // 이미 영어면 그대로
+                })
+                .toList();
+        }
+
         return PopupQuery.withFilters(
             Optional.ofNullable(request.page()).orElse(1),
             Optional.ofNullable(request.size()).orElse(10),
-            request.type(),
+            mappedTypes,
             request.category(),
             request.startDate(),
             request.endDate(),
