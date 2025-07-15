@@ -37,7 +37,7 @@ interface RawPopupListItemType {
     x: number;
     y: number;
   };
-  rating: ratingType;
+  rating?: ratingType;
   period: {
     startDate: string;
     endDate: string;
@@ -59,6 +59,7 @@ interface RawPopupHistoryListItemType {
   name: string;
   peopleCount: number;
   contactEmail: string;
+  registeredAt: string;
   popup: {
     popupId: number;
     popupName: string;

@@ -12,7 +12,7 @@ type ContentBlockProps = {
   value: string | number;
 };
 
-const ContentBlock: React.FC<ContentBlockProps> = ({
+export const ContentBlock: React.FC<ContentBlockProps> = ({
   label,
   value,
 }: ContentBlockProps) => (

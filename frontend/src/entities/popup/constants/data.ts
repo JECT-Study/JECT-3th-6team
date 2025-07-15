@@ -32,6 +32,7 @@ const popupList: PopupItemType[] = [
     name: '임수빈',
     peopleCount: 4,
     contactEmail: 'robin980108@naver.com',
+    registeredAt: '2025-06-26T16:00:00',
     popup: {
       popupId: 1,
       popupName: '무신사 X 나이키 팝업스토어',
@@ -56,6 +57,7 @@ const popupList: PopupItemType[] = [
     name: '임수빈',
     peopleCount: 4,
     contactEmail: 'robin980108@naver.com',
+    registeredAt: '2025-06-26T16:00:00',
     popup: {
       popupId: 1,
       popupName: '무신사 X 나이키 팝업스토어',
