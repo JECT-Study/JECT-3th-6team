@@ -66,7 +66,7 @@ public class PopupPortAdapter implements PopupPort {
     }
 
     public List<Popup> findByQuery(PopupQuery query) {
-        var pageable = PageRequest.of(0, query.size());
+        var pageable = PageRequest.of(0, query.size() + 1);
 
         List<PopupEntity> popupEntities = popupJpaRepository.findFilteredPopups(
             query.popupId(),
