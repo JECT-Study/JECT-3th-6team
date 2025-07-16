@@ -20,8 +20,8 @@ public class PopupController {
 
     @GetMapping("/map")
     public ApiResponse<List<PopupMapResponse>> getPopupsOnMap(PopupMapRequest request) {
-        // TODO: 서비스 로직 구현 필요
-        return new ApiResponse<>("지도 내 팝업 조회가 성공했습니다.", List.of());
+        List<PopupMapResponse> response = popupService.getPopupsOnMap(request);
+        return new ApiResponse<>("지도 내 팝업 조회가 성공했습니다.", response);
     }
 
     @GetMapping("/{popupId}")
