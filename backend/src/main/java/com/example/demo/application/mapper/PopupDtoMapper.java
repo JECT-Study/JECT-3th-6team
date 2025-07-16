@@ -109,13 +109,7 @@ public class PopupDtoMapper {
         List<String> mappedTypes = null;
         if (request.type() != null) {
             mappedTypes = request.type().stream()
-                .map(type -> {
-                    try {
-                        return PopupType.fromKorean(type).name();
-                    } catch (Exception e) {
-                        return type; // 예외 발생 시 원본 반환(혹시 모를 확장성)
-                    }
-                })
+                .map(type -> PopupType.fromKorean(type).name())
                 .toList();
         }
 
