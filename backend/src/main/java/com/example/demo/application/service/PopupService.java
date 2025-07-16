@@ -33,6 +33,7 @@ public class PopupService {
 
     @Transactional(readOnly = true)
     public PopupCursorResponse getFilteredPopups(PopupFilterRequest request) {
+        // TODO: https://github.com/JECT-Study/JECT-3th-6team/pull/92#discussion_r2210591165
         PopupQuery query = popupDtoMapper.toQuery(request);
         int size = Optional.ofNullable(request.size()).orElse(10);
         List<Popup> popups = popupPort.findByQuery(query);

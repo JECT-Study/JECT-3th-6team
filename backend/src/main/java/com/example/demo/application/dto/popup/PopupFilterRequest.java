@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 
 public record PopupFilterRequest(
+    // TODO: https://github.com/JECT-Study/JECT-3th-6team/pull/92#discussion_r2210604215
     Long popupId,
     @Min(1)
     Integer size,

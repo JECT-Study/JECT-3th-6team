@@ -9,6 +9,7 @@ import java.util.Optional;
  * 페이징, 필터링, 정렬 조건 등을 포함할 수 있다.
  */
 public record PopupQuery(
+    // TODO: https://github.com/JECT-Study/JECT-3th-6team/pull/92#discussion_r2210630218
     Long popupId,
     int size,
     List<String> types,
