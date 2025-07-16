@@ -41,7 +41,7 @@ public class PopupService {
             .limit(size)
             .map(popupDtoMapper::toPopupSummaryResponse)
             .toList();
-        Long lastPopupId = content.isEmpty() ? null : content.get(content.size() - 1).popupId();
+        Long lastPopupId = content.isEmpty() ? null : content.getLast().popupId();
         return new PopupCursorResponse(content, lastPopupId, hasNext);
     }
 
