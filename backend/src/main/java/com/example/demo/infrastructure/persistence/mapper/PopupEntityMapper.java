@@ -12,6 +12,21 @@ import java.util.stream.Collectors;
 @Component
 public class PopupEntityMapper {
 
+    public Popup toDomain(PopupEntity popupEntity, PopupLocationEntity locationEntity) {
+        if (popupEntity == null) {
+            return null;
+        }
+
+        Location location = locationEntity != null ? toLocationDomain(locationEntity) : null;
+
+        return Popup.builder()
+                .id(popupEntity.getId())
+                .name(popupEntity.getTitle())
+                .location(location)
+                .type(toDomain(popupEntity.getType()))
+                .build();
+    }
+
     // Entity List -> Domain
     public Popup toDomain(
             PopupEntity popupEntity,

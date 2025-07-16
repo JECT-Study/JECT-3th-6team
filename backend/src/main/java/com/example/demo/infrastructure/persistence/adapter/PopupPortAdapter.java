@@ -1,8 +1,12 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
 import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.popup.PopupMapQuery;
+import com.example.demo.domain.model.popup.PopupQuery;
 import com.example.demo.domain.port.PopupPort;
+import com.example.demo.infrastructure.persistence.entity.popup.PopupEntity;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
+import com.example.demo.infrastructure.persistence.entity.popup.PopupLocationEntity;
 import com.example.demo.infrastructure.persistence.mapper.PopupEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -58,7 +63,7 @@ public class PopupPortAdapter implements PopupPort {
     }
 
     @Override
-    public List<Popup> findByQuery(com.example.demo.domain.model.popup.PopupQuery query) {
+    public List<Popup> findByQuery(PopupQuery query) {
         // TODO: QueryDSL 등을 사용하여 동적 쿼리 구현 필요
         return List.of();
     }
@@ -67,5 +72,22 @@ public class PopupPortAdapter implements PopupPort {
     public void deleteById(Long popupId) {
         // TODO: 연관된 모든 엔티티(location, schedule 등)를 함께 삭제하는 로직 구현 필요
         popupJpaRepository.deleteById(popupId);
+    }
+
+    @Override
+    public List<Popup> findByMapQuery(PopupMapQuery query) {
+        List<PopupEntity> popupEntities = popupJpaRepository.findPopupsByMapQuery(
+                query,
+                query.minLatitude(),
+                query.maxLatitude(),
+                query.minLongitude(),
+                query.maxLongitude()
+        );
+        return popupEntities.stream()
+                .map(it -> {
+                    PopupLocationEntity popupLocationEntity = popupLocationRepository.findById(it.getPopupLocationId()).orElseThrow();
+                    return popupEntityMapper.toDomain(it, popupLocationEntity);
+                })
+                .collect(Collectors.toList());
     }
 }
