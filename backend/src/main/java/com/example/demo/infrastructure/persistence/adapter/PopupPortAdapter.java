@@ -76,13 +76,7 @@ public class PopupPortAdapter implements PopupPort {
 
     @Override
     public List<Popup> findByMapQuery(PopupMapQuery query) {
-        List<PopupEntity> popupEntities = popupJpaRepository.findPopupsByMapQuery(
-                query,
-                query.minLatitude(),
-                query.maxLatitude(),
-                query.minLongitude(),
-                query.maxLongitude()
-        );
+        List<PopupEntity> popupEntities = popupJpaRepository.findByMapQuery(query);
         return popupEntities.stream()
                 .map(it -> {
                     PopupLocationEntity popupLocationEntity = popupLocationRepository.findById(it.getPopupLocationId()).orElseThrow();
