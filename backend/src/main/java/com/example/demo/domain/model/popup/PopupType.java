@@ -34,11 +34,6 @@ public enum PopupType {
                 return type;
             }
         }
-        // 이미 영어로 들어온 경우도 지원
-        try {
-            return PopupType.valueOf(value);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("지원하지 않는 팝업 타입: " + value);
-        }
+        throw new IllegalArgumentException("지원하지 않는 팝업 타입(한글): " + value);
     }
 } 
