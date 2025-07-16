@@ -1,14 +1,15 @@
 package com.example.demo.presentation.controller;
 
 import com.example.demo.application.dto.PopupDetailResponse;
+import com.example.demo.application.dto.popup.PopupMapRequest;
+import com.example.demo.application.dto.popup.PopupMapResponse;
 import com.example.demo.application.service.PopupService;
 import com.example.demo.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/popups")
@@ -16,6 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PopupController {
 
     private final PopupService popupService;
+
+    @GetMapping("/map")
+    public ApiResponse<List<PopupMapResponse>> getPopupsOnMap(PopupMapRequest request) {
+        // TODO: 서비스 로직 구현 필요
+        return new ApiResponse<>("지도 내 팝업 조회가 성공했습니다.", List.of());
+    }
 
     @GetMapping("/{popupId}")
     public ResponseEntity<ApiResponse<PopupDetailResponse>> getPopupDetail(@PathVariable Long popupId) {
