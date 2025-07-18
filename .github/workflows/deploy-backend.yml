@@ -64,8 +64,8 @@ jobs:
             echo "IMAGE_REGISTRY=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}" >> .env
 
             # Pull the latest image and restart the service
-            docker-compose pull backend
-            docker-compose up -d --remove-orphans
+            docker compose pull backend
+            docker compose up -d --remove-orphans
 
             # Clean up
             docker image prune -af 
