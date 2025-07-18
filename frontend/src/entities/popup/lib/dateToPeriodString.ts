@@ -16,3 +16,14 @@ export const dateToPeriodString = (startDate: Date, endDate: Date) => {
 
   return `${startMonth}월 ${startDay}일 ~ ${endMonth}월 ${endDay}일`;
 };
+
+/**
+ *  "2025-06-01 ~ 2025-06-25" 에서 시작날짜, 종료날짜를 추출해서 Date 객체로 변환합니다.
+ */
+export const periodStringToDate = (periodString: string) => {
+  const [startDate, endDate] = periodString.split(' ~ ');
+  return {
+    startDate: new Date(startDate),
+    endDate: new Date(endDate),
+  };
+};

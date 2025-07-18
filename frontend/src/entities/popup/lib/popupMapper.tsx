@@ -5,7 +5,8 @@ import {
   PopupListItemType,
 } from '@/entities/popup/types/PopupListItem';
 import { PopupBadge } from '@/entities/popup/ui/PopupBadge';
-import { dateToPeriodString } from './dateToPeriodString';
+import { dateToPeriodString, periodStringToDate } from './dateToPeriodString';
+import { region1DepthShortMap } from '@/entities/popup/constants/region1DepthNameShort';
 
 type PopupItemMapperMap = {
   DEFAULT: (data: PopupListItemType) => PopupCardViewProps;
@@ -29,15 +30,18 @@ const mapPopupListItemToViewProps = (
     new Date(data.period.endDate)
   );
 
+  const { region_1depth_name, region_2depth_name } = data.location;
+  const renderLocation = `${region1DepthShortMap[region_1depth_name]}, ${region_2depth_name}`;
+
   return {
     popupId: data.id,
     popupName: data.name,
     popupImageUrl: data.imageUrl,
-    location: data.location.address_name,
-    rating: data.rating,
+    location: renderLocation,
     period: periodStr,
     linkTo: `/detail/${data.id}`,
     Badge: renderedBadge,
+    //rating: data.rating,
   };
 };
 
@@ -46,16 +50,24 @@ const mapHistoryItemToViewProps = (
 ): PopupCardViewProps => {
   const renderedBadge = <PopupBadge data={data} />;
 
+  //  "2025-06-01 ~ 2025-06-25" 을 '6월 1일 ~ 6월 25일' 로 변환
+  const { startDate, endDate } = periodStringToDate(data.popup.period);
+  const renderedPeriod = dateToPeriodString(startDate, endDate);
+
+  const { region1depthName, region2depthName } = data.popup.location;
+  const renderLocation = `${region1DepthShortMap[region1depthName]}, ${region2depthName}`;
+
   return {
-    popupId: data.popupId,
-    popupName: data.popupName,
-    popupImageUrl: data.popupImageUrl,
-    location: data.location,
-    rating: data.rating,
-    period: data.period,
-    hasRightBar: data.status === 'RESERVED',
-    linkTo: data.status === 'RESERVED' ? '/waiting' : `/detail/${data.popupId}`,
+    popupId: data.popup.popupId,
+    popupName: data.popup.popupName,
+    popupImageUrl: data.popup.popupImageUrl,
+    location: renderLocation,
+    period: renderedPeriod,
+    hasRightBar: data.status === 'WAITING',
+    linkTo:
+      data.status === 'WAITING' ? '/waiting' : `/detail/${data.popup.popupId}`,
     Badge: renderedBadge,
+    // rating: data.rating,
   };
 };
 

@@ -17,7 +17,7 @@ const PopupCardLink = ({
   linkTo: string;
 }) => (
   <Link href={linkTo}>
-    <div className="relative w-full flex rounded-2xl bg-white overflow-hidden shadow-card">
+    <div className="relative w-full flex rounded-2xl bg-white overflow-hidden shadow-card border border-gray40">
       {children}
     </div>
   </Link>
@@ -52,23 +52,25 @@ const PopupCardContent = ({
 }: {
   location: string;
   popupName: string;
-  rating: ratingType;
+  rating?: ratingType;
   period: string;
 }) => (
   <div className="relative flex flex-1 flex-col justify-between py-4 pl-4">
-    <div className="flex flex-col gap-y-[8px]">
+    <div className="flex flex-col gap-y-[3px]">
       <p className="flex items-center font-medium text-sm text-gray60 gap-x-1">
-        <IconMap width={12} height={13} fill={'var(--color-gray60)'} />
+        <IconMap width={22} height={30} fill={'var(--color-gray60)'} />
         <span>{location}</span>
       </p>
-      <h3 className="text-black font-semibold text-base">{popupName}</h3>
-      <p className="font-regular text-sm/normal text-gray60 flex gap-x-1 items-center">
-        <IconStar width={16} height={16} fill={'var(--color-main)'} />
-        <span>{rating.averageStar}</span>
-        <span>({rating.reviewCount})</span>
-      </p>
+      <h3 className="text-black font-medium text-base">{popupName}</h3>
+      {rating && (
+        <p className="font-regular text-sm/normal text-gray60 flex gap-x-1 items-center">
+          <IconStar width={16} height={16} fill={'var(--color-main)'} />
+          <span>{rating.averageStar}</span>
+          <span>({rating.reviewCount})</span>
+        </p>
+      )}
     </div>
-    <div className="block font-semibold text-gray60 text-sm tracking-tight">
+    <div className="block font-medium text-gray60 text-sm tracking-tight">
       {period}
     </div>
   </div>
