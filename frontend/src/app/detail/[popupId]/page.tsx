@@ -11,7 +11,7 @@ import { MediumText } from '@/shared/ui/text/MediumText';
 import Image from 'next/image';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
-import KakaoMap from '@/shared/ui/map/KaKaoMap';
+import { CircleMap } from '@/shared/ui';
 
 export default function ProductDetail() {
   const images = [
@@ -77,7 +77,7 @@ export default function ProductDetail() {
         </div>
         {/* Map */}
         <div className="mt-2.5">
-          <KakaoMap />
+          <CircleMap center={{ lat: 37.5353, lng: 127.008 }} radius={200} />
         </div>
       </div>
 
