@@ -12,7 +12,9 @@ import Image from 'next/image';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { CircleMap } from '@/shared/ui';
-
+import PageHeader from '@/shared/ui/header/PageHeader';
+import StandardButton from '@/shared/ui/button/StandardButton';
+import { BottomButtonContainer } from '@/shared/ui';
 export default function ProductDetail() {
   const images = [
     '/images/sunglass.jpg',
@@ -21,7 +23,8 @@ export default function ProductDetail() {
   ];
 
   return (
-    <div>
+    <div className="pb-36">
+      <PageHeader title="상세 정보" />
       {/* Image Carousel */}
       <ImageCarousel images={images} />
 
@@ -77,7 +80,12 @@ export default function ProductDetail() {
         </div>
         {/* Map */}
         <div className="mt-2.5">
-          <CircleMap center={{ lat: 37.5353, lng: 127.008 }} radius={200} />
+          <CircleMap
+            center={{ lat: 37.5353, lng: 127.008 }}
+            radius={200}
+            maxLevel={6}
+            minLevel={6}
+          />
         </div>
       </div>
 
@@ -89,6 +97,18 @@ export default function ProductDetail() {
       <div className="px-5">
         <DescriptionTab />
       </div>
+
+      <BottomButtonContainer>
+        <StandardButton
+          onClick={() => {
+            console.log('웨이팅');
+          }}
+          disabled={false}
+          color="primary"
+        >
+          웨이팅 하기
+        </StandardButton>
+      </BottomButtonContainer>
     </div>
   );
 }

@@ -7,6 +7,8 @@ interface CircleMapProps {
   center: MapPosition;
   radius?: number;
   level?: number;
+  minLevel?: number;
+  maxLevel?: number;
   style?: React.CSSProperties;
   circleOptions?: {
     strokeWeight?: number;
@@ -22,6 +24,8 @@ export default function CircleMap({
   center,
   radius = 200,
   level = 6,
+  minLevel,
+  maxLevel,
   style = { width: '100%', height: '120px', borderRadius: '10px' },
   circleOptions = {
     strokeWeight: 4,
@@ -33,7 +37,13 @@ export default function CircleMap({
   },
 }: CircleMapProps) {
   return (
-    <Map center={center} style={style} level={level}>
+    <Map
+      center={center}
+      style={style}
+      level={level}
+      maxLevel={maxLevel}
+      minLevel={minLevel}
+    >
       <Circle
         center={center}
         radius={radius}
