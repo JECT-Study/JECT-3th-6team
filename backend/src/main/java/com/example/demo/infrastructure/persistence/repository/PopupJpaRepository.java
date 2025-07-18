@@ -15,13 +15,20 @@ import java.util.List;
 @Repository
 public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
 
-    @Query("SELECT DISTINCT p FROM PopupEntity p " +
-            "JOIN PopupLocationEntity pl ON p.popupLocationId = pl.id " +
-            "LEFT JOIN PopupCategoryEntity pc ON p.id = pc.popupId " +
-            "WHERE pl.latitude BETWEEN :#{#query.minLatitude} AND :#{#query.maxLatitude} " +
-            "AND pl.longitude BETWEEN :#{#query.minLongitude} AND :#{#query.maxLongitude} " +
-            "AND (:#{#query.type} IS NULL OR p.type = :#{#query.type}) " +
-            "AND (:#{#query.dateRange} IS NULL OR (p.startDate <= :#{#query.dateRange.endDate} AND p.endDate >= :#{#query.dateRange.startDate})) " +
-            "AND (:#{#query.categories} IS NULL OR pc.name IN (:#{#query.categories}))")
+    @Query("""
+            SELECT DISTINCT p FROM PopupEntity p \
+            JOIN PopupLocationEntity pl ON p.popupLocationId = pl.id \
+            LEFT JOIN PopupCategoryEntity pc ON p.id = pc.popupId \
+            WHERE pl.latitude BETWEEN :#{#query.minLatitude} AND :#{#query.maxLatitude} \
+            AND pl.longitude BETWEEN :#{#query.minLongitude} AND :#{#query.maxLongitude} \
+            AND (:#{#query.type} IS NULL OR CAST(p.type AS string) = CAST(:#{#query.type} AS string)) \
+            AND (
+                ((:#{#query.dateRange.startDate()} IS NULL) OR (:#{#query.dateRange.endDate()} IS NULL))
+                OR
+                (p.startDate <= :#{#query.dateRange.endDate} AND p.endDate >= :#{#query.dateRange.startDate})
+                ) \
+            AND (:#{#query.categories} IS NULL OR pc.name IN (:#{#query.categories}))
+            """
+    )
     List<PopupEntity> findByMapQuery(@Param("query") PopupMapQuery query);
 } 
