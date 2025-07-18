@@ -1,6 +1,6 @@
 package com.example.demo.application.mapper;
 
-import com.example.demo.application.dto.waiting.PopupDtoForWaitingResponse;
+import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
 import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.domain.model.DateRange;
@@ -56,7 +56,7 @@ public class WaitingDtoMapper {
                 waiting.waitingPersonName(),
                 waiting.peopleCount(),
                 waiting.contactEmail(),
-                new PopupDtoForWaitingResponse(
+                new PopupSummaryResponse(
                         popup.getId(),
                         popup.getName(),
                         popup.getDisplay().imageUrls().isEmpty() ? null : popup.getDisplay().imageUrls().getFirst(),

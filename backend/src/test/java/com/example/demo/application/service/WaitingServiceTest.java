@@ -1,6 +1,7 @@
 package com.example.demo.application.service;
 
 import com.example.demo.application.dto.popup.LocationResponse;
+import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.dto.waiting.*;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
@@ -316,7 +317,7 @@ class WaitingServiceTest {
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
-            PopupDtoForWaitingResponse popupDto1 = new PopupDtoForWaitingResponse(
+            PopupSummaryResponse popupDto1 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
@@ -326,7 +327,7 @@ class WaitingServiceTest {
                     1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1
             );
 
-            PopupDtoForWaitingResponse popupDto2 = new PopupDtoForWaitingResponse(
+            PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
@@ -368,14 +369,14 @@ class WaitingServiceTest {
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
-            PopupDtoForWaitingResponse popupDto1 = new PopupDtoForWaitingResponse(
+            PopupSummaryResponse popupDto1 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
             );
             WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1);
 
-            PopupDtoForWaitingResponse popupDto2 = new PopupDtoForWaitingResponse(
+            PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
@@ -443,7 +444,7 @@ class WaitingServiceTest {
 
             List<Waiting> waitings = List.of(waiting);
 
-            PopupDtoForWaitingResponse popupDto = new PopupDtoForWaitingResponse(
+            PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
@@ -485,7 +486,7 @@ class WaitingServiceTest {
 
             List<Waiting> waitings = List.of(waiting);
 
-            PopupDtoForWaitingResponse popupDto = new PopupDtoForWaitingResponse(
+            PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"

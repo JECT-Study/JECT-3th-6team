@@ -8,13 +8,32 @@ public enum PopupType {
     /**
      * 체험형
      */
-    EXPERIENTIAL,
+    EXPERIENTIAL("체험형"),
     /**
      * 전시형
      */
-    EXHIBITION,
+    EXHIBITION("전시형"),
     /**
      * 판매형
      */
-    RETAIL
+    RETAIL("판매형");
+
+    private final String korean;
+
+    PopupType(String korean) {
+        this.korean = korean;
+    }
+
+    public String getKorean() {
+        return korean;
+    }
+
+    public static PopupType fromKorean(String value) {
+        for (PopupType type : values()) {
+            if (type.korean.equals(value)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("지원하지 않는 팝업 타입(한글): " + value);
+    }
 } 
