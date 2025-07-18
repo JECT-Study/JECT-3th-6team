@@ -5,7 +5,7 @@ import IconFilterWhite from '@/assets/icons/Normal/Icon_Filter_White.svg';
 import { tv } from 'tailwind-variants';
 import React, { useEffect, useState } from 'react';
 import { Chip } from '@/shared/ui/chip/Chip';
-import { KeywordType } from '@/features/filtering/hook/useFilter';
+import { KeywordType } from '@/features/filtering/hook/type';
 
 /**
  *  2가지 상태
@@ -21,7 +21,7 @@ export type KeywordChip = {
 interface KeywordFilterPreviewProps {
   initialStatus: statusType;
   onClick: () => void;
-  keywords?: KeywordChip[];
+  keywords: KeywordChip[];
   onDelete?: (chip: KeywordChip) => void;
 }
 

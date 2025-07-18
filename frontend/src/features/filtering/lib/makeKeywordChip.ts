@@ -1,5 +1,5 @@
 import { KeywordChip } from '@/features/filtering/ui/KeywordFilterPreview';
-import { KeywordType } from '@/features/filtering/hook/useFilter';
+import { KeywordType } from '@/features/filtering/hook/type';
 
 const toKeywordChips = <T extends keyof KeywordType>(
   labels: string[],

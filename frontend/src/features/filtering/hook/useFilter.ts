@@ -5,6 +5,7 @@ import {
   FilterState,
   FilterType,
   FilterValue,
+  KeywordType,
 } from '@/features/filtering/hook/type';
 
 export default function useFilter(initialFilter: FilterState) {
@@ -35,10 +36,10 @@ export default function useFilter(initialFilter: FilterState) {
     type: T,
     value: FilterValue<T>
   ) => {
-    setTempState({
-      ...filter,
+    setTempState(prev => ({
+      ...prev,
       [type]: value,
-    });
+    }));
   };
 
   const handleApply = () => {

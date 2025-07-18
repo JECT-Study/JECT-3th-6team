@@ -1,7 +1,7 @@
 import { ChipButton } from '@/shared/ui';
 import LOCATION_OPTIONS from '@/features/filtering/lib/locationOptions';
 
-interface LocationOptionProps {
+export interface LocationOptionProps {
   selected: string;
   onSelect: (location: string) => void;
 }

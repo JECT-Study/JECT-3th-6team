@@ -1,11 +1,12 @@
 import KEYWORD_OPTIONS from '@/features/filtering/lib/keywordOptions';
 import { ChipButton } from '@/shared/ui';
 import KeywordFilterPreview, { KeywordChip } from './KeywordFilterPreview';
-import { KeywordType } from '@/features/filtering/hook/useFilter';
+
 import { toast } from 'sonner';
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
+import { KeywordType } from '@/features/filtering/hook/type';
 
-interface KeywordOptionProps {
+export interface KeywordOptionProps {
   selected: KeywordType;
   onSelect: (value: KeywordType) => void;
   onDelete: (chip: KeywordChip) => void;

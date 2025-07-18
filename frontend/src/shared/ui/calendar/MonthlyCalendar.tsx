@@ -17,13 +17,13 @@ export type DateRange = {
 export interface SingleModeProps {
   mode: 'single';
   selected: Date;
-  onSelected: (value: Date) => void;
+  onSelect: (value: Date) => void;
 }
 
 export interface RangeModeProps {
   mode: 'range';
   selected: DateRange;
-  onSelected: (value: DateRange) => void;
+  onSelect: (value: DateRange) => void;
 }
 
 export type MonthlyCalendarProps = SingleModeProps | RangeModeProps;

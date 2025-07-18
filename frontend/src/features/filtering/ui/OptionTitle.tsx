@@ -2,7 +2,7 @@ import IconCalendar from '@/assets/icons/Normal/Icon_Calendar.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import IconFilter from '@/assets/icons/Normal/Icon_Filter_Gray.svg';
 import React from 'react';
-import { FilterType } from '@/features/filtering/hook/useFilter';
+import { FilterType } from '@/features/filtering/hook/type';
 
 interface OptionTitleProps {
   openType: FilterType;
