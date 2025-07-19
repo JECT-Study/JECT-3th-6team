@@ -15,24 +15,34 @@ import { CircleMap } from '@/shared/ui';
 import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
 import { BottomButtonContainer } from '@/shared/ui';
+import { popupDetailData } from './data';
+
 export default function ProductDetail() {
-  const images = [
-    '/images/sunglass.jpg',
-    '/images/sunglass.jpg',
-    '/images/sunglass.jpg',
-  ];
+  const {
+    thumbnails,
+    dDay,
+    title,
+    searchTags,
+    location,
+    period,
+    status,
+    brandStory,
+    popupDetail,
+  } = popupDetailData;
 
   return (
     <div className="pb-36">
       <PageHeader title="상세 정보" />
       {/* Image Carousel */}
-      <ImageCarousel images={images} />
+      <ImageCarousel images={thumbnails} />
 
       {/* Main Detail */}
       <div className="py-6 px-5">
         {/* Badge and Rating */}
         <div className="flex items-center justify-between">
-          <Badge iconPosition="left">10일 남음</Badge>
+          <Badge iconPosition="left">
+            {dDay > 0 ? `${dDay}일 남음` : '종료됨'}
+          </Badge>
           <div className="flex items-center gap-1">
             <Image
               src="/icons/Normal/Icon_Star.svg"
@@ -47,11 +57,11 @@ export default function ProductDetail() {
         </div>
         {/* Title and Tags*/}
         <div className="mt-6">
-          <SemiBoldText size="lg">젠틀몬스터</SemiBoldText>
-          <Tag>수도권</Tag>
-          <Tag>체험형</Tag>
-          <Tag>패션</Tag>
-          <Tag>뷰티</Tag>
+          <SemiBoldText size="lg">{title}</SemiBoldText>
+          <Tag>{searchTags.type}</Tag>
+          {searchTags.category.map((category, index) => (
+            <Tag key={index}>{category}</Tag>
+          ))}
         </div>
         {/* Schedule and Location */}
         <div className="flex items-center gap-2 mt-2.5">
@@ -64,7 +74,7 @@ export default function ProductDetail() {
           <MediumText color="color-black">일정</MediumText>
           <MediumText color="color-black">|</MediumText>
           <MediumText color="color-black">
-            25.06.01(월) ~ 25.06.30(수)
+            {period.startDate} ~ {period.endDate}
           </MediumText>
         </div>
         <div className="flex items-center gap-2 mt-2.5">
@@ -76,12 +86,12 @@ export default function ProductDetail() {
           />
           <MediumText color="color-black">위치</MediumText>
           <MediumText color="color-black">|</MediumText>
-          <MediumText color="color-black">서울, 용산구 한남동 61-2</MediumText>
+          <MediumText color="color-black">{location.address_name}</MediumText>
         </div>
         {/* Map */}
         <div className="mt-2.5">
           <CircleMap
-            center={{ lat: 37.5353, lng: 127.008 }}
+            center={{ lat: location.y, lng: location.x }}
             radius={200}
             maxLevel={6}
             minLevel={6}
@@ -95,18 +105,22 @@ export default function ProductDetail() {
       </div>
       <div className="w-full h-2 bg-main mt-2"></div>
       <div className="px-5">
-        <DescriptionTab />
+        <DescriptionTab brandStory={brandStory} popupDetail={popupDetail} />
       </div>
 
-      <BottomButtonContainer>
+      <BottomButtonContainer hasShadow={true}>
         <StandardButton
           onClick={() => {
             console.log('웨이팅');
           }}
-          disabled={false}
+          disabled={status === 'WAITING' || status === 'VISITED'}
           color="primary"
         >
-          웨이팅 하기
+          {status === 'WAITING'
+            ? '예약중'
+            : status === 'NONE'
+              ? '웨이팅하기'
+              : '방문 완료'}
         </StandardButton>
       </BottomButtonContainer>
     </div>
