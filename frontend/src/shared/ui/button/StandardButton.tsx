@@ -24,7 +24,7 @@ export default function StandardButton({
 
   const shadowStyle = hasShadow ? 'shadow-button' : '';
   const baseStyle =
-    'text-normal font-medium cursor-pointer active:bg-main-active active:text-white disabled:bg-gray40 disabled:text-gray80 transition-colors duration-250';
+    'text-normal font-medium cursor-pointer active:bg-main-active active:text-white disabled:bg-gray40 disabled:text-gray80 disabled:cursor-default transition-colors duration-250';
 
   return (
     <button
