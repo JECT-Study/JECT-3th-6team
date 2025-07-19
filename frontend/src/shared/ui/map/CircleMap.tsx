@@ -10,6 +10,7 @@ interface CircleMapProps {
   minLevel?: number;
   maxLevel?: number;
   style?: React.CSSProperties;
+  onClick?: (map: kakao.maps.Map, mouseEvent: kakao.maps.MouseEvent) => void;
   circleOptions?: {
     strokeWeight?: number;
     strokeColor?: string;
@@ -27,6 +28,7 @@ export default function CircleMap({
   minLevel,
   maxLevel,
   style = { width: '100%', height: '120px', borderRadius: '10px' },
+  onClick,
   circleOptions = {
     strokeWeight: 4,
     strokeColor: '#75B8FA',
@@ -43,6 +45,8 @@ export default function CircleMap({
       level={level}
       maxLevel={maxLevel}
       minLevel={minLevel}
+      draggable={false}
+      onClick={onClick}
     >
       <Circle
         center={center}

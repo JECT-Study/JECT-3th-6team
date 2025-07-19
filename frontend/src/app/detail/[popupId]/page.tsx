@@ -1,23 +1,28 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
-import { ReviewTab } from '@/features/detail/ui/ReviewTab';
-import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
-import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
-import { MediumText } from '@/shared/ui/text/MediumText';
-import Image from 'next/image';
-import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
-import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { CircleMap } from '@/shared/ui';
+import { BottomButtonContainer } from '@/shared/ui';
 import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
-import { BottomButtonContainer } from '@/shared/ui';
+import { MediumText } from '@/shared/ui/text/MediumText';
+import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
+
+import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
+import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
+
+import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
+import IconMap from '@/assets/icons/Normal/Icon_map.svg';
+
 import { popupDetailData } from './data';
 
 export default function ProductDetail() {
+  const router = useRouter();
   const {
     thumbnails,
     dDay,
@@ -29,6 +34,13 @@ export default function ProductDetail() {
     brandStory,
     popupDetail,
   } = popupDetailData;
+
+  const handleClickMap = (map, mouseEvent) => {
+    const latlng = mouseEvent.latLng;
+    const lat = latlng.getLat();
+    const lng = latlng.getLng();
+    router.push(`/map?lat=${lat}&lng=${lng}`);
+  };
 
   return (
     <div className="pb-36">
@@ -95,6 +107,7 @@ export default function ProductDetail() {
             radius={200}
             maxLevel={6}
             minLevel={6}
+            onClick={handleClickMap}
           />
         </div>
       </div>
