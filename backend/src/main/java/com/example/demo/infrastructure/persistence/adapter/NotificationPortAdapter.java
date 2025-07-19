@@ -87,7 +87,8 @@ public class NotificationPortAdapter implements NotificationPort {
             };
         } else {
             return switch (sortOrder) {
-                case UNREAD_FIRST -> repository.findByMemberIdAndStatusOrderByUnreadFirstThenCreatedAtDesc(memberId, status, limit);
+                case UNREAD_FIRST ->
+                        repository.findByMemberIdAndStatusOrderByUnreadFirstThenCreatedAtDesc(memberId, status, limit);
                 case TIME_DESC -> repository.findByMemberIdAndStatusOrderByCreatedAtDesc(memberId, status, limit);
             };
         }
@@ -99,13 +100,16 @@ public class NotificationPortAdapter implements NotificationPort {
     private List<NotificationEntity> executeNextPageQuery(Long memberId, ReadStatus status, Long lastId, NotificationSortOrder sortOrder, int limit) {
         if (status == null) {
             return switch (sortOrder) {
-                case UNREAD_FIRST -> repository.findByMemberIdAndIdLessThanOrderByUnreadFirstThenCreatedAtDesc(memberId, lastId, limit);
+                case UNREAD_FIRST ->
+                        repository.findByMemberIdAndIdLessThanOrderByUnreadFirstThenCreatedAtDesc(memberId, lastId, limit);
                 case TIME_DESC -> repository.findByMemberIdAndIdLessThanOrderByCreatedAtDesc(memberId, lastId, limit);
             };
         } else {
             return switch (sortOrder) {
-                case UNREAD_FIRST -> repository.findByMemberIdAndStatusAndIdLessThanOrderByUnreadFirstThenCreatedAtDesc(memberId, status, lastId, limit);
-                case TIME_DESC -> repository.findByMemberIdAndStatusAndIdLessThanOrderByCreatedAtDesc(memberId, status, lastId, limit);
+                case UNREAD_FIRST ->
+                        repository.findByMemberIdAndStatusAndIdLessThanOrderByUnreadFirstThenCreatedAtDesc(memberId, status, lastId, limit);
+                case TIME_DESC ->
+                        repository.findByMemberIdAndStatusAndIdLessThanOrderByCreatedAtDesc(memberId, status, lastId, limit);
             };
         }
     }
@@ -156,8 +160,9 @@ public class NotificationPortAdapter implements NotificationPort {
 
         // 임시 구현: 모든 대기 정보를 조회해서 필터링
         // 실제로는 WaitingPort에 findById 메서드가 필요함
-        WaitingQuery query = WaitingQuery.firstPage(null, 1000); // 충분히 큰 사이즈로 조회
-        return waitingPort.findByQuery(query)
+        WaitingQuery query = WaitingQuery.firstPage(1000L, 1000); // 충분히 큰 사이즈로 조회
+        List<Waiting> byQuery = waitingPort.findByQuery(query);
+        return byQuery
                 .stream()
                 .filter(waiting -> waiting.id().equals(key.sourceId()))
                 .findFirst()
