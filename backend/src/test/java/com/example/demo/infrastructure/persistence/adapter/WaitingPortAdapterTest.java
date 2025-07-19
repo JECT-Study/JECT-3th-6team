@@ -39,6 +39,9 @@ class WaitingPortAdapterTest {
     @MockitoBean
     private PopupPortAdapter popupPortAdapter;
 
+    @MockitoBean
+    private MemberPortAdapter memberPortAdapter;
+
     private Member member;
     private Popup popup;
 
