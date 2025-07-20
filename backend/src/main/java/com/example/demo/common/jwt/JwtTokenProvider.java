@@ -1,46 +1,80 @@
 package com.example.demo.common.jwt;
 
-import com.example.demo.domain.model.Member;
+import com.example.demo.common.security.UserPrincipal;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
+import jakarta.annotation.PostConstruct;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
-
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final SecretKey secretKey;
-    private final Long expirationSeconds;
+    private final JwtProperties jwtProperties;
+    private SecretKey key;
 
-    public JwtTokenProvider(JwtProperties jwtProperties) {
-        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
-        this.expirationSeconds = jwtProperties.expirationSeconds();
+    @PostConstruct
+    public void init() {
+        byte[] keyBytes = jwtProperties.secret().getBytes();
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(Member member) {
-        Instant now = Instant.now();
-        Instant expiry = now.plusSeconds(expirationSeconds);
+    public String createToken(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        Date now = new Date();
+        long expirationMillis = now.getTime() + jwtProperties.expirationSeconds() * 1000;
+        Date expiryDate = new Date(expirationMillis);
 
         return Jwts.builder()
-                .claim("id", member.id())
-                .claim("name", member.name())
-                .claim("email", member.email())
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiry))
-                .signWith(secretKey)
-                .compact();
+            .subject(userPrincipal.getId().toString())
+            .issuedAt(now)
+            .expiration(expiryDate)
+            .signWith(key)
+            .compact();
     }
 
-    public Claims getClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
+    public Authentication getAuthentication(String token) {
+        Claims claims = parseClaims(token);
+        Long userId = Long.parseLong(claims.getSubject());
+
+        Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        UserPrincipal principal = new UserPrincipal(userId, authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            return false;
+        }
+    }
+
+    private Claims parseClaims(String token) {
+        try {
+            return Jwts.parser()
+                .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 } 

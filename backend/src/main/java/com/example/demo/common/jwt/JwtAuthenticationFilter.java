@@ -28,15 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         String token = resolveToken(request);
 
-        if (token != null) {
-            try {
-                Claims claims = jwtTokenProvider.getClaims(token);
-                Authentication authentication = getAuthentication(claims);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception e) {
-                // 토큰이 유효하지 않은 경우, SecurityContext를 비웁니다.
-                SecurityContextHolder.clearContext();
-            }
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         
         filterChain.doFilter(request, response);
@@ -52,14 +46,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
-    }
-    
-    private Authentication getAuthentication(Claims claims) {
-        Long id = claims.get("id", Long.class);
-        String name = claims.get("name", String.class);
-        String email = claims.get("email", String.class);
-        
-        Member member = new Member(id, name, email);
-        return new UsernamePasswordAuthenticationToken(member, null, Collections.emptyList());
     }
 } 

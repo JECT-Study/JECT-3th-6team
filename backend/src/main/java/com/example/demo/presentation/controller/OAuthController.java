@@ -3,11 +3,14 @@ package com.example.demo.presentation.controller;
 import com.example.demo.application.service.OAuth2Service;
 import com.example.demo.common.jwt.JwtProperties;
 import com.example.demo.common.jwt.JwtTokenProvider;
+import com.example.demo.common.security.UserPrincipal;
 import com.example.demo.domain.model.Member;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +34,11 @@ public class OAuthController {
     @GetMapping("/callback")
     public void kakaoCallback(@RequestParam String code, @RequestParam String state, HttpServletResponse response) throws IOException {
         Member member = oAuth2Service.processKakaoLogin(code);
-        String accessToken = jwtTokenProvider.createToken(member);
+        
+        UserPrincipal principal = UserPrincipal.create(member.id());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+        
+        String accessToken = jwtTokenProvider.createToken(authentication);
         
         response.addCookie(createAccessTokenCookie(accessToken));
         
