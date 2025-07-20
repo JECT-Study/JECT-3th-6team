@@ -24,7 +24,7 @@ public class OAuth2Service {
 
     private final MemberPort memberPort;
     private final OAuthAccountPort oAuthAccountPort;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String kakaoClientId;
