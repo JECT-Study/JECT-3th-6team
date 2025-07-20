@@ -6,10 +6,14 @@ import com.example.demo.application.dto.waiting.WaitingCreateResponse;
 import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.Member;
+import com.example.demo.domain.model.notification.Notification;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingDomainEvent;
+import com.example.demo.domain.model.waiting.WaitingEventType;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
+import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -27,7 +32,11 @@ public class WaitingService {
     private final WaitingPort waitingPort;
     private final PopupPort popupPort;
     private final MemberPort memberPort;
+    private final NotificationPort notificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
+    private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
 
     /**
      * 현장 대기 신청
@@ -63,8 +72,44 @@ public class WaitingService {
         // 5. 대기 정보 저장
         Waiting savedWaiting = waitingPort.save(waiting);
 
-        // 6. 응답 생성
+        // 6. 웨이팅 확정 알림 생성
+        createWaitingConfirmedNotification(savedWaiting);
+
+        // 7. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
+    }
+
+    /**
+     * 웨이팅 확정 알림 생성
+     */
+    private void createWaitingConfirmedNotification(Waiting waiting) {
+        // 1. 웨이팅 도메인 이벤트 생성
+        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.WAITING_CONFIRMED);
+        
+        // 2. 알림 내용 생성
+        String content = generateWaitingConfirmedContent(waiting);
+        
+        // 3. 알림 생성 및 저장
+        Notification notification = Notification.builder()
+                .member(waiting.member())
+                .event(event)
+                .content(content)
+                .build();
+        
+        notificationPort.save(notification);
+    }
+
+    /**
+     * 웨이팅 확정 알림 내용 생성
+     */
+    private String generateWaitingConfirmedContent(Waiting waiting) {
+        LocalDateTime registeredAt = waiting.registeredAt();
+        String dateText = registeredAt.format(DATE_FORMATTER);
+        String dayText = registeredAt.format(DAY_FORMATTER);
+        int peopleCount = waiting.peopleCount();
+        
+        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!", 
+                dateText, dayText, peopleCount);
     }
 
     /**
