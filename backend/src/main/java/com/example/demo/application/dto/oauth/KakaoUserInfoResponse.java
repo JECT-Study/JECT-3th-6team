@@ -2,6 +2,7 @@ package com.example.demo.application.dto.oauth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
+import java.util.Optional;
 
 public record KakaoUserInfoResponse(
     Long id,
@@ -23,7 +24,9 @@ public record KakaoUserInfoResponse(
     ) {}
     
     public String getNickname() {
-        return this.properties.get("nickname").toString();
+        return Optional.ofNullable(properties.get("nickname"))
+            .map(Object::toString)
+            .orElse("unknown");
     }
     
     public String getEmail() {
