@@ -12,7 +12,8 @@ VALUES (100, '패션'),
 
 INSERT INTO members (id, name, email, created_at, modified_at)
 VALUES (1000, 'test', 'test@test.com', '2025-05-05T06:10:11', '2025-05-05T06:10:11'),
-       (1001, 'test2', 'test2@test.com', '2025-05-05T06:10:11', '2025-05-05T06:10:11');
+       (1001, 'test2', 'test2@test.com', '2025-05-05T06:10:11', '2025-05-05T06:10:11'),
+       (1, 'test3', 'test3@test.com', '2025-05-05T06:10:11', '2025-05-05T06:10:11');
 
 -- ===================================
 -- ✅ [DATA] popup_locations
@@ -90,7 +91,8 @@ VALUES (1, 1, 1000, 4, '좋아요'),
 -- ✅ [DATA] waiting
 -- ===================================
 
-INSERT INTO waitings (id, popup_id, waiting_person_name, member_id, contact_email, people_count, waiting_number, status, created_at, modified_at)
+INSERT INTO waitings (id, popup_id, waiting_person_name, member_id, contact_email, people_count, waiting_number, status,
+                      created_at, modified_at)
 VALUES (100, 1, '김테스트', 1000, 'test@test.com', 2, 1, 'WAITING', '2025-06-28T10:00:00', '2025-06-28T10:00:00'),
        (101, 1, '이테스트', 1001, 'test2@test.com', 1, 2, 'WAITING', '2025-06-28T11:00:00', '2025-06-28T11:00:00');
 
@@ -98,17 +100,24 @@ VALUES (100, 1, '김테스트', 1000, 'test@test.com', 2, 1, 'WAITING', '2025-06
 -- ✅ [DATA] notifications
 -- ===================================
 
-INSERT INTO notifications (id, member_id, source_domain, source_id, event_type, content, status, read_at, created_at, modified_at)
-VALUES 
+INSERT INTO notifications (id, member_id, source_domain, source_id, event_type, content, status, read_at, created_at,
+                           modified_at)
+VALUES
 -- 읽지 않은 알림들 (최신순)
-(500, 1000, 'Waiting', 100, 'ENTER_NOW', '지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!', 'UNREAD', NULL, '2025-06-28T15:30:00', '2025-06-28T15:30:00'),
-(501, 1000, 'Waiting', 100, 'ENTER_3TEAMS_BEFORE', '앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!', 'UNREAD', NULL, '2025-06-28T15:00:00', '2025-06-28T15:00:00'),
-(502, 1001, 'Waiting', 101, 'WAITING_CONFIRMED', '대기 등록이 완료되었습니다. 대기번호 2번으로 확정되었습니다.', 'UNREAD', NULL, '2025-06-28T14:30:00', '2025-06-28T14:30:00'),
+(500, 1000, 'Waiting', 100, 'ENTER_NOW', '지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!', 'UNREAD', NULL, '2025-06-28T15:30:00',
+ '2025-06-28T15:30:00'),
+(501, 1000, 'Waiting', 100, 'ENTER_3TEAMS_BEFORE', '앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!', 'UNREAD', NULL,
+ '2025-06-28T15:00:00', '2025-06-28T15:00:00'),
+(502, 1001, 'Waiting', 101, 'WAITING_CONFIRMED', '대기 등록이 완료되었습니다. 대기번호 2번으로 확정되었습니다.', 'UNREAD', NULL,
+ '2025-06-28T14:30:00', '2025-06-28T14:30:00'),
 
 -- 읽은 알림들
-(504, 1000, 'Waiting', 100, 'WAITING_CONFIRMED', '대기 등록이 완료되었습니다. 대기번호 1번으로 확정되었습니다.', 'read', '2025-06-28T11:05:00', '2025-06-28T10:05:00', '2025-06-28T10:05:00'),
-(505, 1001, 'Waiting', 101, 'ENTER_TIME_OVER', '입장 시간이 초과되어 대기가 취소되었습니다. 다음 기회에 다시 신청해주세요.', 'read', '2025-06-28T12:00:00', '2025-06-28T11:30:00', '2025-06-28T11:30:00'),
+(504, 1000, 'Waiting', 100, 'WAITING_CONFIRMED', '대기 등록이 완료되었습니다. 대기번호 1번으로 확정되었습니다.', 'read', '2025-06-28T11:05:00',
+ '2025-06-28T10:05:00', '2025-06-28T10:05:00'),
+(505, 1001, 'Waiting', 101, 'ENTER_TIME_OVER', '입장 시간이 초과되어 대기가 취소되었습니다. 다음 기회에 다시 신청해주세요.', 'read',
+ '2025-06-28T12:00:00', '2025-06-28T11:30:00', '2025-06-28T11:30:00'),
 
 -- 추가 테스트 데이터 (페이징 테스트용)
 (507, 1001, 'Waiting', 101, 'ENTER_NOW', '지금 입장해주세요!', 'UNREAD', NULL, '2025-06-28T08:00:00', '2025-06-28T08:00:00'),
-(508, 1000, 'Waiting', 100, 'ENTER_TIME_OVER', '입장 시간이 지났습니다.', 'read', '2025-06-28T07:30:00', '2025-06-28T07:00:00', '2025-06-28T07:00:00');
+(508, 1000, 'Waiting', 100, 'ENTER_TIME_OVER', '입장 시간이 지났습니다.', 'read', '2025-06-28T07:30:00', '2025-06-28T07:00:00',
+ '2025-06-28T07:00:00');

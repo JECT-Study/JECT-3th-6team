@@ -160,7 +160,7 @@ public class NotificationPortAdapter implements NotificationPort {
 
         // 임시 구현: 모든 대기 정보를 조회해서 필터링
         // 실제로는 WaitingPort에 findById 메서드가 필요함
-        WaitingQuery query = WaitingQuery.firstPage(1000L, 1000); // 충분히 큰 사이즈로 조회
+        WaitingQuery query = WaitingQuery.firstPage(1L, 1000); // 충분히 큰 사이즈로 조회
         List<Waiting> byQuery = waitingPort.findByQuery(query);
         return byQuery
                 .stream()
