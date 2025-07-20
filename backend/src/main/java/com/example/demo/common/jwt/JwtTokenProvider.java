@@ -41,6 +41,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
             .subject(userPrincipal.getId().toString())
+            .claim("email", userPrincipal.getEmail())
             .issuedAt(now)
             .expiration(expiryDate)
             .signWith(key)
@@ -50,9 +51,10 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
         Long userId = Long.parseLong(claims.getSubject());
+        String email = claims.get("email", String.class);
 
         Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-        UserPrincipal principal = new UserPrincipal(userId, authorities);
+        UserPrincipal principal = new UserPrincipal(userId, email, authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }

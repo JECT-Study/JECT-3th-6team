@@ -22,7 +22,7 @@ public class OAuth2SuccessHandler {
     private final JwtProperties jwtProperties;
 
     public void onAuthenticationSuccess(HttpServletResponse response, Member member, String state, String frontendUrl) throws IOException {
-        UserPrincipal principal = UserPrincipal.create(member.id());
+        UserPrincipal principal = UserPrincipal.create(member.id(), member.email());
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
         
         String accessToken = jwtTokenProvider.createToken(authentication);

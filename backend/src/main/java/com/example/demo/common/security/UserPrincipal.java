@@ -11,15 +11,17 @@ import java.util.Collections;
 public class UserPrincipal implements UserDetails {
 
     private final Long id;
+    private final String email;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id, Collection<? extends GrantedAuthority> authorities) {
+    public UserPrincipal(Long id, String email, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
+        this.email = email;
         this.authorities = authorities;
     }
 
-    public static UserPrincipal create(Long id) {
-        return new UserPrincipal(id, Collections.emptyList());
+    public static UserPrincipal create(Long id, String email) {
+        return new UserPrincipal(id, email, Collections.emptyList());
     }
 
     @Override
@@ -34,7 +36,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.id.toString();
+        return this.email;
     }
 
     @Override
