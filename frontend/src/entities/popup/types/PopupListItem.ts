@@ -4,6 +4,12 @@ export type ratingType = {
   averageStar: number;
   reviewCount: number;
 };
+
+export type searchTagType = {
+  type: string;
+  category: string[];
+};
+
 export type statusType = 'WAITING' | 'VISITED';
 export type tagType = 'DEFAULT' | 'HISTORY';
 interface TaggedItem<T extends tagType> {
@@ -44,6 +50,7 @@ interface RawPopupListItemType {
   };
   dDay: number;
   imageUrl: string;
+  searchTags: searchTagType;
 }
 
 /**
@@ -74,6 +81,7 @@ interface RawPopupHistoryListItemType {
     };
     dDay: number;
     period: string; // "2025-06-01 ~ 2025-06-25"
+    searchTags: searchTagType;
   };
 }
 
@@ -84,6 +92,7 @@ export interface PopupCardViewProps {
   location: string;
   period: string;
   linkTo: string;
+  searchTags: string;
   hasRightBar?: boolean;
   Badge?: React.ReactElement;
   rating?: ratingType;

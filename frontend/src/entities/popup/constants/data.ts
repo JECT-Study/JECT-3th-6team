@@ -23,6 +23,10 @@ const popupList: PopupItemType[] = [
     },
     dDay: 5,
     imageUrl: 'https://picsum.photos/200',
+    searchTags: {
+      type: '체험형',
+      category: ['패션', '예술'],
+    },
   },
   {
     tag: 'HISTORY',
@@ -47,6 +51,10 @@ const popupList: PopupItemType[] = [
       },
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
+      searchTags: {
+        type: '체험형',
+        category: ['패션', '예술'],
+      },
     },
   },
   {
@@ -72,6 +80,10 @@ const popupList: PopupItemType[] = [
       },
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
+      searchTags: {
+        type: '체험형',
+        category: ['패션', '예술'],
+      },
     },
   },
   {
@@ -97,6 +109,10 @@ const popupList: PopupItemType[] = [
       },
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
+      searchTags: {
+        type: '체험형',
+        category: ['패션', '예술'],
+      },
     },
   },
   {
@@ -122,6 +138,10 @@ const popupList: PopupItemType[] = [
       },
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
+      searchTags: {
+        type: '체험형',
+        category: ['패션', '예술'],
+      },
     },
   },
   {
@@ -147,6 +167,10 @@ const popupList: PopupItemType[] = [
       },
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
+      searchTags: {
+        type: '체험형',
+        category: ['패션', '예술'],
+      },
     },
   },
 ];

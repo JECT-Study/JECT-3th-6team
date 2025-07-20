@@ -7,6 +7,7 @@ import {
 import { PopupBadge } from '@/entities/popup/ui/PopupBadge';
 import { dateToPeriodString, periodStringToDate } from './dateToPeriodString';
 import { region1DepthShortMap } from '@/entities/popup/constants/region1DepthNameShort';
+import { formatSearchTags } from '@/entities/popup/lib/formatSearchTags';
 
 type PopupItemMapperMap = {
   DEFAULT: (data: PopupListItemType) => PopupCardViewProps;
@@ -32,7 +33,7 @@ const mapPopupListItemToViewProps = (
 
   const { region_1depth_name, region_2depth_name } = data.location;
   const renderLocation = `${region1DepthShortMap[region_1depth_name]}, ${region_2depth_name}`;
-
+  const renderTag = formatSearchTags(data.searchTags);
   return {
     popupId: data.id,
     popupName: data.name,
@@ -41,6 +42,7 @@ const mapPopupListItemToViewProps = (
     period: periodStr,
     linkTo: `/detail/${data.id}`,
     Badge: renderedBadge,
+    searchTags: renderTag,
     //rating: data.rating,
   };
 };
@@ -56,6 +58,7 @@ const mapHistoryItemToViewProps = (
 
   const { region1depthName, region2depthName } = data.popup.location;
   const renderLocation = `${region1DepthShortMap[region1depthName]}, ${region2depthName}`;
+  const renderTag = formatSearchTags(data.popup.searchTags);
 
   return {
     popupId: data.popup.popupId,
@@ -67,6 +70,7 @@ const mapHistoryItemToViewProps = (
     linkTo:
       data.status === 'WAITING' ? '/waiting' : `/detail/${data.popup.popupId}`,
     Badge: renderedBadge,
+    searchTags: renderTag,
     // rating: data.rating,
   };
 };

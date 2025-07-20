@@ -49,19 +49,22 @@ const PopupCardContent = ({
   popupName,
   rating,
   period,
+  searchTags,
 }: {
   location: string;
   popupName: string;
   rating?: ratingType;
   period: string;
+  searchTags: string;
 }) => (
-  <div className="relative flex flex-1 flex-col justify-between py-4 pl-4">
+  <div className="relative flex flex-1 flex-col justify-between py-3 pl-4">
     <div className="flex flex-col gap-y-[3px]">
       <p className="flex items-center font-medium text-sm text-gray60 gap-x-1">
         <IconMap width={22} height={30} fill={'var(--color-gray60)'} />
         <span>{location}</span>
       </p>
       <h3 className="text-black font-medium text-base">{popupName}</h3>
+      <p className="text-gray60 font-regular text-[14px]">{searchTags}</p>
       {rating && (
         <p className="font-regular text-sm/normal text-gray60 flex gap-x-1 items-center">
           <IconStar width={16} height={16} fill={'var(--color-main)'} />
@@ -95,6 +98,7 @@ export default function PopupCardView(props: PopupCardViewProps) {
         popupName={props.popupName}
         rating={props.rating}
         period={props.period}
+        searchTags={props.searchTags}
       />
       {props.hasRightBar && <PopupCardRightBar />}
     </PopupCardLink>
