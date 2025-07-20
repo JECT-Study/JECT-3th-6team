@@ -17,4 +17,12 @@ public interface MemberPort {
      * @return 회원 정보 (없으면 empty)
      */
     Optional<Member> findById(Long id);
+
+    /**
+     * 회원 정보를 저장(생성 또는 수정)한다.
+     *
+     * @param member 회원 정보
+     * @return 저장된 회원 정보
+     */
+    Member save(Member member);
 } 
