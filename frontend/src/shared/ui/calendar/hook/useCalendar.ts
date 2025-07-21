@@ -12,7 +12,7 @@ type TempRangeType = {
 };
 
 export default function useCalendar(props: MonthlyCalendarProps) {
-  const { mode, selected, onSelected } = props;
+  const { mode, selected, onSelect } = props;
   const today = new Date();
   const [tempRange, setTempRange] = useState<TempRangeType | null>({
     ...(selected as DateRange),
@@ -27,7 +27,7 @@ export default function useCalendar(props: MonthlyCalendarProps) {
   const onChangeDate = (date: Date) => {
     if (mode === 'single') {
       setBrowsingDate(date);
-      onSelected(date);
+      onSelect(date);
       return;
     }
     // mode=== 'range'
@@ -37,7 +37,7 @@ export default function useCalendar(props: MonthlyCalendarProps) {
         end: null,
       };
       setTempRange(next);
-      onSelected(next as DateRange);
+      onSelect(next as DateRange);
       return;
     } else {
       // 두번째로 클릭된 경우, date와 start를 비교
@@ -47,7 +47,7 @@ export default function useCalendar(props: MonthlyCalendarProps) {
           ? { start: start, end: date }
           : { start: date, end: start };
       setTempRange(next);
-      onSelected(next as DateRange);
+      onSelect(next as DateRange);
       return;
     }
   };
