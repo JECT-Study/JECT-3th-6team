@@ -12,6 +12,7 @@ import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
 import { MediumText } from '@/shared/ui/text/MediumText';
 import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
+import type { _MapProps } from 'react-kakao-maps-sdk';
 
 import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
 import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
@@ -35,7 +36,8 @@ export default function ProductDetail() {
     popupDetail,
   } = popupDetailData;
 
-  const handleClickMap = (map, mouseEvent) => {
+  type ClickMapFunction = _MapProps['onClick'];
+  const handleClickMap: ClickMapFunction = (_, mouseEvent) => {
     const latlng = mouseEvent.latLng;
     const lat = latlng.getLat();
     const lng = latlng.getLng();
@@ -104,7 +106,6 @@ export default function ProductDetail() {
         <div className="mt-2.5">
           <CircleMap
             center={{ lat: location.y, lng: location.x }}
-            radius={200}
             maxLevel={6}
             minLevel={6}
             onClick={handleClickMap}
