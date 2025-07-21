@@ -9,7 +9,7 @@ export default function KakaoLoginButton({
   disabled: boolean;
 }) {
   return (
-    <button onClick={onClick} disabled={disabled}>
+    <button onClick={onClick} disabled={disabled} className={'cursor-pointer'}>
       <Image
         src={KakaoLoginImage}
         alt="카카오 로그인 버튼"

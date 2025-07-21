@@ -18,7 +18,7 @@ export default function LoginPage() {
   return (
     <div className={'w-full h-full mt-[30%]'}>
       <div className={'flex flex-col justify-center items-center gap-y-8'}>
-        <h1 className={'flex flex-col gap-y-[1px]'}>
+        <h1 className={'flex flex-col gap-y-[1px] select-none'}>
           <span className="text-main text-center font-gangwon font-bold text-3xl">
             스팟잇
           </span>
