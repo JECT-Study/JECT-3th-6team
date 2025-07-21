@@ -15,5 +15,5 @@ export default function useInitUser() {
       // const user = getUserAPI();
       // if(user) setUser(user);
     }
-  }, []);
+  }, [isLoggedIn]);
 }
