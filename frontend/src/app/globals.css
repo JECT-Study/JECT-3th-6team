@@ -33,6 +33,7 @@
 
   /*primary*/
   --color-main: rgba(254, 163, 31, 1);
+  --color-main-pale: #FFF2E6;
   --color-sub: rgba(255, 232, 199, 1);
   --color-sub2: #FFF8EC;
   --color-sub-pale: rgba(255, 232, 199, 0.3);
@@ -40,26 +41,21 @@
   /*other-color*/
   --color-red: rgba(255, 89, 89, 1);
   --color-modal-overlay : rgba(40, 40, 40, 0.40);
+  /*ganwon-font*/
+  --font-gangwon: 'GangwonEdu Power', sans-serif;
 
+  /*shadow*/
+  --shadow-button: 0px 2px 10px 0px rgba(152, 74, 0, 0.15);
+  --shadow-calendar: 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
+  --shadow-container: 0px -4px 20px 0px rgba(0, 0, 0, 0.05);
+  --shadow-card :0px 4px 10px 0px rgba(0, 0, 0, 0.05);
 
   /*text-colors*/
   --color-text-color: #545454;
   --color-text-gray-color: #8B95A1;
 
-  /*ganwon-font*/
-  --font-gangwon: 'GangwonEdu Power', sans-serif;
-
-  /*pretendard-font*/
-  --font-pretendard: 'Pretendard', sans-serif;
-
-  /*shadow*/
-  --shadow-button: 0px 2px 10px 0px rgba(152, 74, 0, 0.15);
-  --shadow-calendar: 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
-  --shadow-card :0px 4px 10px 0px rgba(0, 0, 0, 0.05);
-
 }
 
-/*---break---*/
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -135,7 +131,6 @@
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
 }
-
 /*---break---*/
 
 .dark {

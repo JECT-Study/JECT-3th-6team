@@ -1,7 +1,9 @@
 package com.example.demo.domain.port;
 
 import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.domain.model.popup.PopupQuery;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,4 +46,12 @@ public interface PopupPort {
      * @param popupId 삭제할 팝업의 ID
      */
     void deleteById(Long popupId);
+    
+    /**
+     * 지도 영역 내 팝업 목록을 조회한다.
+     *
+     * @param query 조회 조건을 담은 객체
+     * @return 조건에 맞는 팝업 목록
+     */
+    List<Popup> findByMapQuery(PopupMapQuery query);
 } 
