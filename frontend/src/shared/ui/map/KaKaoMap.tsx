@@ -49,7 +49,7 @@ export default function KakaoMap({
   ...props
 }: _MapProps &
   React.HTMLAttributes<HTMLDivElement> & { children?: ReactNode }) {
-  const imageUrl = '/icons/Normal/Icon_map.svg';
+  const imageUrl = '/icons/Color/Icon_map.svg';
   return (
     <>
       <Map center={center} level={level} {...props}>
