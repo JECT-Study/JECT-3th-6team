@@ -9,7 +9,7 @@ public interface ScheduledNotificationPort {
 
     ScheduledNotification save(ScheduledNotification scheduledNotification);
 
-    List<ScheduledNotification> saveAll(List<ScheduledNotification> scheduledNotifications);
-
     List<ScheduledNotification> findAllByQuery(ScheduledNotificationQuery query);
+
+    void delete(List<ScheduledNotification> scheduledNotifications);
 }

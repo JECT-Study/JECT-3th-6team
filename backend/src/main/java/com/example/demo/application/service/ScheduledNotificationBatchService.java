@@ -36,32 +36,25 @@ public class ScheduledNotificationBatchService {
     @Scheduled(fixedDelay = 30_000)
     @Transactional
     public void processScheduledNotifications() {
-        try {
-            // 1. 미처리 스케줄된 알림들 조회
-            List<ScheduledNotification> pendingNotifications = getPendingScheduledNotifications();
+        List<ScheduledNotification> pendingNotifications = getPendingScheduledNotifications();
 
-            if (pendingNotifications.isEmpty()) {
-                return;
-            }
+        if (pendingNotifications.isEmpty()) {
+            return;
+        }
 
-            log.debug("스케줄된 알림 배치 처리 시작 - 대상: {}개", pendingNotifications.size());
+        log.debug("스케줄된 알림 배치 처리 시작 - 대상: {}개", pendingNotifications.size());
 
-            int processedCount = 0;
+        int processedCount = 0;
 
-            // 2. 각 스케줄된 알림의 트리거 조건 체크
-            for (ScheduledNotification scheduledNotification : pendingNotifications) {
-                if (isTriggerConditionSatisfied(scheduledNotification)) {
-                    sendScheduledNotification(scheduledNotification);
-                    processedCount++;
-                }
-            }
+        List<ScheduledNotification> needToSend = pendingNotifications.stream().filter(this::isTriggerConditionSatisfied).toList();
 
-            if (processedCount > 0) {
-                log.info("스케줄된 알림 배치 처리 완료 - 발송: {}개", processedCount);
-            }
+        for (ScheduledNotification scheduledNotification : needToSend) {
+            sendScheduledNotification(scheduledNotification);
+            processedCount++;
+        }
 
-        } catch (Exception e) {
-            log.error("스케줄된 알림 배치 처리 중 오류 발생", e);
+        if (processedCount > 0) {
+            log.info("스케줄된 알림 배치 처리 완료 - 발송: {}개", processedCount);
         }
     }
 
@@ -243,7 +236,7 @@ public class ScheduledNotificationBatchService {
      * 미처리 스케줄된 알림들 조회
      */
     private List<ScheduledNotification> getPendingScheduledNotifications() {
-        ScheduledNotificationQuery query = ScheduledNotificationQuery.forPendingNotifications();
+        ScheduledNotificationQuery query = new ScheduledNotificationQuery();
         return scheduledNotificationPort.findAllByQuery(query);
     }
 

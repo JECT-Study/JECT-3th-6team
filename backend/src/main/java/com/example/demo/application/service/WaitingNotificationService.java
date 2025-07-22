@@ -34,7 +34,7 @@ public class WaitingNotificationService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
     private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
     private static final int AVERAGE_WAITING_TIME_MINUTES = 15; // 팀당 평균 대기 시간
-    
+
     /**
      * 웨이팅 생성 시 알림 정책 실행.
      * 1. 즉시 알림 (WAITING_CONFIRMED) 발송
@@ -44,12 +44,12 @@ public class WaitingNotificationService {
     public void processWaitingCreatedNotifications(Waiting waiting) {
         // 1. 즉시 알림 발송
         sendWaitingConfirmedNotification(waiting);
-        
+
         // 2. 미래 알림들 스케줄링
         List<ScheduledNotification> scheduledNotifications = createScheduledNotifications(waiting);
-        scheduledNotificationPort.saveAll(scheduledNotifications);
-        
-        log.info("웨이팅 알림 처리 완료 - 웨이팅 ID: {}, 스케줄된 알림: {}개", 
+        scheduledNotifications.forEach(scheduledNotificationPort::save);
+
+        log.info("웨이팅 알림 처리 완료 - 웨이팅 ID: {}, 스케줄된 알림: {}개",
                 waiting.id(), scheduledNotifications.size());
     }
 
@@ -58,14 +58,14 @@ public class WaitingNotificationService {
      */
     private void sendWaitingConfirmedNotification(Waiting waiting) {
         String content = generateWaitingConfirmedContent(waiting);
-        
+
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.WAITING_CONFIRMED);
         Notification notification = Notification.builder()
                 .member(waiting.member())
                 .event(event)
                 .content(content)
                 .build();
-        
+
         notificationPort.save(notification);
         log.debug("웨이팅 확정 알림 발송 - 웨이팅 ID: {}", waiting.id());
     }
@@ -75,21 +75,21 @@ public class WaitingNotificationService {
      */
     private List<ScheduledNotification> createScheduledNotifications(Waiting waiting) {
         List<ScheduledNotification> schedules = new ArrayList<>();
-        
+
         LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-        
+
         // 1. 입장 시작 알림 (ENTER_NOW 정책)
         schedules.add(createEnterNowSchedule(waiting, estimatedEnterTime));
-        
+
         // 2. 입장 시간 초과 알림 (ENTER_TIME_OVER 정책) 
         schedules.add(createEnterTimeOverSchedule(waiting, estimatedEnterTime));
-        
+
         // 3. 리뷰 요청 알림 (REVIEW_REQUEST 정책)
         schedules.add(createReviewRequestSchedule(waiting, estimatedEnterTime));
-        
+
         // 4. 3팀 전 알림 (ENTER_3TEAMS_BEFORE 정책) - 동적 트리거
         schedules.add(createEnter3TeamsBeforeSchedule(waiting));
-        
+
         return schedules;
     }
 
@@ -104,7 +104,7 @@ public class WaitingNotificationService {
                 .event(event)
                 .content("지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!")
                 .build();
-        
+
         return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_NOW);
     }
 
@@ -119,7 +119,7 @@ public class WaitingNotificationService {
                 .event(event)
                 .content("입장 시간이 초과되었습니다. 빠른 입장 부탁드립니다! 입장이 지연될 경우 웨이팅이 취소될 수 있습니다.")
                 .build();
-        
+
         return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_TIME_OVER);
     }
 
@@ -134,7 +134,7 @@ public class WaitingNotificationService {
                 .event(event)
                 .content("방문하신 팝업은 어떠셨나요? 소중한 후기를 남겨주세요!")
                 .build();
-        
+
         return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_REVIEW_REQUEST);
     }
 
@@ -149,7 +149,7 @@ public class WaitingNotificationService {
                 .event(event)
                 .content("앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!")
                 .build();
-        
+
         return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_3TEAMS_BEFORE);
     }
 
@@ -174,8 +174,8 @@ public class WaitingNotificationService {
         String dateText = registeredAt.format(DATE_FORMATTER);
         String dayText = registeredAt.format(DAY_FORMATTER);
         int peopleCount = waiting.peopleCount();
-        
-        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!", 
+
+        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!",
                 dateText, dayText, peopleCount);
     }
 }
