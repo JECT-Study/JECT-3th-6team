@@ -6,6 +6,7 @@ import ExImage from '/public/images/popup-ex.png';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { BottomButtonContainer, StandardButton } from '@/shared/ui';
 import { useRouter } from 'next/navigation';
+import { formatKoreanDateTime } from '@/entities/popup/lib/formatKoreanDateTime';
 
 type ContentBlockProps = {
   label: string;
@@ -31,9 +32,10 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
 export default function ReservationSummaryView() {
   const router = useRouter();
   const displayData = [
-    { label: '예약자 명', value: '이윤재' },
-    { label: '예약자 수', value: 3 },
-    { label: '예약자 이메일', value: 'asdf@gmail.coms' },
+    { label: '대기자 명', value: '이윤재' },
+    { label: '대기자 수', value: 3 },
+    { label: '대기자 이메일', value: 'asdf@gmail.coms' },
+    { label: '대기 일자', value: formatKoreanDateTime('2025-06-26T16:00:00') },
   ];
 
   return (
@@ -53,7 +55,7 @@ export default function ReservationSummaryView() {
               젠틀 몬스터 팝업
             </h2>
             <p className={'text-sm text-medium flex items-center gap-x-1'}>
-              <IconMap width={15} height={17} fill={'var(--color-gray60)'} />
+              <IconMap width={20} height={20} fill={'var(--color-gray60)'} />
               <span>서울, 용산구 한남동 61-2</span>
             </p>
           </div>
@@ -62,7 +64,7 @@ export default function ReservationSummaryView() {
         <hr className={'border-gray40'} />
 
         {/*예약 정보*/}
-        <div className={'w-full flex flex-col gap-y-[40px] '}>
+        <div className={'w-full flex flex-col gap-y-[30px] '}>
           {displayData.map(({ label, value }, index) => (
             <ContentBlock label={label} value={value} key={index} />
           ))}

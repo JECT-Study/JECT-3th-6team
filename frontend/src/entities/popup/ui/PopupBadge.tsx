@@ -31,7 +31,7 @@ export const PopupBadge = ({ data }: Props): React.ReactElement => {
   if (data.status === 'WAITING') {
     return (
       <Badge variant="main" className={BADGE_POSITION_STYLE}>
-        예약 중
+        웨이팅 중
       </Badge>
     );
   }

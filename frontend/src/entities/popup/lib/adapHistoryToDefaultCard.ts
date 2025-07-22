@@ -26,6 +26,7 @@ function adaptHistoryToDefaultData(
       endDate: periodStringToDate(data.popup.period).endDate.toISOString(),
     },
     dDay: data.popup.dDay ?? 0, // 없으면 기본값 0
+    searchTags: data.popup.searchTags,
   };
 }
 

@@ -12,9 +12,10 @@ export default async function ReservationDetailPage({
 }) {
   // TODO 예약내역 조회 api 연결
   const { waitingId } = await params;
+  console.log('waitingId : ', waitingId, '');
   const data: PopupHistoryListItemType = {
     tag: 'HISTORY',
-    waitingId: waitingId,
+    waitingId: 1,
     waitingNumber: 1,
     status: 'WAITING',
     name: '임수빈',
@@ -35,23 +36,27 @@ export default async function ReservationDetailPage({
       },
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
+      searchTags: {
+        type: '체험형',
+        category: ['패션', '예술'],
+      },
     },
   };
 
   return (
     <div>
-      <PageHeader title={'웨이팅 확정'} />
+      <PageHeader title={'예약 내역 확인'} />
       <div>
         <div className={'w-full mt-[14px] px-5 flex flex-col gap-y-[26px]'}>
           <ReservationDetailCard data={data} />
           <hr className={'border-gray40'} />
           {/*예약 정보*/}
           <div className={'w-full flex flex-col gap-y-[30px] '}>
-            <ContentBlock label={'예약자 명'} value={data!.name} />
-            <ContentBlock label={'예약자 수'} value={data!.peopleCount} />
-            <ContentBlock label={'예약자 이메일'} value={data!.contactEmail} />
+            <ContentBlock label={'대기자 명'} value={data!.name} />
+            <ContentBlock label={'대기자 수'} value={data!.peopleCount} />
+            <ContentBlock label={'대기자 이메일'} value={data!.contactEmail} />
             <ContentBlock
-              label={'예약 일자'}
+              label={'대기 일자'}
               value={formatKoreanDateTime(data!.registeredAt)}
             />
           </div>

@@ -4,7 +4,7 @@ import BellIcon from '@/assets/icons/Normal/Icon_Bell.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import IconCalendar from '@/assets/icons/Normal/Icon_Calendar.svg';
 import { SelectButton } from '@/shared/ui';
-import popupList from '@/entities/popup/constants/data';
+import popupList from '@/entities/popup/api/data';
 
 export default function Home() {
   return (
