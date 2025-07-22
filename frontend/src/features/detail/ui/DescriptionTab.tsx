@@ -46,9 +46,9 @@ export function DescriptionTab({
 }: DescriptionTabProps) {
   return (
     // <TabsContent value="description" className="px-5 py-6">
-    <div className="px-5 py-6">
+    <div>
       {/* 브랜드 정보 */}
-      <MediumText className="mt-5">브랜드 정보</MediumText>
+      <MediumText className="mt-5 font-semibold">브랜드 정보</MediumText>
       <ImageCarousel
         images={brandStory.imageUrls}
         className="rounded-2xl mt-5"

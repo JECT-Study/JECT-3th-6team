@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 
 import { Badge } from '@/shared/ui/badge/Badge';
@@ -24,6 +24,8 @@ import { popupDetailData } from './data';
 
 export default function ProductDetail() {
   const router = useRouter();
+  const params = useParams();
+  const popupId = params.popupId as string;
   const {
     thumbnails,
     dDay,
@@ -41,7 +43,7 @@ export default function ProductDetail() {
     const latlng = mouseEvent.latLng;
     const lat = latlng.getLat();
     const lng = latlng.getLng();
-    router.push(`/map?lat=${lat}&lng=${lng}`);
+    router.push(`/detail/${popupId}/map?lat=${lat}&lng=${lng}`);
   };
 
   return (
@@ -52,22 +54,10 @@ export default function ProductDetail() {
 
       {/* Main Detail */}
       <div className="py-6 px-5">
-        {/* Badge and Rating */}
         <div className="flex items-center justify-between">
           <Badge iconPosition="left">
             {dDay > 0 ? `${dDay}일 남음` : '종료됨'}
           </Badge>
-          <div className="flex items-center gap-1">
-            <Image
-              src="/icons/Normal/Icon_Star.svg"
-              alt="star"
-              width={18}
-              height={17}
-              className="w-4.5 h-4.5 fill-main"
-            />
-            <MediumText color="text-gray80">4.5</MediumText>
-            <MediumText color="text-gray80">(25개의 리뷰)</MediumText>
-          </div>
         </div>
         {/* Title and Tags*/}
         <div className="mt-6">
@@ -78,7 +68,7 @@ export default function ProductDetail() {
           ))}
         </div>
         {/* Schedule and Location */}
-        <div className="flex items-center gap-2 mt-2.5">
+        <div className="flex items-center gap-2 mt-5">
           <IconClock
             width={22}
             height={22}
@@ -103,7 +93,7 @@ export default function ProductDetail() {
           <MediumText color="color-black">{location.address_name}</MediumText>
         </div>
         {/* Map */}
-        <div className="mt-2.5">
+        <div className="mt-6.5">
           <CircleMap
             center={{ lat: location.y, lng: location.x }}
             maxLevel={6}
@@ -115,10 +105,10 @@ export default function ProductDetail() {
 
       {/* Description Section */}
       <div className="px-5 text-center">
-        <SemiBoldText size="lg">팝업 설명</SemiBoldText>
+        {/* <SemiBoldText size="lg">팝업 설명</SemiBoldText> */}
       </div>
-      <div className="w-full h-2 bg-main mt-2"></div>
-      <div className="px-5">
+      <div className="w-full h-px bg-gray40 mt-7.5" />
+      <div className="px-5 py-6">
         <DescriptionTab brandStory={brandStory} popupDetail={popupDetail} />
       </div>
 
