@@ -42,10 +42,8 @@ public class WaitingService {
         Integer nextWaitingNumber = waitingPort.getNextWaitingNumber(request.popupId());
 
         // 3. 회원 정보 조회
-//        Member member = memberPort.findById(request.memberId())
-//                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + request.memberId()));
-
-        Member member = new Member(request.memberId(), "dd", "robin@naver.com");
+        Member member = memberPort.findById(request.memberId())
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + request.memberId()));
 
         // 4. 대기 정보 생성
         Waiting waiting = new Waiting(
@@ -71,9 +69,7 @@ public class WaitingService {
      * 내 방문/예약 내역 조회 (무한 스크롤)
      */
     @Transactional(readOnly = true)
-    public VisitHistoryCursorResponse getVisitHistory(Integer size, Long lastWaitingId, String status) {
-        // TODO: 사용자 인증 확인 (현재는 임시로 memberId = 1 사용)
-        Long memberId = 1L;
+    public VisitHistoryCursorResponse getVisitHistory(Long memberId,Integer size, Long lastWaitingId, String status) {
 
         // 1. 조회 조건 생성
         WaitingQuery query = WaitingQuery.forVisitHistory(memberId, size, lastWaitingId, status);

@@ -3,8 +3,10 @@ package com.example.demo.presentation.controller;
 import com.example.demo.application.dto.notification.NotificationListRequest;
 import com.example.demo.application.dto.notification.NotificationListResponse;
 import com.example.demo.application.service.NotificationService;
+import com.example.demo.common.security.UserPrincipal;
 import com.example.demo.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,10 +31,11 @@ public class NotificationController {
             @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false) Long lastNotificationId,
             @RequestParam(required = false, defaultValue = "ALL") String readStatus,
-            @RequestParam(required = false, defaultValue = "TIME_DESC") String sort
+            @RequestParam(required = false, defaultValue = "TIME_DESC") String sort,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
         NotificationListRequest request = new NotificationListRequest(
-                1000L,
+                principal.getId(),
                 size,
                 lastNotificationId,
                 readStatus,

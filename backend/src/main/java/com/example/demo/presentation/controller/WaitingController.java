@@ -4,9 +4,11 @@ import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
 import com.example.demo.application.dto.waiting.WaitingCreateRequest;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
 import com.example.demo.application.service.WaitingService;
+import com.example.demo.common.security.UserPrincipal;
 import com.example.demo.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,9 +45,10 @@ public class WaitingController {
     public ResponseEntity<ApiResponse<VisitHistoryCursorResponse>> getVisitHistory(
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long lastWaitingId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+        VisitHistoryCursorResponse response = waitingService.getVisitHistory(principal.getId(),size, lastWaitingId, status);
 
         return ResponseEntity.ok(new ApiResponse<>("성공적으로 조회되었습니다.", response));
     }

@@ -1,19 +1,48 @@
 package com.example.demo.application.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
-import com.example.demo.application.dto.waiting.*;
+import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
+import com.example.demo.application.dto.waiting.WaitingCreateRequest;
+import com.example.demo.application.dto.waiting.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
-import com.example.demo.domain.model.popup.*;
+import com.example.demo.domain.model.popup.OpeningHours;
+import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.popup.PopupCategory;
+import com.example.demo.domain.model.popup.PopupContent;
+import com.example.demo.domain.model.popup.PopupDisplay;
+import com.example.demo.domain.model.popup.PopupSchedule;
+import com.example.demo.domain.model.popup.PopupStatus;
+import com.example.demo.domain.model.popup.PopupType;
+import com.example.demo.domain.model.popup.Sns;
+import com.example.demo.domain.model.popup.WeeklyOpeningHours;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,17 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -133,7 +151,7 @@ class WaitingServiceTest {
 
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenReturn(nextWaitingNumber);
-//            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
+            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
             when(waitingPort.save(any(Waiting.class))).thenReturn(savedWaiting);
             when(waitingDtoMapper.toCreateResponse(savedWaiting)).thenReturn(expectedResponse);
 
@@ -147,7 +165,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(waitingPort).getNextWaitingNumber(1L);
-//            verify(memberPort).findById(1L);
+            verify(memberPort).findById(1L);
             verify(waitingPort).save(any(Waiting.class));
             verify(waitingDtoMapper).toCreateResponse(savedWaiting);
         }
@@ -213,7 +231,7 @@ class WaitingServiceTest {
             // given
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenReturn(5);
-//            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
+            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
             when(waitingPort.save(any(Waiting.class))).thenThrow(new RuntimeException("저장 실패"));
 
             // when & then
@@ -222,7 +240,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(waitingPort).getNextWaitingNumber(1L);
-//            verify(memberPort).findById(1L);
+            verify(memberPort).findById(1L);
             verify(waitingPort).save(any(Waiting.class));
             verify(waitingDtoMapper, never()).toCreateResponse(any());
         }
@@ -342,7 +360,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(),size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -388,7 +406,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -415,7 +433,7 @@ class WaitingServiceTest {
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(emptyWaitings);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -458,7 +476,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -500,7 +518,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -522,7 +540,7 @@ class WaitingServiceTest {
 
             // when & then
             assertThrows(IllegalArgumentException.class, () ->
-                    waitingService.getVisitHistory(size, lastWaitingId, invalidStatus)
+                    waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, invalidStatus)
             );
 
             // verify
