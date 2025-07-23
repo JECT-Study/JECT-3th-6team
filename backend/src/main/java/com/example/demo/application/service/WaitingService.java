@@ -7,11 +7,7 @@ import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.Notification;
-import com.example.demo.domain.model.waiting.Waiting;
-import com.example.demo.domain.model.waiting.WaitingDomainEvent;
-import com.example.demo.domain.model.waiting.WaitingEventType;
-import com.example.demo.domain.model.waiting.WaitingQuery;
-import com.example.demo.domain.model.waiting.WaitingStatus;
+import com.example.demo.domain.model.waiting.*;
 import com.example.demo.domain.port.MemberPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
@@ -34,6 +30,7 @@ public class WaitingService {
     private final MemberPort memberPort;
     private final NotificationPort notificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
+    private final WaitingNotificationService waitingNotificationService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
     private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
@@ -75,7 +72,10 @@ public class WaitingService {
         // 6. 웨이팅 확정 알림 생성
         createWaitingConfirmedNotification(savedWaiting);
 
-        // 7. 응답 생성
+        // 7. 새로운 알림 서비스로 모든 알림 처리 위임
+        waitingNotificationService.processWaitingCreatedNotifications(savedWaiting);
+
+        // 8. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
     }
 
@@ -85,17 +85,17 @@ public class WaitingService {
     private void createWaitingConfirmedNotification(Waiting waiting) {
         // 1. 웨이팅 도메인 이벤트 생성
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.WAITING_CONFIRMED);
-        
+
         // 2. 알림 내용 생성
         String content = generateWaitingConfirmedContent(waiting);
-        
+
         // 3. 알림 생성 및 저장
         Notification notification = Notification.builder()
                 .member(waiting.member())
                 .event(event)
                 .content(content)
                 .build();
-        
+
         notificationPort.save(notification);
     }
 
@@ -107,8 +107,8 @@ public class WaitingService {
         String dateText = registeredAt.format(DATE_FORMATTER);
         String dayText = registeredAt.format(DAY_FORMATTER);
         int peopleCount = waiting.peopleCount();
-        
-        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!", 
+
+        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!",
                 dateText, dayText, peopleCount);
     }
 

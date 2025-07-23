@@ -2,7 +2,10 @@ package com.example.demo.application.service;
 
 import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
-import com.example.demo.application.dto.waiting.*;
+import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
+import com.example.demo.application.dto.waiting.WaitingCreateRequest;
+import com.example.demo.application.dto.waiting.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
@@ -12,6 +15,7 @@ import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
+import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
 import org.junit.jupiter.api.Disabled;
@@ -48,6 +52,12 @@ class WaitingServiceTest {
 
     @Mock
     private WaitingDtoMapper waitingDtoMapper;
+
+    @Mock
+    private WaitingNotificationService waitingNotificationService;
+
+    @Mock
+    private NotificationPort notificationPort;
 
     @InjectMocks
     private WaitingService waitingService;
