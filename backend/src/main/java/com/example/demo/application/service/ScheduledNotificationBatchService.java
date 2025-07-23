@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 스케줄된 알림을 배치로 처리하는 서비스.
@@ -44,18 +45,19 @@ public class ScheduledNotificationBatchService {
 
         log.debug("스케줄된 알림 배치 처리 시작 - 대상: {}개", pendingNotifications.size());
 
-        int processedCount = 0;
 
         List<ScheduledNotification> needToSend = pendingNotifications.stream().filter(this::isTriggerConditionSatisfied).toList();
 
-        for (ScheduledNotification scheduledNotification : needToSend) {
-            sendScheduledNotification(scheduledNotification);
-            processedCount++;
+        List<ScheduledNotification> completeSend = needToSend.stream()
+                .map(this::sendScheduledNotification)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (!completeSend.isEmpty()) {
+            log.info("스케줄된 알림 배치 처리 완료 - 발송: {}개", completeSend.size());
         }
 
-        if (processedCount > 0) {
-            log.info("스케줄된 알림 배치 처리 완료 - 발송: {}개", processedCount);
-        }
+        scheduledNotificationPort.delete(completeSend);
     }
 
     /**
@@ -184,22 +186,22 @@ public class ScheduledNotificationBatchService {
     /**
      * 스케줄된 알림 실제 발송
      */
-    private void sendScheduledNotification(ScheduledNotification scheduledNotification) {
+    private ScheduledNotification sendScheduledNotification(ScheduledNotification scheduledNotification) {
         try {
             Notification notification = scheduledNotification.getReservatedNotification();
 
             // 실제 알림 저장 (발송)
             notificationPort.save(notification);
 
-            // 처리 완료 표시 (TODO: ScheduledNotification에 처리 완료 상태 추가 필요)
-            markAsProcessed(scheduledNotification);
-
             log.info("스케줄된 알림 발송 완료 - 멤버 ID: {}, 트리거: {}",
                     notification.getMember().id(),
                     scheduledNotification.getScheduledNotificationTrigger());
 
+            return scheduledNotification;
+
         } catch (Exception e) {
             log.error("스케줄된 알림 발송 실패", e);
+            return null;
         }
     }
 
@@ -209,9 +211,9 @@ public class ScheduledNotificationBatchService {
      * 알림에서 웨이팅 정보 추출
      */
     private Waiting extractWaitingFromNotification(ScheduledNotification scheduledNotification) {
-        // TODO: 실제 구현에서는 알림의 도메인 이벤트에서 웨이팅 ID를 추출하여 조회
-        // 현재는 임시 구현
-        return null;
+        return (Waiting) scheduledNotification.getReservatedNotification()
+                .getEvent()
+                .getSource();
     }
 
     /**
@@ -227,9 +229,7 @@ public class ScheduledNotificationBatchService {
      * 현재 실제 대기 순번 계산
      */
     private int calculateCurrentWaitingPosition(Waiting waiting) {
-        // TODO: 실제 구현에서는 해당 팝업의 현재 대기 중인 웨이팅들을 조회하여 순번 계산
-        // 현재는 임시 구현
-        return Integer.MAX_VALUE;
+        return waiting.waitingNumber();
     }
 
     /**
@@ -238,13 +238,5 @@ public class ScheduledNotificationBatchService {
     private List<ScheduledNotification> getPendingScheduledNotifications() {
         ScheduledNotificationQuery query = new ScheduledNotificationQuery();
         return scheduledNotificationPort.findAllByQuery(query);
-    }
-
-    /**
-     * 스케줄된 알림을 처리 완료로 표시
-     */
-    private void markAsProcessed(ScheduledNotification scheduledNotification) {
-        // TODO: ScheduledNotification에 처리 상태 필드 추가 후 구현
-        log.debug("스케줄된 알림 처리 완료 표시");
     }
 } 

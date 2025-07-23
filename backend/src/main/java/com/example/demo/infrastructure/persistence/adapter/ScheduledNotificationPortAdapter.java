@@ -62,7 +62,7 @@ public class ScheduledNotificationPortAdapter implements ScheduledNotificationPo
 
     private ScheduledNotification entityToDomain(ScheduledNotificationEntity entity) {
         NotificationEntity notificationEntity = NotificationEntity.builder()
-                .id(entity.getId())
+                .id(null)
                 .memberId(entity.getMemberId())
                 .sourceDomain(entity.getSourceDomain())
                 .sourceId(entity.getSourceId())
