@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
 
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
@@ -76,7 +74,7 @@ export default function ProductDetail() {
             stroke={'var(--gray-80)'}
           />
           <MediumText color="color-black">일정</MediumText>
-          <MediumText color="color-black">|</MediumText>
+          <MediumText color="text-gray60">|</MediumText>
           <MediumText color="color-black">
             {period.startDate} ~ {period.endDate}
           </MediumText>
@@ -89,7 +87,7 @@ export default function ProductDetail() {
             stroke={'var(--gray-80)'}
           />
           <MediumText color="color-black">위치</MediumText>
-          <MediumText color="color-black">|</MediumText>
+          <MediumText color="text-gray60">|</MediumText>
           <MediumText color="color-black">{location.address_name}</MediumText>
         </div>
         {/* Map */}
