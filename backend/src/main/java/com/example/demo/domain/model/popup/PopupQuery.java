@@ -17,11 +17,12 @@ public record PopupQuery(
     LocalDate startDate,
     LocalDate endDate,
     String region1DepthName,
-    Long lastPopupId
+    Long lastPopupId,
+    String keyword
 ) {
 
     public static PopupQuery directPopupId(Long popupId) {
-        return new PopupQuery(popupId, 1, List.of(), List.of(), null, null, null, null);
+        return new PopupQuery(popupId, 1, List.of(), List.of(), null, null, null, null, null);
     }
 
     public static PopupQuery withFilters(
@@ -41,7 +42,31 @@ public record PopupQuery(
             startDate,
             endDate,
             region1DepthName,
-            lastPopupId
+            lastPopupId,
+            null
+        );
+    }
+
+    public static PopupQuery withFilters(
+        int size,
+        List<String> types,
+        List<String> categories,
+        LocalDate startDate,
+        LocalDate endDate,
+        String region1DepthName,
+        Long lastPopupId,
+        String keyword
+    ) {
+        return new PopupQuery(
+            null,
+            size,
+            Optional.ofNullable(types).orElse(List.of()),
+            Optional.ofNullable(categories).orElse(List.of()),
+            startDate,
+            endDate,
+            region1DepthName,
+            lastPopupId,
+            keyword
         );
     }
 }

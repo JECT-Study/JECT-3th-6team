@@ -145,6 +145,20 @@ public class PopupDtoMapper {
             return PopupQuery.directPopupId(request.popupId());
         }
 
+        // 키워드가 있을 때는 다른 검색 조건을 무시하고 페이징 관련 조건만 유지
+        if (request.keyword() != null && !request.keyword().trim().isEmpty()) {
+            return PopupQuery.withFilters(
+                    Optional.ofNullable(request.size()).orElse(10),
+                    null, // types 무시
+                    null, // categories 무시
+                    null, // startDate 무시
+                    null, // endDate 무시
+                    null, // region1DepthName 무시
+                    request.lastPopupId(),
+                    request.keyword().trim()
+            );
+        }
+
         List<String> mappedTypes = null;
         if (request.type() != null) {
             mappedTypes = request.type().stream()
@@ -159,7 +173,8 @@ public class PopupDtoMapper {
                 request.startDate(),
                 request.endDate(),
                 (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName(),
-                request.lastPopupId()
+                request.lastPopupId(),
+                null
         );
     }
     public PopupSummaryResponse toPopupSummaryResponse(Popup popup) {

@@ -16,11 +16,15 @@ import com.example.demo.infrastructure.persistence.repository.PopupLocationRepos
 import com.example.demo.infrastructure.persistence.repository.PopupSocialRepository;
 import com.example.demo.infrastructure.persistence.repository.PopupWeeklyScheduleRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,16 +76,24 @@ public class PopupPortAdapter implements PopupPort {
     public List<Popup> findByQuery(PopupQuery query) {
         var pageable = PageRequest.of(0, query.size() + 1);
 
-        List<PopupEntity> popupEntities = popupJpaRepository.findFilteredPopups(
-            query.popupId(),
-            query.startDate(),
-            query.endDate(),
-            query.types().isEmpty() ? null : query.types(),
-            query.categories().isEmpty() ? null : query.categories(),
-            query.region1DepthName(),
-            query.lastPopupId(),
-            pageable
-        );
+        List<PopupEntity> popupEntities;
+        
+        // 키워드 검색이 있는 경우
+        if (query.keyword() != null && !query.keyword().trim().isEmpty()) {
+            popupEntities = findByKeywordSearch(query, pageable);
+        } else {
+            // 기존 필터 검색
+            popupEntities = popupJpaRepository.findFilteredPopups(
+                query.popupId(),
+                query.startDate(),
+                query.endDate(),
+                query.types().isEmpty() ? null : query.types(),
+                query.categories().isEmpty() ? null : query.categories(),
+                query.region1DepthName(),
+                query.lastPopupId(),
+                pageable
+            );
+        }
 
         return popupEntities.stream()
             .map(entity -> {
@@ -111,5 +123,41 @@ public class PopupPortAdapter implements PopupPort {
                     return popupEntityMapper.toDomain(it, popupLocationEntity);
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 키워드 검색을 수행한다.
+     * 키워드를 토큰화하고 각 토큰에 대해 검색을 수행하여 결과를 통합한다.
+     */
+    private List<PopupEntity> findByKeywordSearch(PopupQuery query, Pageable pageable) {
+        String keyword = query.keyword().trim();
+        
+        // 키워드를 띄어쓰기 기준으로 토큰화하고 공백문자 및 의미 없는 문자 제거
+        List<String> tokens = Arrays.stream(keyword.split("\\s+"))
+                .map(String::trim)
+                .filter(token -> !token.isEmpty() && token.length() > 0)
+                .distinct()
+                .toList();
+        
+        if (tokens.isEmpty()) {
+            return List.of();
+        }
+        
+        // 각 토큰에 대해 검색을 수행하고 결과를 통합 (중복 제거)
+        Set<PopupEntity> resultSet = new LinkedHashSet<>();
+        
+        for (String token : tokens) {
+            List<PopupEntity> tokenResults = popupJpaRepository.findByKeyword(
+                query.popupId(),
+                token,
+                query.lastPopupId(),
+                pageable
+            );
+            resultSet.addAll(tokenResults);
+        }
+        
+        return resultSet.stream()
+                .limit(query.size() + 1) // 페이징 처리
+                .toList();
     }
 }
