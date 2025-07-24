@@ -1,7 +1,7 @@
 'use client';
 
 import { StandardButton } from '@/shared/ui';
-import { useLogout } from '@/entities/user/hook/useLogout';
+import { useLogout } from '@/features/auth/hook/useLogout';
 
 export const LogoutButton = () => {
   const logout = useLogout();

@@ -3,7 +3,7 @@ import Image from 'next/image';
 import LogoImage from '/public/images/spotit-logo.png';
 import IconBracketRight from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
 import Link from 'next/link';
-import { LogoutButton } from '@/entities/user/ui/LogoutButton';
+import { LogoutButton } from '@/features/auth/ui/LogoutButton';
 
 const LogoutStateCard = () => {
   return (
