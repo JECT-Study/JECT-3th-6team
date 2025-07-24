@@ -1,16 +1,5 @@
 package com.example.demo.application.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
@@ -21,28 +10,13 @@ import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
-import com.example.demo.domain.model.popup.OpeningHours;
-import com.example.demo.domain.model.popup.Popup;
-import com.example.demo.domain.model.popup.PopupCategory;
-import com.example.demo.domain.model.popup.PopupContent;
-import com.example.demo.domain.model.popup.PopupDisplay;
-import com.example.demo.domain.model.popup.PopupSchedule;
-import com.example.demo.domain.model.popup.PopupStatus;
-import com.example.demo.domain.model.popup.PopupType;
-import com.example.demo.domain.model.popup.Sns;
-import com.example.demo.domain.model.popup.WeeklyOpeningHours;
+import com.example.demo.domain.model.popup.*;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,6 +25,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -322,16 +307,18 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = null;
 
+            LocalDateTime now = LocalDateTime.now();
+
             Waiting waiting1 = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 1,
-                    WaitingStatus.WAITING, LocalDateTime.now()
+                    WaitingStatus.WAITING, now
             );
 
             Waiting waiting2 = new Waiting(
                     2L, validPopup, "김철수", validMember,
                     "kim@example.com", 3, 2,
-                    WaitingStatus.VISITED, LocalDateTime.now().minusDays(1));
+                    WaitingStatus.VISITED, now.minusDays(1));
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
@@ -342,7 +329,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
-                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1
+                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now
             );
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
@@ -352,7 +339,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
-                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2
+                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -360,7 +347,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(),size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -382,8 +369,9 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = null;
 
-            Waiting waiting1 = new Waiting(1L, validPopup, "홍길동", validMember, "hong@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now());
-            Waiting waiting2 = new Waiting(2L, validPopup, "김철수", validMember, "kim@example.com", 3, 2, WaitingStatus.VISITED, LocalDateTime.now().minusDays(1));
+            LocalDateTime now = LocalDateTime.now();
+            Waiting waiting1 = new Waiting(1L, validPopup, "홍길동", validMember, "hong@example.com", 2, 1, WaitingStatus.WAITING, now);
+            Waiting waiting2 = new Waiting(2L, validPopup, "김철수", validMember, "kim@example.com", 3, 2, WaitingStatus.VISITED, now.minusDays(1));
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
@@ -392,14 +380,14 @@ class WaitingServiceTest {
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
             );
-            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1);
+            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
             );
-            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2);
+            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1));
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
             when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
@@ -454,10 +442,11 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = "WAITING";
 
+            LocalDateTime now = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 1,
-                    WaitingStatus.WAITING, LocalDateTime.now()
+                    WaitingStatus.WAITING, now
             );
 
             List<Waiting> waitings = List.of(waiting);
@@ -469,7 +458,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto
+                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -496,10 +485,11 @@ class WaitingServiceTest {
             Long lastWaitingId = 5L;
             String status = null;
 
+            LocalDateTime now = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     6L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 6,
-                    WaitingStatus.WAITING, LocalDateTime.now()
+                    WaitingStatus.WAITING, now
             );
 
             List<Waiting> waitings = List.of(waiting);
@@ -511,7 +501,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto
+                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
