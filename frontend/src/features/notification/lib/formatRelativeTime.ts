@@ -1,3 +1,10 @@
+/**
+ * 주어진 ISO 8601 string 을 현재시간과의 시간차 string 으로 포맷팅합니다.
+ *
+ * @param {string} isoString - The ISO 8601 formatted date string
+ * @return {string} "just now", "5 mins ago", or "2 days ago"와 같은 시간차
+ */
+
 export default function formatRelativeTime(isoString: string): string {
   const now = new Date();
   const target = new Date(isoString);
