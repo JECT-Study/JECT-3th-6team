@@ -1,4 +1,4 @@
-import BellIcon from '@/assets/icons/Normal/Icon_Bell.svg';
+import NotificationBell from '@/features/notification/ui/NotificationBell';
 
 export default function HomeLayout({
   children,
@@ -13,8 +13,7 @@ export default function HomeLayout({
           <span className={'font-gangwon text-[17px] text-white font-regular'}>
             Spot it
           </span>
-          {/*TODO : 알림기능 구현시 BellIcon을 제거*/}
-          <BellIcon fill={'var(--color-main)'} width={28} height={28} />
+          <NotificationBell />
         </div>
       </div>
       {children}
