@@ -1,88 +1,130 @@
 'use client';
 
+import { useRouter, useParams } from 'next/navigation';
+
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
-import { ReviewTab } from '@/features/detail/ui/ReviewTab';
-import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
-import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
+import { CircleMap } from '@/shared/ui';
+import { BottomButtonContainer } from '@/shared/ui';
+import PageHeader from '@/shared/ui/header/PageHeader';
+import StandardButton from '@/shared/ui/button/StandardButton';
 import { MediumText } from '@/shared/ui/text/MediumText';
-import Image from 'next/image';
+import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
+import type { _MapProps } from 'react-kakao-maps-sdk';
+
+import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
+import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
+
+import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
+import IconMap from '@/assets/icons/Normal/Icon_map.svg';
+
+import { popupDetailData } from './data';
 
 export default function ProductDetail() {
-  const images = [
-    '/images/sunglass.jpg',
-    '/images/sunglass.jpg',
-    '/images/sunglass.jpg',
-  ];
+  const router = useRouter();
+  const params = useParams();
+  const popupId = params.popupId as string;
+  const {
+    thumbnails,
+    dDay,
+    title,
+    searchTags,
+    location,
+    period,
+    status,
+    brandStory,
+    popupDetail,
+  } = popupDetailData;
+
+  type ClickMapFunction = _MapProps['onClick'];
+  const handleClickMap: ClickMapFunction = (_, mouseEvent) => {
+    const latlng = mouseEvent.latLng;
+    const lat = latlng.getLat();
+    const lng = latlng.getLng();
+    router.push(`/detail/${popupId}/map?lat=${lat}&lng=${lng}`);
+  };
 
   return (
-    <div>
+    <div className="pb-36">
+      <PageHeader title="상세 정보" />
       {/* Image Carousel */}
-      <ImageCarousel images={images} />
+      <ImageCarousel images={thumbnails} />
 
       {/* Main Detail */}
       <div className="py-6 px-5">
-        {/* Badge and Rating */}
         <div className="flex items-center justify-between">
-          <Badge iconPosition="left">10일 남음</Badge>
-          <div className="flex items-center gap-1">
-            <Image
-              src="/icons/Normal/Icon_Star.svg"
-              alt="star"
-              width={18}
-              height={17}
-              className="w-4.5 h-4.5 fill-main"
-            />
-            <MediumText color="text-gray80">4.5</MediumText>
-            <MediumText color="text-gray80">(25개의 리뷰)</MediumText>
-          </div>
+          <Badge iconPosition="left">
+            {dDay > 0 ? `${dDay}일 남음` : '종료됨'}
+          </Badge>
         </div>
         {/* Title and Tags*/}
         <div className="mt-6">
-          <SemiBoldText size="lg">젠틀몬스터</SemiBoldText>
-          <Tag>수도권</Tag>
-          <Tag>체험형</Tag>
-          <Tag>패션</Tag>
-          <Tag>뷰티</Tag>
+          <SemiBoldText size="lg">{title}</SemiBoldText>
+          <Tag>{searchTags.type}</Tag>
+          {searchTags.category.map((category, index) => (
+            <Tag key={index}>{category}</Tag>
+          ))}
         </div>
-        {/* Location */}
-        <div className="flex items-center justify-between mt-2.5">
-          <div className="flex items-center">
-            <Image
-              src="/icons/Normal/Icon_map.svg"
-              alt="map"
-              width={22}
-              height={22}
-              className="w-5.5 h-5.5 mr-1"
-            />
-            <MediumText>서울, 용산구 한남동 61-2</MediumText>
-          </div>
-          {/* 없어도 무관한 화살표 */}
-          {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
+        {/* Schedule and Location */}
+        <div className="flex items-center gap-2 mt-5">
+          <IconClock
+            width={22}
+            height={22}
+            fill={'var(--gray-80)'}
+            stroke={'var(--gray-80)'}
+          />
+          <MediumText color="color-black">일정</MediumText>
+          <MediumText color="text-gray60">|</MediumText>
+          <MediumText color="color-black">
+            {period.startDate} ~ {period.endDate}
+          </MediumText>
+        </div>
+        <div className="flex items-center gap-2 mt-2.5">
+          <IconMap
+            width={22}
+            height={22}
+            fill={'var(--gray-80)'}
+            stroke={'var(--gray-80)'}
+          />
+          <MediumText color="color-black">위치</MediumText>
+          <MediumText color="text-gray60">|</MediumText>
+          <MediumText color="color-black">{location.address_name}</MediumText>
+        </div>
+        {/* Map */}
+        <div className="mt-6.5">
+          <CircleMap
+            center={{ lat: location.y, lng: location.x }}
+            maxLevel={6}
+            minLevel={6}
+            onClick={handleClickMap}
+          />
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="description" className="w-full gap-0">
-        <TabsList className="grid w-full grid-cols-2 bg-transparent border-b-2 border-sub rounded-none h-auto p-0">
-          <TabsTrigger
-            value="description"
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 data-[state=active]:border-0 data-[state=active]:border-b-4 data-[state=active]:border-main data-[state=active]:text-black data-[state=active]:-mb-1 rounded-none pb-3 py-4 text-base font-medium"
-          >
-            팝업 설명
-          </TabsTrigger>
-          <TabsTrigger
-            value="reviews"
-            className="data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 data-[state=active]:border-0 data-[state=active]:border-b-4 data-[state=active]:border-main data-[state=active]:text-black data-[state=active]:-mb-1 rounded-none pb-3 py-4 text-base font-medium"
-          >
-            리뷰
-          </TabsTrigger>
-        </TabsList>
-        <DescriptionTab />
-        <ReviewTab />
-      </Tabs>
+      {/* Description Section */}
+      <div className="px-5 text-center">
+        {/* <SemiBoldText size="lg">팝업 설명</SemiBoldText> */}
+      </div>
+      <div className="w-full h-px bg-gray40 mt-7.5" />
+      <div className="px-5 py-6">
+        <DescriptionTab brandStory={brandStory} popupDetail={popupDetail} />
+      </div>
+
+      <BottomButtonContainer hasShadow={true}>
+        <StandardButton
+          onClick={() => {
+            console.log('웨이팅');
+          }}
+          disabled={status === 'WAITING' || status === 'VISITED'}
+          color="primary"
+        >
+          {status === 'WAITING'
+            ? '예약중'
+            : status === 'NONE'
+              ? '웨이팅하기'
+              : '방문 완료'}
+        </StandardButton>
+      </BottomButtonContainer>
     </div>
   );
 }

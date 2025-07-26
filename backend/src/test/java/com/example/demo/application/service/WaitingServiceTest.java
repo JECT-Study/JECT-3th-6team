@@ -143,7 +143,7 @@ class WaitingServiceTest {
 
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenReturn(nextWaitingNumber);
-//            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
+            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
             when(waitingPort.save(any(Waiting.class))).thenReturn(savedWaiting);
             when(waitingDtoMapper.toCreateResponse(savedWaiting)).thenReturn(expectedResponse);
 
@@ -157,7 +157,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(waitingPort).getNextWaitingNumber(1L);
-//            verify(memberPort).findById(1L);
+            verify(memberPort).findById(1L);
             verify(waitingPort).save(any(Waiting.class));
             verify(waitingDtoMapper).toCreateResponse(savedWaiting);
         }
@@ -223,7 +223,7 @@ class WaitingServiceTest {
             // given
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenReturn(5);
-//            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
+            when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
             when(waitingPort.save(any(Waiting.class))).thenThrow(new RuntimeException("저장 실패"));
 
             // when & then
@@ -232,7 +232,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(waitingPort).getNextWaitingNumber(1L);
-//            verify(memberPort).findById(1L);
+            verify(memberPort).findById(1L);
             verify(waitingPort).save(any(Waiting.class));
             verify(waitingDtoMapper, never()).toCreateResponse(any());
         }
@@ -314,16 +314,18 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = null;
 
+            LocalDateTime now = LocalDateTime.now();
+
             Waiting waiting1 = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 1,
-                    WaitingStatus.WAITING, LocalDateTime.now()
+                    WaitingStatus.WAITING, now
             );
 
             Waiting waiting2 = new Waiting(
                     2L, validPopup, "김철수", validMember,
                     "kim@example.com", 3, 2,
-                    WaitingStatus.VISITED, LocalDateTime.now().minusDays(1));
+                    WaitingStatus.VISITED, now.minusDays(1));
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
@@ -334,7 +336,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
-                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1
+                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now
             );
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
@@ -344,7 +346,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
-                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2
+                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -352,7 +354,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -374,8 +376,9 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = null;
 
-            Waiting waiting1 = new Waiting(1L, validPopup, "홍길동", validMember, "hong@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now());
-            Waiting waiting2 = new Waiting(2L, validPopup, "김철수", validMember, "kim@example.com", 3, 2, WaitingStatus.VISITED, LocalDateTime.now().minusDays(1));
+            LocalDateTime now = LocalDateTime.now();
+            Waiting waiting1 = new Waiting(1L, validPopup, "홍길동", validMember, "hong@example.com", 2, 1, WaitingStatus.WAITING, now);
+            Waiting waiting2 = new Waiting(2L, validPopup, "김철수", validMember, "kim@example.com", 3, 2, WaitingStatus.VISITED, now.minusDays(1));
 
             List<Waiting> waitings = List.of(waiting1, waiting2);
 
@@ -384,21 +387,21 @@ class WaitingServiceTest {
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
             );
-            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1);
+            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
                     5L, "6월 10일 ~ 6월 20일"
             );
-            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2);
+            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1));
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
             when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -425,7 +428,7 @@ class WaitingServiceTest {
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(emptyWaitings);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -446,10 +449,11 @@ class WaitingServiceTest {
             Long lastWaitingId = null;
             String status = "WAITING";
 
+            LocalDateTime now = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 1,
-                    WaitingStatus.WAITING, LocalDateTime.now()
+                    WaitingStatus.WAITING, now
             );
 
             List<Waiting> waitings = List.of(waiting);
@@ -461,14 +465,14 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto
+                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -488,10 +492,11 @@ class WaitingServiceTest {
             Long lastWaitingId = 5L;
             String status = null;
 
+            LocalDateTime now = LocalDateTime.now();
             Waiting waiting = new Waiting(
                     6L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, 6,
-                    WaitingStatus.WAITING, LocalDateTime.now()
+                    WaitingStatus.WAITING, now
             );
 
             List<Waiting> waitings = List.of(waiting);
@@ -503,14 +508,14 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto
+                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
 
             // then
             assertNotNull(response);
@@ -532,7 +537,7 @@ class WaitingServiceTest {
 
             // when & then
             assertThrows(IllegalArgumentException.class, () ->
-                    waitingService.getVisitHistory(size, lastWaitingId, invalidStatus)
+                    waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, invalidStatus)
             );
 
             // verify

@@ -1,4 +1,3 @@
-import { Navbar } from '@/widgets';
 import BellIcon from '@/assets/icons/Normal/Icon_Bell.svg';
 
 export default function HomeLayout({
@@ -19,7 +18,6 @@ export default function HomeLayout({
         </div>
       </div>
       {children}
-      <Navbar />
     </div>
   );
 }

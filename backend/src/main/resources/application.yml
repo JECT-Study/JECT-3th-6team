@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
@@ -22,7 +24,33 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 1000
-
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${OAUTH2_KAKAO_CLIENT_ID}
+            client-secret: ${OAUTH2_KAKAO_CLIENT_SECRET}
+            redirect-uri: "${BACKEND_URL}/oauth/kakao/callback"
+            authorization_grant_type: authorization_code
+            client-authentication-method: client_secret_post
+            client_name: Kakao
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: ${OAUTH2_KAKAO_PROVIDER_AUTHORIZATION_URI}
+            token-uri: ${OAUTH2_KAKAO_PROVIDER_TOKEN_URI}
+            user-info-uri: ${OAUTH2_KAKAO_PROVIDER_USER_INFO_URI}
+            user-name-attribute: id
+custom:
+  app:
+    frontend-url: ${FRONTEND_URL}
+  jwt:
+    accessToken:
+      secret: ${JWT_ACCESS_TOKEN_SECRET}
+      expirationSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
 logging:
   level:
     org.hibernate.SQL: DEBUG

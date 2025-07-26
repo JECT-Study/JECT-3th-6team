@@ -4,7 +4,13 @@ export type ratingType = {
   averageStar: number;
   reviewCount: number;
 };
-export type statusType = 'RESERVED' | 'COMPLETED';
+
+export type searchTagType = {
+  type: string;
+  category: string[];
+};
+
+export type statusType = 'WAITING' | 'VISITED';
 export type tagType = 'DEFAULT' | 'HISTORY';
 interface TaggedItem<T extends tagType> {
   tag: T;
@@ -37,13 +43,14 @@ interface RawPopupListItemType {
     x: number;
     y: number;
   };
-  rating: ratingType;
+  rating?: ratingType;
   period: {
     startDate: string;
     endDate: string;
   };
   dDay: number;
   imageUrl: string;
+  searchTags: searchTagType;
 }
 
 /**
@@ -54,14 +61,28 @@ interface RawPopupListItemType {
 
 interface RawPopupHistoryListItemType {
   waitingId: number;
-  popupId: number;
-  popupName: string;
-  popupImageUrl: string;
-  location: string;
-  rating: ratingType;
-  period: string;
   waitingNumber: number;
   status: statusType;
+  name: string;
+  peopleCount: number;
+  contactEmail: string;
+  registeredAt: string;
+  popup: {
+    popupId: number;
+    popupName: string;
+    popupImageUrl: string;
+    location: {
+      addressName: string;
+      region1depthName: string;
+      region2depthName: string;
+      region3depthName: string;
+      longitude: number;
+      latitude: number;
+    };
+    dDay: number;
+    period: string; // "2025-06-01 ~ 2025-06-25"
+    searchTags: searchTagType;
+  };
 }
 
 export interface PopupCardViewProps {
@@ -69,9 +90,10 @@ export interface PopupCardViewProps {
   popupName: string;
   popupImageUrl: string;
   location: string;
-  rating: ratingType;
   period: string;
   linkTo: string;
+  searchTags: string;
   hasRightBar?: boolean;
   Badge?: React.ReactElement;
+  rating?: ratingType;
 }

@@ -63,7 +63,8 @@ public class WaitingDtoMapper {
                         popupDtoMapper.toLocationResponse(popup.getLocation()),
                         dDay,
                         formatPeriod(popup.getSchedule().dateRange())
-                )
+                ),
+                waiting.registeredAt()
         );
     }
 

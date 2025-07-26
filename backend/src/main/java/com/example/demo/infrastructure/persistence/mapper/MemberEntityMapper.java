@@ -23,4 +23,18 @@ public class MemberEntityMapper {
                 entity.getEmail()
         );
     }
+
+    /**
+     * Member 도메인 모델을 MemberEntity로 변환한다.
+     *
+     * @param domain Member 도메인 모델
+     * @return MemberEntity
+     */
+    public MemberEntity toEntity(Member domain) {
+        return MemberEntity.builder()
+            .id(domain.id())
+            .name(domain.name())
+            .email(domain.email())
+            .build();
+    }
 } 

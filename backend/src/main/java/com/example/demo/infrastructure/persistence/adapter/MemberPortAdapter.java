@@ -24,4 +24,11 @@ public class MemberPortAdapter implements MemberPort {
         return memberJpaRepository.findById(id)
                 .map(memberEntityMapper::toDomain);
     }
+
+    @Override
+    public Member save(Member member) {
+        var entity = memberEntityMapper.toEntity(member);
+        var savedEntity = memberJpaRepository.save(entity);
+        return memberEntityMapper.toDomain(savedEntity);
+    }
 } 
