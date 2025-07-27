@@ -39,4 +39,10 @@ public interface NotificationEventPort {
      * @return 연결되어 있으면 true, 아니면 false
      */
     boolean isConnected(Long memberId);
+    
+    /**
+     * 모든 연결된 클라이언트에게 하트비트 ping을 전송한다.
+     * 전송 실패한 연결은 자동으로 제거된다.
+     */
+    void sendHeartbeatToAllConnections();
 } 

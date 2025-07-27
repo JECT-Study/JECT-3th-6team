@@ -170,4 +170,60 @@ public class NotificationSseAdapter implements NotificationEventPort {
                     cleanupEmptyConnectionsIfNeeded(memberId, connections);
                 });
     }
+
+    /**
+     * 현재 연결 상태를 반환한다. (모니터링용)
+     */
+    public Map<Long, Integer> getConnectionStatus() {
+        Map<Long, Integer> status = new ConcurrentHashMap<>();
+        memberConnections.forEach((memberId, connections) -> 
+            status.put(memberId, connections.size()));
+        return status;
+    }
+
+    @Override
+    public void sendHeartbeatToAllConnections() {
+        log.debug("전체 {} 명의 회원에게 하트비트 ping 전송", memberConnections.size());
+        
+        memberConnections.entrySet().removeIf(memberEntry -> {
+            Long memberId = memberEntry.getKey();
+            Map<String, SseEmitter> connections = memberEntry.getValue();
+            
+            // 해당 회원의 모든 연결에 ping 전송
+            connections.entrySet().removeIf(connectionEntry -> 
+                !sendPingToConnection(memberId, connectionEntry)
+            );
+            
+            // 연결이 모두 제거된 회원은 맵에서 제거
+            boolean shouldRemoveMember = connections.isEmpty();
+            if (shouldRemoveMember) {
+                log.debug("회원 ID {}의 모든 연결이 제거되어 회원 정보를 삭제합니다.", memberId);
+            }
+            
+            return shouldRemoveMember;
+        });
+    }
+
+    private boolean sendPingToConnection(Long memberId, Map.Entry<String, SseEmitter> connectionEntry) {
+        String connectionId = connectionEntry.getKey();
+        SseEmitter emitter = connectionEntry.getValue();
+        
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("ping")
+                    .data(Map.of(
+                        "timestamp", System.currentTimeMillis(),
+                        "message", "heartbeat",
+                        "connectionId", connectionId
+                    )));
+            
+            log.trace("회원 ID {}의 연결 {}로 ping 전송 성공", memberId, connectionId);
+            return true; // 연결 유지
+            
+        } catch (IOException e) {
+            log.warn("회원 ID {}의 연결 {}로 ping 전송 실패: {}", memberId, connectionId, e.getMessage());
+            emitter.completeWithError(e);
+            return false; // 연결 제거
+        }
+    }
 } 
