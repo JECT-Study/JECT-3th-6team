@@ -33,12 +33,12 @@ const mapPopupListItemToViewProps = (
   const renderLocation = `${region1DepthShortMap[region1depthName]}, ${region2depthName}`;
   const renderTag = formatSearchTags(data.searchTags);
   return {
-    popupId: data.id,
+    popupId: data.popupId,
     popupName: data.popupName,
     popupImageUrl: data.imageUrl,
     location: renderLocation,
     period: periodStr,
-    linkTo: `/detail/${data.id}`,
+    linkTo: `/detail/${data.popupId}`,
     Badge: renderedBadge,
     searchTags: renderTag,
     //rating: data.rating,

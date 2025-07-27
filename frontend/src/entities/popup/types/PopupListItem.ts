@@ -33,7 +33,7 @@ export type RawPopupItemType =
  */
 
 interface RawPopupListItemType {
-  id: number;
+  popupId: number;
   popupName: string;
   location: {
     addressName: string;

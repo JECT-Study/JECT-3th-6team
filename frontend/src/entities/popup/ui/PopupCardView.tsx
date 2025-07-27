@@ -87,8 +87,6 @@ const PopupCardRightBar = () => (
 );
 
 export default function PopupCardView(props: PopupCardViewProps) {
-  console.log(props);
-
   return (
     <PopupCardLink linkTo={props.linkTo}>
       <PopupCardImage

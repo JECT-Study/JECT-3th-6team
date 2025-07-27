@@ -37,7 +37,7 @@ export default async function ReservationDetailPage({
       dDay: -18,
       period: '2025-06-01 ~ 2025-06-25',
       searchTags: {
-        type: '체험형',
+        type: 'EXPERIENTIAL',
         category: ['패션', '예술'],
       },
     },

@@ -22,7 +22,7 @@ export default async function getPopupListApi(): Promise<TaggedPopupListResponse
   try {
     const response = await APIBuilder.get('/popups')
       .timeout(5000)
-      .setCache('no-store')
+      .setCache('force-cache')
       .build()
       .call<PopupListResponse>();
     const { content, hasNext, lastPopupId } = response.data;
