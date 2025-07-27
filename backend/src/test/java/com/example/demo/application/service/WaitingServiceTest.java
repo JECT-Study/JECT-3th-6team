@@ -2,6 +2,7 @@ package com.example.demo.application.service;
 
 import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
+import com.example.demo.application.dto.popup.SearchTagsResponse;
 import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
 import com.example.demo.application.dto.waiting.WaitingCreateRequest;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
@@ -332,7 +333,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto1 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
@@ -342,7 +344,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
@@ -385,14 +388,16 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto1 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
             WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
             WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1));
 
@@ -461,7 +466,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
@@ -504,7 +510,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
