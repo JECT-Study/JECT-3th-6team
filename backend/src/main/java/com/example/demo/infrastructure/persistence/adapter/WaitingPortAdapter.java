@@ -65,4 +65,15 @@ public class WaitingPortAdapter implements WaitingPort {
                 return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
             });
     }
+
+    @Override
+    public Optional<Waiting> findById(Long waitingId) {
+        return waitingJpaRepository.findById(waitingId)
+            .flatMap(entity -> {
+                var popup = popupPortAdapter.findById(entity.getPopupId()).orElse(null);
+                var member = memberPortAdapter.findById(entity.getMemberId()).orElse(null);
+                if (popup == null || member == null) return Optional.empty();
+                return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
+            });
+    }
 } 

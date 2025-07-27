@@ -89,10 +89,24 @@ public class WaitingService {
     }
 
     /**
-     * 내 방문/예약 내역 조회 (무한 스크롤)
+     * 내 방문/예약 내역 조회 (무한 스크롤) 또는 단건 조회
      */
     @Transactional(readOnly = true)
-    public VisitHistoryCursorResponse getVisitHistory(Long memberId,Integer size, Long lastWaitingId, String status) {
+    public VisitHistoryCursorResponse getVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status, Long waitingId) {
+        
+        // waitingId가 있으면 단건 조회
+        if (waitingId != null) {
+            Waiting waiting = waitingPort.findById(waitingId)
+                    .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다: " + waitingId));
+
+            // 본인의 대기 정보인지 확인
+            if (!waiting.member().id().equals(memberId)) {
+                throw new IllegalArgumentException("본인의 대기 정보만 조회할 수 있습니다.");
+            }
+
+            WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting);
+            return new VisitHistoryCursorResponse(List.of(waitingResponse), waitingId, false);
+        }
 
         // 1. 조회 조건 생성
         WaitingQuery query = WaitingQuery.forVisitHistory(memberId, size, lastWaitingId, status);

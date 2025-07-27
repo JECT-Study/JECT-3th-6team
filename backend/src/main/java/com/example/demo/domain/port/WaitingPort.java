@@ -35,4 +35,12 @@ public interface WaitingPort {
      */
     Integer getNextWaitingNumber(Long popupId);
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
+    
+    /**
+     * 대기 ID로 대기 정보를 조회한다.
+     *
+     * @param waitingId 대기 ID
+     * @return 대기 정보
+     */
+    Optional<Waiting> findById(Long waitingId);
 } 
