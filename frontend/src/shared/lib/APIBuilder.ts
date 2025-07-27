@@ -1,6 +1,5 @@
 import { HTTPHeaders, HTTPMethod, HTTPParams } from '@/shared/type/api';
 import API from '@/shared/lib/API';
-import { cookies } from 'next/headers';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -78,9 +77,9 @@ export default class APIBuilder {
   async auth(): Promise<APIBuilder> {
     const isServer = () => typeof window === 'undefined';
     if (isServer()) {
+      const { cookies } = await import('next/headers');
       const cookieStore = await cookies();
       const token = cookieStore.get('accessToken')?.value;
-
       if (token) {
         this._instance.headers = {
           ...this._instance.headers,
