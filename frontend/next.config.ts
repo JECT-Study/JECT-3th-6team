@@ -2,9 +2,12 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  images: {
-    domains: ['picsum.photos'],
+  logging: {
+    fetches: {
+      fullUrl: true, // 요청하는 전체 URL을 로깅하도록 설정
+    },
   },
+
   webpack: config => {
     const fileLoaderRule = config.module.rules.find(
       (rule: { test: { test: (arg0: string) => never } }) =>
