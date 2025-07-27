@@ -45,7 +45,7 @@ public class NotificationController {
     @Profile("sse-test")
     @GetMapping(value = "/stream-test", produces = "text/event-stream")
     public SseEmitter testStreamNotifications() {
-        Long memberId = 1L; // 테스트용으로 고정된 회원 ID
+        Long memberId = 1000L; // 테스트용으로 고정된 회원 ID
         return notificationSseService.createSseConnection(memberId);
     }
 
