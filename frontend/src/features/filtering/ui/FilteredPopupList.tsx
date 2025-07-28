@@ -1,4 +1,4 @@
-import popupList from '@/entities/popup/constants/data';
+import popupList from '@/entities/popup/api/data';
 import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 
 export default function FilteredPopupList() {
