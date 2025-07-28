@@ -51,7 +51,7 @@ public class PopupDtoMapper {
         List<String> descriptions = List.of(
                 popup.getDisplay().content().introduction(),
                 popup.getDisplay().content().notice()
-        );
+            );
 
         return new PopupDetailInfoResponse(dayOfWeekInfos, descriptions);
     }
@@ -85,9 +85,9 @@ public class PopupDtoMapper {
 
     public BrandStoryResponse toBrandStoryResponse(BrandStory brandStory) {
         if (brandStory == null) return null;
-        List<SnsResponse> snsResponses = brandStory.sns() != null ?
-                brandStory.sns().stream().map(this::toSnsResponse).collect(Collectors.toList()) :
-                Collections.emptyList();
+        List<SnsResponse> snsResponses = brandStory.sns() != null
+                ? brandStory.sns().stream().map(this::toSnsResponse).collect(Collectors.toList())
+                : Collections.emptyList();
         return new BrandStoryResponse(brandStory.imageUrls(), snsResponses);
     }
 
@@ -96,21 +96,22 @@ public class PopupDtoMapper {
             return new SearchTagsResponse(null, Collections.emptyList());
         }
 
-        String type = popup.getType() != null ? popup.getType().name() : null;
+        String type = popup.getType() != null ? popup.getType().getKorean() : null;
 
-        List<String> categoryNames = popup.getPopupCategories() != null ?
-                popup.getPopupCategories().stream().map(PopupCategory::name).collect(Collectors.toList()) :
-                Collections.emptyList();
+        List<String> categoryNames = popup.getPopupCategories() != null
+                ? popup.getPopupCategories().stream().map(PopupCategory::name).collect(Collectors.toList())
+                : Collections.emptyList();
 
         return new SearchTagsResponse(type, categoryNames);
     }
 
     public PopupMapQuery toPopupMapQuery(PopupMapRequest request) {
         PopupType type = StringUtils.hasText(request.type()) ? PopupType.valueOf(request.type()) : null;
-        List<String> categories = StringUtils.hasText(request.category()) ?
-                Arrays.asList(request.category().split(",")) : null;
-        DateRange dateRange = (request.startDate() != null && request.endDate() != null) ?
-                new DateRange(request.startDate(), request.endDate()) : null;
+        List<String> categories = StringUtils.hasText(request.category()) ? Arrays.asList(request.category().split(","))
+                : null;
+        DateRange dateRange = (request.startDate() != null && request.endDate() != null)
+                ? new DateRange(request.startDate(), request.endDate())
+                : null;
 
         return new PopupMapQuery(
                 request.minLatitude(),
@@ -120,7 +121,7 @@ public class PopupDtoMapper {
                 type,
                 categories,
                 dateRange
-        );
+                );
     }
 
     public List<PopupMapResponse> toPopupMapResponses(List<Popup> popups) {
@@ -137,7 +138,7 @@ public class PopupDtoMapper {
                 popup.getId(),
                 BigDecimal.valueOf(popup.getLocation().latitude()),
                 BigDecimal.valueOf(popup.getLocation().longitude())
-        );
+                );
     }
 
     public PopupQuery toQuery(PopupFilterRequest request) {
@@ -156,7 +157,7 @@ public class PopupDtoMapper {
                     null, // region1DepthName 무시
                     request.lastPopupId(),
                     request.keyword().trim()
-            );
+                    );
         }
 
         List<String> mappedTypes = null;
@@ -175,7 +176,7 @@ public class PopupDtoMapper {
                 (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName(),
                 request.lastPopupId(),
                 null
-        );
+                );
     }
     public PopupSummaryResponse toPopupSummaryResponse(Popup popup) {
         if (popup == null) return null;
@@ -188,7 +189,7 @@ public class PopupDtoMapper {
                 calculateDDay(popup.getSchedule().dateRange().endDate()),
                 formatPeriod(popup.getSchedule().dateRange()),
                 toSearchTagsResponse(popup)
-        );
+                );
     }
     private long calculateDDay(LocalDate endDate) {
         if (endDate == null) return -1;
