@@ -186,7 +186,8 @@ public class PopupDtoMapper {
                 popup.getDisplay().imageUrls().getFirst(),
                 toLocationResponse(popup.getLocation()),
                 calculateDDay(popup.getSchedule().dateRange().endDate()),
-                formatPeriod(popup.getSchedule().dateRange())
+                formatPeriod(popup.getSchedule().dateRange()),
+                toSearchTagsResponse(popup)
         );
     }
     private long calculateDDay(LocalDate endDate) {
