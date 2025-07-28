@@ -582,16 +582,15 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
-                // TODO 팝업 리스트 searchTags 추가 PR 머지 시 주석 해제 예정
-//                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
                     waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now
             );
 
-            when(waitingPort.findById(waitingId)).thenReturn(Optional.of(waiting));
+            when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
@@ -605,7 +604,7 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findById(waitingId);
+            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
             verify(waitingDtoMapper).toResponse(waiting);
         }
 
@@ -615,7 +614,7 @@ class WaitingServiceTest {
             // given
             Long waitingId = 999L;
 
-            when(waitingPort.findById(waitingId)).thenReturn(Optional.empty());
+            when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of());
 
             // when & then
             assertThrows(IllegalArgumentException.class, () ->
@@ -623,7 +622,7 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findById(waitingId);
+            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
 
@@ -640,7 +639,7 @@ class WaitingServiceTest {
                     WaitingStatus.WAITING, now
             );
 
-            when(waitingPort.findById(waitingId)).thenReturn(Optional.of(waiting));
+            when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
 
             // when & then
             assertThrows(IllegalArgumentException.class, () ->
@@ -648,7 +647,7 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findById(waitingId);
+            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
     }

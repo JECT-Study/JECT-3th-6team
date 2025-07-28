@@ -4,6 +4,7 @@ import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import java.util.List;
 import java.util.Optional;
+import com.example.demo.domain.model.CursorResult;
 
 /**
  * 대기 저장소 포트 인터페이스.
@@ -21,6 +22,7 @@ public interface WaitingPort {
 
     /**
      * 조회 조건에 따라 대기 정보 목록을 조회한다.
+     * (waitingId가 있으면 단건 조회로 동작)
      *
      * @param query 조회 조건
      * @return 대기 정보 목록
@@ -36,11 +38,4 @@ public interface WaitingPort {
     Integer getNextWaitingNumber(Long popupId);
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
     
-    /**
-     * 대기 ID로 대기 정보를 조회한다.
-     *
-     * @param waitingId 대기 ID
-     * @return 대기 정보
-     */
-    Optional<Waiting> findById(Long waitingId);
 } 

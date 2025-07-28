@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.example.demo.domain.model.CursorResult;
 
 @Service
 @RequiredArgsConstructor
@@ -96,7 +97,9 @@ public class WaitingService {
         
         // waitingId가 있으면 단건 조회
         if (waitingId != null) {
-            Waiting waiting = waitingPort.findById(waitingId)
+            Waiting waiting = waitingPort.findByQuery(new WaitingQuery(waitingId, null, null, null, null, null))
+                    .stream()
+                    .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다: " + waitingId));
 
             // 본인의 대기 정보인지 확인
