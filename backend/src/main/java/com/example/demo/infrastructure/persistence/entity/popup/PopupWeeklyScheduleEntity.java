@@ -1,16 +1,10 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import lombok.Getter;
 
 /**
  * 팝업 요일별 운영시간 엔티티.
@@ -19,6 +13,9 @@ import lombok.Getter;
 @Entity
 @Table(name = "popup_weekly_schedules")
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PopupWeeklyScheduleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

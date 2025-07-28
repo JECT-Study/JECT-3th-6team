@@ -13,13 +13,13 @@ export default function TextInput({
   inputMode = 'text',
   id = '',
 }: TextInputProps) {
-  const borderStyle = error ? 'border-red' : 'border-gray20';
+  const borderStyle = error ? 'border-red' : 'border-gray40';
 
   return (
     <div className={'flex flex-col gap-2 w-full'}>
       <label
         htmlFor={id}
-        className={'font-semibold text-sm/normal tracking-wide'}
+        className={'font-semibold text-sm/normal tracking-wide select-none'}
       >
         {label}
       </label>
@@ -33,11 +33,11 @@ export default function TextInput({
         disabled={disabled}
         type={type}
         inputMode={inputMode}
-        className={`px-3 py-3 rounded-xl border text-base font-regular/normal tracking-wide placeholder:text-gray40 text-gray80 focus:outline-none focus:border-main ${borderStyle}`}
+        className={`px-3 py-3 rounded-xl border text-base font-regular/normal tracking-wide placeholder:text-gray40 text-gray80 focus:outline-none caret-main focus:border-main ${borderStyle}`}
       />
       {error && (
-        <span className={'font-regular text-sm/normal text-red tracking-wide'}>
-          {errorMessage}
+        <span className={'font-regular text-xs/normal text-red tracking-wide'}>
+          *{errorMessage}
         </span>
       )}
     </div>

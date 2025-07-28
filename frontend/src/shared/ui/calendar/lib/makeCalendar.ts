@@ -1,14 +1,14 @@
 import {
+  addMonths,
+  eachDayOfInterval,
   endOfMonth,
   endOfWeek,
   startOfMonth,
   startOfWeek,
-  eachDayOfInterval,
-  addMonths,
   startOfYear,
 } from 'date-fns';
 
-const makeCalender = (selectedDate: Date) => {
+const getMonthlyCalendarData = (selectedDate: Date) => {
   const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
   const allMonth = [];
   const startMonth = startOfYear(selectedDate);
@@ -30,4 +30,4 @@ const makeCalender = (selectedDate: Date) => {
   return { weekDays, currentMonthAllDates, allMonth };
 };
 
-export default makeCalender;
+export default getMonthlyCalendarData;
