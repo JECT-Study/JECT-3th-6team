@@ -6,6 +6,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // API 빌더 클래스 정의
 export default class APIBuilder {
   private _instance: API;
+  private _useAuth = false;
 
   constructor(method: HTTPMethod, url: string, data?: unknown) {
     this._instance = new API(method, url);
@@ -70,11 +71,14 @@ export default class APIBuilder {
     this._instance.next = { ...config };
     return this;
   }
+  // 인증 사용 여부만 기록하는 체이닝 메서드
+  auth(): APIBuilder {
+    this._useAuth = true;
+    return this;
+  }
 
-  /**
-   * 서버/클라이언트 환경에 맞춰 accessToken을 자동으로 주입
-   */
-  async auth(): Promise<APIBuilder> {
+  // 실제 인증 로직을 수행하는 비공개 메서드
+  private async authInternal(): Promise<void> {
     const isServer = () => typeof window === 'undefined';
     if (isServer()) {
       const { cookies } = await import('next/headers');
@@ -83,14 +87,19 @@ export default class APIBuilder {
       if (token) {
         this._instance.headers = {
           ...this._instance.headers,
-          Cookie: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         };
       }
     }
-    return this;
   }
 
-  // 구성된 API 객체를 반환
+  async buildAsync(): Promise<API> {
+    if (this._useAuth) {
+      await this.authInternal();
+    }
+    return this.build();
+  }
+
   build(): API {
     return this._instance;
   }

@@ -41,10 +41,15 @@ export default class API {
     if (this.params) {
       const queryParams = new URLSearchParams();
       Object.entries(this.params).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value === undefined || value === null) return;
+
+        if (Array.isArray(value)) {
+          value.forEach(item => queryParams.append(key, String(item)));
+        } else {
           queryParams.append(key, String(value));
         }
       });
+
       const queryString = queryParams.toString();
       if (queryString) {
         finalUrl += `?${queryString}`;
@@ -54,7 +59,7 @@ export default class API {
     // 기본 URL 설정
     const baseURL = this.baseURL || BASE_URL;
     const fullUrl = `${baseURL}${finalUrl}`;
-
+    console.log('fullUrl', fullUrl);
     // 헤더 설정
     const headers: Record<string, string> = {
       'Content-Type': 'application/json; charset=utf-8',

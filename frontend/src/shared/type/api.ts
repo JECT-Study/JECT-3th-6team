@@ -8,7 +8,7 @@ export interface HTTPHeaders {
 
 // HTTP 파라미터 타입 정의
 export interface HTTPParams {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]: string | number | boolean | string[] | undefined;
 }
 
 // API 응답 타입 정의
