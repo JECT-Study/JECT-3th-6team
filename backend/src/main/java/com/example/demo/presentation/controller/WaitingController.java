@@ -24,18 +24,19 @@ public class WaitingController {
     @PostMapping("/popups/{popupId}/waitings")
     public ResponseEntity<ApiResponse<WaitingCreateResponse>> createWaiting(
             @PathVariable Long popupId,
-            @RequestBody WaitingCreateRequest request
+            @RequestBody WaitingCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
         WaitingCreateRequest createRequest = new WaitingCreateRequest(
                 popupId,
-                request.memberId(),
+                principal.getId(),
                 request.name(),
                 request.peopleCount(),
                 request.contactEmail()
         );
         WaitingCreateResponse response = waitingService.createWaiting(createRequest);
 
-        return ResponseEntity.ok(new ApiResponse<>("성공적으로 대기가 등록되었습니다.",response));
+        return ResponseEntity.ok(new ApiResponse<>("성공적으로 대기가 등록되었습니다.", response));
     }
 
     /**

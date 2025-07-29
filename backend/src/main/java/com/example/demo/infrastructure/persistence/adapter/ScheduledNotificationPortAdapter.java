@@ -112,20 +112,16 @@ public class ScheduledNotificationPortAdapter implements ScheduledNotificationPo
 
     /**
      * Waiting 엔티티 로드
-     * TODO: WaitingPort에 findById 메서드 추가되면 개선 필요
      */
     private Waiting loadWaitingEntity(NotificationEntityMapper.SourceEntityKey key) {
         if (!"Waiting".equals(key.sourceDomain())) {
             throw new IllegalArgumentException("Waiting 도메인이 아닙니다: " + key.sourceDomain());
         }
 
-        // 임시 구현: 모든 대기 정보를 조회해서 필터링
-        // 실제로는 WaitingPort에 findById 메서드가 필요함
-        WaitingQuery query = WaitingQuery.firstPage(1000L, 1000); // 충분히 큰 사이즈로 조회
+        WaitingQuery query = WaitingQuery.forWaitingId(key.sourceId());
         List<Waiting> byQuery = waitingPort.findByQuery(query);
         return byQuery
                 .stream()
-                .filter(waiting -> waiting.id().equals(key.sourceId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기 정보입니다: " + key.sourceId()));
     }

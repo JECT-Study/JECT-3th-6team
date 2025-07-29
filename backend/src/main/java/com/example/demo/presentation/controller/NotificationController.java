@@ -31,9 +31,17 @@ public class NotificationController {
     @GetMapping
     public ApiResponse<NotificationListResponse> getNotifications(
             @AuthenticationPrincipal UserPrincipal principal,
-            NotificationListRequest request) {
+            NotificationListRequest request
+    ) {
+        NotificationListRequest requestWithMemberId = new NotificationListRequest(
+                principal.getId(),
+                request.size(),
+                request.lastNotificationId(),
+                request.readStatus(),
+                request.sort()
+        );
 
-        NotificationListResponse response = notificationService.getNotifications(request);
+        NotificationListResponse response = notificationService.getNotifications(requestWithMemberId);
         return new ApiResponse<>("알림 목록 조회 성공", response);
     }
 
