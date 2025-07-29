@@ -3,7 +3,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
-import IconClock from '@/assets/icons/Normal/Icon_Clock.svg?react';
+import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 
 export const badgeVariants = cva(
   'inline-flex items-center justify-center gap-1 px-2 py-1 text-xs font-medium w-fit whitespace-nowrap shrink-0 text-white rounded-md leading-none',

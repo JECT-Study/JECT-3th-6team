@@ -7,6 +7,7 @@ public record PopupSummaryResponse(
         String popupImageUrl,
         LocationResponse location,
         long dDay,
-        String period
+        String period,
+        SearchTagsResponse searchTags
 ) {
 }

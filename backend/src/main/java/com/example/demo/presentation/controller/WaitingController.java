@@ -39,16 +39,17 @@ public class WaitingController {
     }
 
     /**
-     * 내 방문/예약 내역 조회 (무한 스크롤)
+     * 내 방문/예약 내역 조회 (무한 스크롤) 또는 단건 조회
      */
     @GetMapping("/me/visits")
     public ResponseEntity<ApiResponse<VisitHistoryCursorResponse>> getVisitHistory(
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long lastWaitingId,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long waitingId,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        VisitHistoryCursorResponse response = waitingService.getVisitHistory(principal.getId(),size, lastWaitingId, status);
+        VisitHistoryCursorResponse response = waitingService.getVisitHistory(principal.getId(), size, lastWaitingId, status, waitingId);
 
         return ResponseEntity.ok(new ApiResponse<>("성공적으로 조회되었습니다.", response));
     }
