@@ -1,17 +1,16 @@
-import getPopupListApi from '@/entities/popup/api/getPopupListApi';
-import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
+'use client';
 
-export default async function FilteredPopupList() {
-  const data = await getPopupListApi();
+import useFilteredPopupList from '@/entities/popup/hook/useFilteredPopuplist';
+import FilteredPopupListView from './FilteredPopupListView';
+import PopupCardListSuspenseFallback from '@/entities/popup/ui/PopupCardListSuspenseFallback';
+import FilteredPopupListErrorFallback from '@/features/filtering/ui/FilteredPopupListErrorFallback';
 
-  return (
-    <div className={'flex flex-col gap-y-2 px-5 pt-4.5  bg-white'}>
-      <h2 className={'font-semibold text-xl text-black '}>찾은 팝업</h2>
-      <div className={'flex flex-col gap-y-3 mt-4 pb-[90px]'}>
-        {data.content.map((popup, index) => (
-          <BadgedPopupCard {...popup} key={index} />
-        ))}
-      </div>
-    </div>
-  );
+export default function FilteredPopupList() {
+  const { data, isLoading, isError, refetch } = useFilteredPopupList();
+
+  if (isError) return <FilteredPopupListErrorFallback onRetry={refetch} />;
+  if (isLoading) return <PopupCardListSuspenseFallback />;
+  if (!data) return null;
+
+  return <FilteredPopupListView data={data.content} />;
 }
