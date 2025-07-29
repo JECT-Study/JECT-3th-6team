@@ -6,7 +6,7 @@ export type ratingType = {
 };
 
 export type searchTagType = {
-  type: 'EXPERIENTIAL';
+  type: string;
   category: string[];
 };
 
@@ -32,7 +32,7 @@ export type RawPopupItemType =
  * =========================
  */
 
-interface RawPopupListItemType {
+export interface RawPopupListItemType {
   popupId: number;
   popupName: string;
   location: {
