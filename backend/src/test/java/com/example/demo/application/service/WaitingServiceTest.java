@@ -1,7 +1,19 @@
 package com.example.demo.application.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
+import com.example.demo.application.dto.popup.SearchTagsResponse;
 import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
 import com.example.demo.application.dto.waiting.WaitingCreateRequest;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
@@ -10,13 +22,29 @@ import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
-import com.example.demo.domain.model.popup.*;
+import com.example.demo.domain.model.popup.OpeningHours;
+import com.example.demo.domain.model.popup.Popup;
+import com.example.demo.domain.model.popup.PopupCategory;
+import com.example.demo.domain.model.popup.PopupContent;
+import com.example.demo.domain.model.popup.PopupDisplay;
+import com.example.demo.domain.model.popup.PopupSchedule;
+import com.example.demo.domain.model.popup.PopupStatus;
+import com.example.demo.domain.model.popup.PopupType;
+import com.example.demo.domain.model.popup.Sns;
+import com.example.demo.domain.model.popup.WeeklyOpeningHours;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
+import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,17 +53,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -51,6 +68,12 @@ class WaitingServiceTest {
 
     @Mock
     private WaitingDtoMapper waitingDtoMapper;
+
+    @Mock
+    private WaitingNotificationService waitingNotificationService;
+
+    @Mock
+    private NotificationPort notificationPort;
 
     @InjectMocks
     private WaitingService waitingService;
@@ -325,7 +348,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto1 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
@@ -335,7 +359,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
@@ -347,7 +372,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
 
             // then
             assertNotNull(response);
@@ -378,14 +403,16 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto1 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
             WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
             WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1));
 
@@ -394,7 +421,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
 
             // then
             assertNotNull(response);
@@ -421,7 +448,7 @@ class WaitingServiceTest {
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(emptyWaitings);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
 
             // then
             assertNotNull(response);
@@ -454,7 +481,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
@@ -465,7 +493,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
 
             // then
             assertNotNull(response);
@@ -497,7 +525,8 @@ class WaitingServiceTest {
             PopupSummaryResponse popupDto = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
                     new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
-                    5L, "6월 10일 ~ 6월 20일"
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
@@ -508,7 +537,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
 
             // when
-            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status);
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
 
             // then
             assertNotNull(response);
@@ -530,11 +559,95 @@ class WaitingServiceTest {
 
             // when & then
             assertThrows(IllegalArgumentException.class, () ->
-                    waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, invalidStatus)
+                    waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, invalidStatus, null)
             );
 
             // verify
             verify(waitingPort, never()).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, never()).toResponse(any());
+        }
+
+        @Test
+        @DisplayName("대기 단건 조회 테스트")
+        public void test07() {
+            // given
+            Long waitingId = 1L;
+            LocalDateTime now = LocalDateTime.now();
+            Waiting waiting = new Waiting(
+                    waitingId, validPopup, "홍길동", validMember,
+                    "hong@example.com", 2, 1,
+                    WaitingStatus.WAITING, now
+            );
+
+            PopupSummaryResponse popupDto = new PopupSummaryResponse(
+                    1L, "테스트 팝업", "thumbnail1.jpg",
+                    new LocationResponse("서울시 강남구", "서울특별시", "강남구", "역삼동", 127.0012, 37.5665),
+                    5L, "6월 10일 ~ 6월 20일",
+                    new SearchTagsResponse("체험형", List.of("패션", "예술"))
+            );
+
+            WaitingResponse waitingResponse = new WaitingResponse(
+                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now
+            );
+
+            when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
+            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+
+            // when
+            VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId);
+
+            // then
+            assertNotNull(response);
+            assertEquals(1, response.content().size());
+            assertEquals(waitingId, response.content().getFirst().waitingId());
+            assertEquals(waitingId, response.lastWaitingId());
+            assertFalse(response.hasNext());
+
+            // verify
+            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingDtoMapper).toResponse(waiting);
+        }
+
+        @Test
+        @DisplayName("대기 단건 조회 테스트 - 존재하지 않는 대기")
+        public void test08() {
+            // given
+            Long waitingId = 999L;
+
+            when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of());
+
+            // when & then
+            assertThrows(IllegalArgumentException.class, () ->
+                    waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId)
+            );
+
+            // verify
+            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingDtoMapper, never()).toResponse(any());
+        }
+
+        @Test
+        @DisplayName("대기 단건 조회 테스트 - 다른 사용자의 대기")
+        public void test09() {
+            // given
+            Long waitingId = 1L;
+            Member otherMember = new Member(2L, "다른 사용자", "other@example.com");
+            LocalDateTime now = LocalDateTime.now();
+            Waiting waiting = new Waiting(
+                    waitingId, validPopup, "홍길동", otherMember,
+                    "hong@example.com", 2, 1,
+                    WaitingStatus.WAITING, now
+            );
+
+            when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
+
+            // when & then
+            assertThrows(IllegalArgumentException.class, () ->
+                    waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId)
+            );
+
+            // verify
+            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
     }

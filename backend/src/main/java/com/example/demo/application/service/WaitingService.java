@@ -10,6 +10,7 @@ import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
+import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import com.example.demo.domain.model.CursorResult;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +30,12 @@ public class WaitingService {
     private final WaitingPort waitingPort;
     private final PopupPort popupPort;
     private final MemberPort memberPort;
+    private final NotificationPort notificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
+    private final WaitingNotificationService waitingNotificationService;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
+    private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
 
     /**
      * 현장 대기 신청
@@ -61,15 +69,47 @@ public class WaitingService {
         // 5. 대기 정보 저장
         Waiting savedWaiting = waitingPort.save(waiting);
 
-        // 6. 응답 생성
+        // 7. 새로운 알림 서비스로 모든 알림 처리 위임
+        waitingNotificationService.processWaitingCreatedNotifications(savedWaiting);
+
+        // 8. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
     }
 
     /**
-     * 내 방문/예약 내역 조회 (무한 스크롤)
+     * 웨이팅 확정 알림 내용 생성
+     */
+    private String generateWaitingConfirmedContent(Waiting waiting) {
+        LocalDateTime registeredAt = waiting.registeredAt();
+        String dateText = registeredAt.format(DATE_FORMATTER);
+        String dayText = registeredAt.format(DAY_FORMATTER);
+        int peopleCount = waiting.peopleCount();
+
+        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!",
+                dateText, dayText, peopleCount);
+    }
+
+    /**
+     * 내 방문/예약 내역 조회 (무한 스크롤) 또는 단건 조회
      */
     @Transactional(readOnly = true)
-    public VisitHistoryCursorResponse getVisitHistory(Long memberId,Integer size, Long lastWaitingId, String status) {
+    public VisitHistoryCursorResponse getVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status, Long waitingId) {
+        
+        // waitingId가 있으면 단건 조회
+        if (waitingId != null) {
+            Waiting waiting = waitingPort.findByQuery(new WaitingQuery(waitingId, null, null, null, null, null))
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다: " + waitingId));
+
+            // 본인의 대기 정보인지 확인
+            if (!waiting.member().id().equals(memberId)) {
+                throw new IllegalArgumentException("본인의 대기 정보만 조회할 수 있습니다.");
+            }
+
+            WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting);
+            return new VisitHistoryCursorResponse(List.of(waitingResponse), waitingId, false);
+        }
 
         // 1. 조회 조건 생성
         WaitingQuery query = WaitingQuery.forVisitHistory(memberId, size, lastWaitingId, status);

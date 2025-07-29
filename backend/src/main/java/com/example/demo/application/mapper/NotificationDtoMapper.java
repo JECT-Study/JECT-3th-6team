@@ -6,12 +6,13 @@ import com.example.demo.application.dto.notification.RelatedResourceResponse;
 import com.example.demo.domain.model.CursorResult;
 import com.example.demo.domain.model.notification.DomainEvent;
 import com.example.demo.domain.model.notification.Notification;
+import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -19,12 +20,12 @@ import java.util.stream.Collectors;
 public class NotificationDtoMapper {
 
     // 대기 도메인 이벤트 타입별 리소스 변환 전략
-    private static final Map<String, Function<Waiting, RelatedResourceResponse>> WAITING_EVENT_STRATEGIES = Map.of(
-            "REVIEW_REQUEST", waiting -> new RelatedResourceResponse("POPUP", waiting.popup().getId()),
-            "WAITING_CONFIRMED", waiting -> new RelatedResourceResponse("WAITING", waiting.id()),
-            "ENTER_3TEAMS_BEFORE", waiting -> new RelatedResourceResponse("WAITING", waiting.id()),
-            "ENTER_NOW", waiting -> new RelatedResourceResponse("WAITING", waiting.id()),
-            "ENTER_TIME_OVER", waiting -> new RelatedResourceResponse("WAITING", waiting.id())
+    private static final Map<String, Function<Waiting, List<RelatedResourceResponse>>> WAITING_EVENT_STRATEGIES = Map.of(
+            "REVIEW_REQUEST", waiting -> createReviewRequestResources(waiting),
+            "WAITING_CONFIRMED", waiting -> createWaitingConfirmedResources(waiting),
+            "ENTER_3TEAMS_BEFORE", waiting -> createEnterNotificationResources(waiting),
+            "ENTER_NOW", waiting -> createEnterNotificationResources(waiting),
+            "ENTER_TIME_OVER", waiting -> createEnterNotificationResources(waiting)
     );
 
     public NotificationListResponse toCursorResponse(CursorResult<Notification> cursorResult) {
@@ -48,11 +49,11 @@ public class NotificationDtoMapper {
                 notification.getContent(),
                 notification.getCreatedAt(),
                 notification.isRead(),
-                toRelatedResourceResponse(notification.getEvent())
+                toRelatedResourceResponses(notification.getEvent())
         );
     }
 
-    private RelatedResourceResponse toRelatedResourceResponse(DomainEvent<?> event) {
+    private List<RelatedResourceResponse> toRelatedResourceResponses(DomainEvent<?> event) {
         Object source = event.getSource();
         String eventType = event.getEventType();
 
@@ -64,11 +65,77 @@ public class NotificationDtoMapper {
         };
     }
 
-    private RelatedResourceResponse processWaitingEvent(Waiting waiting, String eventType) {
-        return Optional.ofNullable(WAITING_EVENT_STRATEGIES.get(eventType))
-                .map(strategy -> strategy.apply(waiting))
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "지원하지 않는 대기 이벤트 타입입니다: " + eventType
-                ));
+    private List<RelatedResourceResponse> processWaitingEvent(Waiting waiting, String eventType) {
+        return WAITING_EVENT_STRATEGIES.getOrDefault(eventType, w -> List.of())
+                .apply(waiting);
+    }
+
+    // 리뷰 요청 알림: Popup 정보가 필요 (스토어명, 주소 등)
+    private static List<RelatedResourceResponse> createReviewRequestResources(Waiting waiting) {
+        List<RelatedResourceResponse> resources = new ArrayList<>();
+        
+        // Popup 리소스 추가
+        Popup popup = waiting.popup();
+        if (popup != null) {
+            resources.add(new RelatedResourceResponse("POPUP", Map.of(
+                    "id", popup.getId(),
+                    "storeName", popup.getName(),
+                    "address", popup.getLocation().addressName()
+            )));
+        }
+        
+        // Waiting 리소스 추가 (대기 번호 등)
+        resources.add(new RelatedResourceResponse("WAITING", Map.of(
+                "id", waiting.id(),
+                "waitingNumber", waiting.waitingNumber()
+        )));
+        
+        return resources;
+    }
+
+    // 대기 확정 알림: Waiting과 Popup 정보 모두 필요
+    private static List<RelatedResourceResponse> createWaitingConfirmedResources(Waiting waiting) {
+        List<RelatedResourceResponse> resources = new ArrayList<>();
+        
+        // Popup 리소스 추가 (스토어명)
+        Popup popup = waiting.popup();
+        if (popup != null) {
+            resources.add(new RelatedResourceResponse("POPUP", Map.of(
+                    "id", popup.getId(),
+                    "storeName", popup.getName()
+            )));
+        }
+        
+        // Waiting 리소스 추가 (대기 번호, 등록 시간 등)
+        resources.add(new RelatedResourceResponse("WAITING", Map.of(
+                "id", waiting.id(),
+                "waitingNumber", waiting.waitingNumber(),
+                "registeredAt", waiting.registeredAt()
+        )));
+        
+        return resources;
+    }
+
+    // 입장 관련 알림: Waiting과 Popup 정보 필요
+    private static List<RelatedResourceResponse> createEnterNotificationResources(Waiting waiting) {
+        List<RelatedResourceResponse> resources = new ArrayList<>();
+        
+        // Popup 리소스 추가
+        Popup popup = waiting.popup();
+        if (popup != null) {
+            resources.add(new RelatedResourceResponse("POPUP", Map.of(
+                    "id", popup.getId(),
+                    "storeName", popup.getName(),
+                    "address", popup.getLocation().addressName()
+            )));
+        }
+        
+        // Waiting 리소스 추가
+        resources.add(new RelatedResourceResponse("WAITING", Map.of(
+                "id", waiting.id(),
+                "waitingNumber", waiting.waitingNumber()
+        )));
+        
+        return resources;
     }
 }

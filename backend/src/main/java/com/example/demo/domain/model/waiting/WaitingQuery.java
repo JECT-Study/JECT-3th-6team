@@ -7,6 +7,7 @@ import java.util.Optional;
  * 커서 기반 페이지네이션과 필터링 조건을 포함한다.
  */
 public record WaitingQuery(
+        Long waitingId,
         Long memberId,
         Integer size,
         Long lastWaitingId,
@@ -28,14 +29,14 @@ public record WaitingQuery(
      * 첫 페이지 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
      */
     public static WaitingQuery firstPage(Long memberId, Integer size) {
-        return new WaitingQuery(memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
+        return new WaitingQuery(null, memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
     }
 
     /**
      * 상태 필터링이 포함된 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
      */
     public static WaitingQuery withStatus(Long memberId, Integer size, WaitingStatus status) {
-        return new WaitingQuery(memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
+        return new WaitingQuery(null, memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
     }
 
     /**
@@ -50,24 +51,14 @@ public record WaitingQuery(
      */
     public static WaitingQuery forVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status) {
         return Optional.ofNullable(lastWaitingId)
-                .map(id -> new WaitingQuery(memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC))
+                .map(id -> new WaitingQuery(null, memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC))
                 .orElseGet(() -> Optional.ofNullable(WaitingStatus.fromString(status))
                         .map(waitingStatus -> withStatus(memberId, size, waitingStatus))
                         .orElse(firstPage(memberId, size))
                 );
     }
 
-    /**
-     * 정렬 순서를 지정한 조회 조건을 생성한다.
-     *
-     * @param memberId      회원 ID
-     * @param size          조회할 개수
-     * @param lastWaitingId 마지막 대기 ID (첫 페이지 조회 시 null)
-     * @param status        상태 (필터링 시 사용, null이면 전체 조회)
-     * @param sortOrder     정렬 순서
-     * @return WaitingQuery 객체
-     */
-    public static WaitingQuery withSortOrder(Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder) {
-        return new WaitingQuery(memberId, size, lastWaitingId, status, sortOrder);
+    public static WaitingQuery forWaitingId(Long waitingId) {
+        return new WaitingQuery(waitingId, null, null, null, null, null);
     }
 } 

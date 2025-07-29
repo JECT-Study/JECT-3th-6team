@@ -21,5 +21,6 @@ public record PopupFilterRequest(
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate endDate,
     String region1DepthName,
-    Long lastPopupId
+    Long lastPopupId,
+    String keyword
 ) {}

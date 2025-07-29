@@ -3,16 +3,16 @@ import NotificationType from '@/features/notification/type/Notification';
 const dummyNotificationList: Array<NotificationType> = [
   {
     notificationId: 101,
-    notificationCode: 'REVIEW_REQUEST',
+    notificationCode: 'WAITING_CONFIRMED',
     message:
-      "오늘 '무신사 X 나이키 팝업스토어' 방문은 어떠셨나요? 간단한 리뷰만 남겨주셔도 큰 힘이 됩니다 :)",
-    createdAt: '2025-07-25T15:00:00',
+      'XX.XX (X) X인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!',
+    createdAt: '2025-07-27T13:00:00',
     isRead: false,
     relatedResource: {
-      type: 'POPUP',
-      id: 42,
+      type: 'WAITING',
+      id: 12,
     },
-    notificationTitle: '엑시즈와이 팝업',
+    notificationTitle: '무신사 팝업',
   },
   {
     notificationId: 100,

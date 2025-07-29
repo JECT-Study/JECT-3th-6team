@@ -32,9 +32,9 @@ spring:
             client-id: ${OAUTH2_KAKAO_CLIENT_ID}
             client-secret: ${OAUTH2_KAKAO_CLIENT_SECRET}
             redirect-uri: "${BACKEND_URL}/oauth/kakao/callback"
-            authorization_grant_type: authorization_code
+            authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
-            client_name: Kakao
+            client-name: Kakao
             scope:
               - profile_nickname
               - account_email
@@ -51,6 +51,13 @@ custom:
     accessToken:
       secret: ${JWT_ACCESS_TOKEN_SECRET}
       expirationSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
+
+app:
+  sse:
+    heartbeat:
+      enabled: true          # SSE 하트비트 기능 활성화
+      ping-interval: 30000   # 30초마다 ping 전송
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

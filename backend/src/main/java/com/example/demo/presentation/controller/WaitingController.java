@@ -24,31 +24,33 @@ public class WaitingController {
     @PostMapping("/popups/{popupId}/waitings")
     public ResponseEntity<ApiResponse<WaitingCreateResponse>> createWaiting(
             @PathVariable Long popupId,
-            @RequestBody WaitingCreateRequest request
+            @RequestBody WaitingCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
         WaitingCreateRequest createRequest = new WaitingCreateRequest(
                 popupId,
-                request.memberId(),
+                principal.getId(),
                 request.name(),
                 request.peopleCount(),
                 request.contactEmail()
         );
         WaitingCreateResponse response = waitingService.createWaiting(createRequest);
 
-        return ResponseEntity.ok(new ApiResponse<>("성공적으로 대기가 등록되었습니다.",response));
+        return ResponseEntity.ok(new ApiResponse<>("성공적으로 대기가 등록되었습니다.", response));
     }
 
     /**
-     * 내 방문/예약 내역 조회 (무한 스크롤)
+     * 내 방문/예약 내역 조회 (무한 스크롤) 또는 단건 조회
      */
     @GetMapping("/me/visits")
     public ResponseEntity<ApiResponse<VisitHistoryCursorResponse>> getVisitHistory(
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long lastWaitingId,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long waitingId,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        VisitHistoryCursorResponse response = waitingService.getVisitHistory(principal.getId(),size, lastWaitingId, status);
+        VisitHistoryCursorResponse response = waitingService.getVisitHistory(principal.getId(), size, lastWaitingId, status, waitingId);
 
         return ResponseEntity.ok(new ApiResponse<>("성공적으로 조회되었습니다.", response));
     }

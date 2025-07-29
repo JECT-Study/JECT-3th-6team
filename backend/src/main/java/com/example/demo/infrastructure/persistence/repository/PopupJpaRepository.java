@@ -68,4 +68,22 @@ public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
         @Param("lastPopupId") Long lastPopupId,
         Pageable pageable
     );
+
+    /**
+     * 키워드 검색을 위한 팝업 조회 메서드.
+     * 키워드가 팝업 제목에 포함되는 팝업을 검색한다.
+     */
+    @Query("""
+        SELECT p FROM PopupEntity p
+        WHERE (:popupId IS NULL OR p.id = :popupId)
+        AND (:keyword IS NULL OR p.title LIKE CONCAT('%', :keyword, '%'))
+        AND (:lastPopupId IS NULL OR p.id > :lastPopupId)
+        ORDER BY p.startDate ASC, p.id ASC
+    """)
+    List<PopupEntity> findByKeyword(
+        @Param("popupId") Long popupId,
+        @Param("keyword") String keyword,
+        @Param("lastPopupId") Long lastPopupId,
+        Pageable pageable
+    );
 } 

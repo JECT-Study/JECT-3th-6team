@@ -1,7 +1,9 @@
 package com.example.demo.application.dto.notification;
 
+import java.util.Map;
+
 public record RelatedResourceResponse(
         String type,
-        Long id
+        Map<String, Object> data
 ) {
 } 

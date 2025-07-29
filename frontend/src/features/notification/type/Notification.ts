@@ -4,11 +4,10 @@ export type RelatedResourceType = {
 };
 
 export type NotificationCodeType =
-  | 'WAITING_CONFIRMED' // 웨이팅 완료, 대기번호 확인 -> 대기순번 페이지
-  | 'ENTER_3TEAMS_BEFORE' // 3팀 남음, 입장 대기 -> 내 방문 페이지
-  | 'ENTER_NOW' // 입장 -> 웨이팅 상세 페이지
-  | 'ENTER_TIME_OVER' // 입장 시간이 초과 -> 웨이팅 상세
-  | 'REVIEW_REQUEST'; // MVP 제외
+  | 'WAITING_CONFIRMED'
+  | 'ENTER_3TEAMS_BEFORE'
+  | 'ENTER_NOW'
+  | 'ENTER_TIME_OVER';
 
 export default interface NotificationType {
   notificationId: number;
