@@ -4,6 +4,7 @@ import com.example.demo.application.dto.notification.NotificationListRequest;
 import com.example.demo.application.dto.notification.NotificationListResponse;
 import com.example.demo.application.dto.notification.NotificationReadRequest;
 import com.example.demo.application.dto.notification.NotificationResponse;
+import com.example.demo.application.dto.notification.NotificationDeleteRequest;
 import com.example.demo.application.service.NotificationService;
 import com.example.demo.application.service.NotificationSseService;
 import com.example.demo.common.security.UserPrincipal;
@@ -71,5 +72,15 @@ public class NotificationController {
         NotificationResponse notificationResponse = notificationService.markNotificationAsRead(principal.getId(), new NotificationReadRequest(notificationId));
 
         return new ApiResponse<>("알림 읽기 성공", notificationResponse);
+    }
+
+    @DeleteMapping("/{notificationId}")
+    public ApiResponse<Void> deleteNotification(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long notificationId
+    ) {
+        notificationService.deleteNotification(principal.getId(), new NotificationDeleteRequest(notificationId));
+
+        return new ApiResponse<>("알림 삭제 성공", null);
     }
 }

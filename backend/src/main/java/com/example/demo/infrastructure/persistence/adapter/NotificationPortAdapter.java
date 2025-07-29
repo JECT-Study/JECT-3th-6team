@@ -17,10 +17,6 @@ import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapp
 import com.example.demo.infrastructure.persistence.repository.NotificationJpaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.CriteriaUpdate;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -49,27 +45,11 @@ public class NotificationPortAdapter implements NotificationPort {
     }
 
     @Override
-    public Notification update(Notification notification) {
+    public void delete(Notification notification) {
         if (notification.getId() == null) {
-            throw new IllegalArgumentException("알림 ID가 null입니다. 업데이트할 알림은 반드시 ID를 가져야 합니다.");
+            throw new IllegalArgumentException("알림 ID가 null입니다. 삭제할 알림은 반드시 ID를 가져야 합니다.");
         }
-        NotificationEntity entity = mapper.toEntity(notification);
-
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaQuery<NotificationEntity> query = criteriaBuilder.createQuery(NotificationEntity.class);
-        Root<NotificationEntity> root = query.from(NotificationEntity.class);
-        CriteriaUpdate<NotificationEntity> update = criteriaBuilder.createCriteriaUpdate(NotificationEntity.class)
-                .set("memberId", entity.getMemberId())
-                .set("sourceDomain", entity.getSourceDomain())
-                .set("sourceId", entity.getSourceId())
-                .set("eventType", entity.getEventType())
-                .set("content", entity.getContent())
-                .set("status", entity.getStatus())
-                .set("readAt", entity.getReadAt())
-                .where(criteriaBuilder.equal(root.get("id"), notification.getId()));
-
-        em.createQuery(update).executeUpdate();
-        return notification;
+        repository.deleteById(notification.getId());
     }
 
     @Override

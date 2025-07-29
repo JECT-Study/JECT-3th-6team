@@ -4,6 +4,7 @@ import com.example.demo.application.dto.notification.NotificationListRequest;
 import com.example.demo.application.dto.notification.NotificationListResponse;
 import com.example.demo.application.dto.notification.NotificationReadRequest;
 import com.example.demo.application.dto.notification.NotificationResponse;
+import com.example.demo.application.dto.notification.NotificationDeleteRequest;
 import com.example.demo.application.mapper.NotificationDtoMapper;
 import com.example.demo.domain.model.CursorResult;
 import com.example.demo.domain.model.notification.Notification;
@@ -97,5 +98,18 @@ public class NotificationService {
         notification.read();
         notificationPort.save(notification);
         return notificationDtoMapper.toNotificationResponse(notification);
+    }
+
+    public void deleteNotification(Long memberId, NotificationDeleteRequest request) {
+        Notification notification = notificationPort.findAllBy(NotificationQuery.findByNotificationId(request.notificationId()))
+                .content().stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다: " + request.notificationId()));
+
+        if (!notification.getMember().id().equals(memberId)) {
+            throw new IllegalArgumentException("해당 알림은 다른 회원의 것입니다: " + request.notificationId());
+        }
+
+        notificationPort.delete(notification);
     }
 } 
