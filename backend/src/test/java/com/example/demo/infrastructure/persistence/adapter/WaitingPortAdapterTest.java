@@ -136,7 +136,7 @@ class WaitingPortAdapterTest {
         @DisplayName("정렬 조건이 RESERVED_FIRST_THEN_DATE_DESC 일때 WAITING, CANCELED 순으로 정렬되고 날짜 내림차순으로 정렬된다")
         void shouldSortByStatusAndWaitThenDateDesc() {
             // given
-            WaitingQuery query = new WaitingQuery(member.id(), 10, null, null, WaitingQuery.SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
+            WaitingQuery query = new WaitingQuery(null, member.id(), 10, null, null, WaitingQuery.SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
 
             // when
             List<Waiting> result = waitingPortAdapter.findByQuery(query);

@@ -5,6 +5,7 @@ import com.example.demo.domain.model.notification.ScheduledNotification;
 import com.example.demo.domain.model.notification.ScheduledNotificationQuery;
 import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.ScheduledNotificationPort;
 import com.example.demo.domain.port.WaitingPort;
@@ -30,6 +31,7 @@ public class ScheduledNotificationBatchService {
     private final ScheduledNotificationPort scheduledNotificationPort;
     private final NotificationPort notificationPort;
     private final WaitingPort waitingPort;
+    private final NotificationEventPort notificationEventPort;
 
     /**
      * 30초마다 스케줄된 알림들을 체크하여 트리거 조건 만족 시 발송
@@ -189,18 +191,28 @@ public class ScheduledNotificationBatchService {
     private ScheduledNotification sendScheduledNotification(ScheduledNotification scheduledNotification) {
         try {
             Notification notification = scheduledNotification.getReservatedNotification();
+            Long memberId = notification.getMember().id();
 
-            // 실제 알림 저장 (발송)
-            notificationPort.save(notification);
+            // 1. 실제 알림 저장 (DB 저장)
+            Notification savedNotification = notificationPort.save(notification);
 
-            log.info("스케줄된 알림 발송 완료 - 멤버 ID: {}, 트리거: {}",
-                    notification.getMember().id(),
-                    scheduledNotification.getScheduledNotificationTrigger());
+            // 2. SSE를 통한 실시간 알림 발송 (연결된 클라이언트가 있는 경우에만)
+            if (notificationEventPort.isConnected(memberId)) {
+                notificationEventPort.sendRealTimeNotification(memberId, savedNotification);
+                log.debug("실시간 알림 발송 완료 - 멤버 ID: {}, 알림 ID: {}", memberId, savedNotification.getId());
+            } else {
+                log.debug("SSE 연결이 없는 회원입니다. 실시간 알림을 스킵합니다. - 멤버 ID: {}", memberId);
+            }
+
+            log.info("스케줄된 알림 발송 완료 - 멤버 ID: {}, 트리거: {}, 알림 ID: {}",
+                    memberId,
+                    scheduledNotification.getScheduledNotificationTrigger(),
+                    savedNotification.getId());
 
             return scheduledNotification;
 
         } catch (Exception e) {
-            log.error("스케줄된 알림 발송 실패", e);
+            log.error("스케줄된 알림 발송 실패 - 스케줄 ID: {}", scheduledNotification.getId(), e);
             return null;
         }
     }

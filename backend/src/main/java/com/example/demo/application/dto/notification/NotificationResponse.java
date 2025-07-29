@@ -1,6 +1,7 @@
 package com.example.demo.application.dto.notification;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record NotificationResponse(
         Long notificationId,
@@ -8,6 +9,6 @@ public record NotificationResponse(
         String message,
         LocalDateTime createdAt,
         boolean isRead,
-        RelatedResourceResponse relatedResource
+        List<RelatedResourceResponse> relatedResources
 ) {
 } 

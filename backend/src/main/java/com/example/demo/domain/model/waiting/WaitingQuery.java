@@ -58,17 +58,7 @@ public record WaitingQuery(
                 );
     }
 
-    /**
-     * 정렬 순서를 지정한 조회 조건을 생성한다.
-     *
-     * @param memberId      회원 ID
-     * @param size          조회할 개수
-     * @param lastWaitingId 마지막 대기 ID (첫 페이지 조회 시 null)
-     * @param status        상태 (필터링 시 사용, null이면 전체 조회)
-     * @param sortOrder     정렬 순서
-     * @return WaitingQuery 객체
-     */
-    public static WaitingQuery withSortOrder(Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder) {
-        return new WaitingQuery(null, memberId, size, lastWaitingId, status, sortOrder);
+    public static WaitingQuery forWaitingId(Long waitingId) {
+        return new WaitingQuery(waitingId, null, null, null, null, null);
     }
 } 

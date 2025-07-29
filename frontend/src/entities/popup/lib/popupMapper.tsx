@@ -66,7 +66,9 @@ const mapHistoryItemToViewProps = (
     period: renderedPeriod,
     hasRightBar: data.status === 'WAITING',
     linkTo:
-      data.status === 'WAITING' ? '/waiting' : `/detail/${data.popup.popupId}`,
+      data.status === 'WAITING'
+        ? `/waiting/${data.waitingId}`
+        : `/detail/${data.popup.popupId}`,
     Badge: renderedBadge,
     searchTags: renderTag,
     // rating: data.rating,
