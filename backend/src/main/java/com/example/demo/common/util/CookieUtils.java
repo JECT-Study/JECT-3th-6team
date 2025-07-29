@@ -14,4 +14,13 @@ public class CookieUtils {
         cookie.setMaxAge((int) maxAgeSeconds);
         return cookie;
     }
+
+    public static Cookie deleteAccessTokenCookie() {
+        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        return cookie;
+    }
 } 
