@@ -15,6 +15,12 @@ import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapp
 import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapper.DomainSpecificMapper;
 import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapper.SourceEntityKey;
 import com.example.demo.infrastructure.persistence.repository.NotificationJpaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +35,8 @@ public class NotificationPortAdapter implements NotificationPort {
     private final NotificationEntityMapper mapper;
     private final MemberPort memberPort;
     private final WaitingPort waitingPort;
+    @PersistenceContext
+    private final EntityManager em;
 
     // 도메인별 매퍼 (지연 초기화)
     private DomainSpecificMapper<Waiting> waitingMapper;
@@ -41,7 +49,38 @@ public class NotificationPortAdapter implements NotificationPort {
     }
 
     @Override
+    public Notification update(Notification notification) {
+        if (notification.getId() == null) {
+            throw new IllegalArgumentException("알림 ID가 null입니다. 업데이트할 알림은 반드시 ID를 가져야 합니다.");
+        }
+        NotificationEntity entity = mapper.toEntity(notification);
+
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<NotificationEntity> query = criteriaBuilder.createQuery(NotificationEntity.class);
+        Root<NotificationEntity> root = query.from(NotificationEntity.class);
+        CriteriaUpdate<NotificationEntity> update = criteriaBuilder.createCriteriaUpdate(NotificationEntity.class)
+                .set("memberId", entity.getMemberId())
+                .set("sourceDomain", entity.getSourceDomain())
+                .set("sourceId", entity.getSourceId())
+                .set("eventType", entity.getEventType())
+                .set("content", entity.getContent())
+                .set("status", entity.getStatus())
+                .set("readAt", entity.getReadAt())
+                .where(criteriaBuilder.equal(root.get("id"), notification.getId()));
+
+        em.createQuery(update).executeUpdate();
+        return notification;
+    }
+
+    @Override
     public CursorResult<Notification> findAllBy(NotificationQuery query) {
+        if (query.getNotificationId() != null) {
+            // 단일 알림 조회
+            Notification notification = repository.findById(query.getNotificationId())
+                    .map(this::entityToDomain)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다: " + query.getNotificationId()));
+            return new CursorResult<>(List.of(notification), false);
+        }
         List<NotificationEntity> entities = executeQuery(query);
 
         boolean hasNext = false;

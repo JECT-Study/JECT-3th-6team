@@ -8,5 +8,7 @@ public interface NotificationPort {
 
     Notification save(Notification notification);
 
+    Notification update(Notification notification);
+
     CursorResult<Notification> findAllBy(NotificationQuery query);
 } 

@@ -1,6 +1,5 @@
 package com.example.demo.domain.model.notification;
 
-import com.example.demo.domain.model.notification.ReadStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,5 +21,11 @@ public class NotificationQuery {
         this.readStatus = readStatus;
         this.pageSize = pageSize;
         this.sortOrder = sortOrder;
+    }
+
+    public static NotificationQuery findByNotificationId(Long notificationId) {
+        return NotificationQuery.builder()
+                .notificationId(notificationId)
+                .build();
     }
 } 

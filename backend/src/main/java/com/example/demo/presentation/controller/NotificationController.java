@@ -2,6 +2,8 @@ package com.example.demo.presentation.controller;
 
 import com.example.demo.application.dto.notification.NotificationListRequest;
 import com.example.demo.application.dto.notification.NotificationListResponse;
+import com.example.demo.application.dto.notification.NotificationReadRequest;
+import com.example.demo.application.dto.notification.NotificationResponse;
 import com.example.demo.application.service.NotificationService;
 import com.example.demo.application.service.NotificationSseService;
 import com.example.demo.common.security.UserPrincipal;
@@ -9,9 +11,7 @@ import com.example.demo.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
@@ -61,5 +61,15 @@ public class NotificationController {
     public ApiResponse<Boolean> getConnectionStatus(@AuthenticationPrincipal UserPrincipal principal) {
         boolean isConnected = notificationSseService.isConnected(principal.getId());
         return new ApiResponse<>("연결 상태 조회 성공", isConnected);
+    }
+
+    @PatchMapping("/{notificationId}/read")
+    public ApiResponse<NotificationResponse> markNotificationAsRead(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long notificationId
+    ) {
+        NotificationResponse notificationResponse = notificationService.markNotificationAsRead(principal.getId(), new NotificationReadRequest(notificationId));
+
+        return new ApiResponse<>("알림 읽기 성공", notificationResponse);
     }
 }
