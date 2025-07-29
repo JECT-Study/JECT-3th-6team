@@ -15,6 +15,19 @@ const dummyNotificationList: Array<NotificationType> = [
     notificationTitle: '무신사 팝업',
   },
   {
+    notificationId: 99,
+    notificationCode: 'ENTER_3TEAMS_BEFORE',
+    message:
+      '앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!',
+    createdAt: '2025-07-25T12:50:00',
+    isRead: true,
+    relatedResource: {
+      type: 'MY_VISIT_HISTORY',
+      id: null,
+    },
+    notificationTitle: '엑시즈와이 팝업',
+  },
+  {
     notificationId: 100,
     notificationCode: 'ENTER_NOW',
     message: '지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!',
@@ -27,15 +40,15 @@ const dummyNotificationList: Array<NotificationType> = [
     notificationTitle: '엑시즈와이 팝업',
   },
   {
-    notificationId: 99,
-    notificationCode: 'ENTER_3TEAMS_BEFORE',
+    notificationId: 98,
+    notificationCode: 'ENTER_TIME_OVER',
     message:
       '앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!',
     createdAt: '2025-07-25T12:50:00',
     isRead: true,
     relatedResource: {
-      type: 'MY_VISIT_HISTORY',
-      id: null,
+      type: 'WAITING',
+      id: 123,
     },
     notificationTitle: '엑시즈와이 팝업',
   },

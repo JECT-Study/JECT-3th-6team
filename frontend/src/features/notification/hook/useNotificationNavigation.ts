@@ -6,9 +6,9 @@ export default function useNotificationNavigation() {
   const router = useRouter();
 
   return (code: NotificationCodeType, id: number | null) => {
-    if (id === null) return;
+    if (!(code === 'ENTER_3TEAMS_BEFORE') && id === null) return;
 
-    const nextPath = NotificationCodeRouterMap[code]?.(id);
+    const nextPath = NotificationCodeRouterMap[code]?.(id!);
     if (nextPath) router.push(nextPath);
   };
 }
