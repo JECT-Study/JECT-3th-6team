@@ -6,6 +6,7 @@ import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingDomainEvent;
 import com.example.demo.domain.model.waiting.WaitingEventType;
+import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.ScheduledNotificationPort;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class WaitingNotificationService {
 
     private final NotificationPort notificationPort;
     private final ScheduledNotificationPort scheduledNotificationPort;
+    private final NotificationEventPort notificationEventPort;
 
     // === 알림 정책 상수 ===
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
@@ -58,6 +60,7 @@ public class WaitingNotificationService {
      */
     private void sendWaitingConfirmedNotification(Waiting waiting) {
         String content = generateWaitingConfirmedContent(waiting);
+        Long memberId = waiting.member().id();
 
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.WAITING_CONFIRMED);
         Notification notification = Notification.builder()
@@ -66,8 +69,18 @@ public class WaitingNotificationService {
                 .content(content)
                 .build();
 
-        notificationPort.save(notification);
-        log.debug("웨이팅 확정 알림 발송 - 웨이팅 ID: {}", waiting.id());
+        // 1. 알림 저장 (DB 저장)
+        Notification savedNotification = notificationPort.save(notification);
+
+        // 2. SSE를 통한 실시간 알림 발송 (연결된 클라이언트가 있는 경우에만)
+        if (notificationEventPort.isConnected(memberId)) {
+            notificationEventPort.sendRealTimeNotification(memberId, savedNotification);
+            log.debug("실시간 웨이팅 확정 알림 발송 완료 - 웨이팅 ID: {}, 멤버 ID: {}", waiting.id(), memberId);
+        } else {
+            log.debug("SSE 연결이 없는 회원입니다. 실시간 알림을 스킵합니다. - 웨이팅 ID: {}, 멤버 ID: {}", waiting.id(), memberId);
+        }
+
+        log.debug("웨이팅 확정 알림 발송 완료 - 웨이팅 ID: {}, 알림 ID: {}", waiting.id(), savedNotification.getId());
     }
 
     /**

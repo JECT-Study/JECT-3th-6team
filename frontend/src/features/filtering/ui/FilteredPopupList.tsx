@@ -1,3 +1,4 @@
+
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
 import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 
