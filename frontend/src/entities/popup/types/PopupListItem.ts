@@ -56,7 +56,7 @@ export interface RawPopupListItemType {
  * =========================
  */
 
-interface RawPopupHistoryListItemType {
+export interface RawPopupHistoryListItemType {
   waitingId: number;
   waitingNumber: number;
   status: statusType;
