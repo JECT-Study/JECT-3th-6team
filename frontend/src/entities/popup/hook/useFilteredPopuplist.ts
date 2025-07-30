@@ -1,7 +1,7 @@
 'use client';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import getPopupListApi, {
   PopupListRequest,
 } from '@/entities/popup/api/getPopupListApi';
@@ -29,7 +29,7 @@ export default function useFilteredPopupList() {
     request.endDate = dateToSeperatedString(end, '-');
   }
 
-  const query = useQuery({
+  const query = useSuspenseQuery({
     queryKey: ['popup', 'list', { ...request }],
     queryFn: () => getPopupListApi({ ...request }),
     gcTime: 1000 * 60 * 300, // 30분
@@ -45,6 +45,7 @@ export default function useFilteredPopupList() {
     onError: error => {
       handleNetworkError(error);
       console.error('[onError]:', error);
+      throw error;
     },
     onSettled: (data, error) => {
       console.log('[onSettled]:', data, error);
