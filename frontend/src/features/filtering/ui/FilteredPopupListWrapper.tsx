@@ -1,11 +1,11 @@
 'use client';
 
 import FilteredPopupListErrorFallback from '@/features/filtering/ui/FilteredPopupListErrorFallback';
-import { Suspense } from 'react';
 import PopupCardListSuspenseFallback from '@/entities/popup/ui/PopupCardListSuspenseFallback';
 import FilteredPopupList from '@/features/filtering/ui/FilteredPopupList';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
+import { Suspense } from 'react';
 
 export default function FilteredPopupListWrapper() {
   return (

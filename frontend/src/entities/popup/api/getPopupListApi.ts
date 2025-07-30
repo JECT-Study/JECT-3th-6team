@@ -34,7 +34,7 @@ export default async function getPopupListApi(
 ): Promise<TaggedPopupListResponse> {
   try {
     const response = await (
-      await APIBuilder.get('/api/popups')
+      await APIBuilder.get('/popups')
         .timeout(5000)
         .params({ ...request })
         .buildAsync()
