@@ -1,13 +1,12 @@
 'use client';
 
 import { KakaoMap } from '@/shared/ui';
-import FilterKeywordSelect from '@/features/filtering/ui/FilterKeywordSelect';
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import KeywordFilterPreview, {
   KeywordChip,
 } from '@/features/filtering/ui/KeywordFilterPreview';
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
-
+import SearchInput from '@/shared/ui/input/SearchInput';
 interface MapContentProps {
   center: { lat: number; lng: number };
 }
@@ -20,10 +19,16 @@ export default function MapContent({ center }: MapContentProps) {
     ...toKeywordChips(popupType, 'popupType'),
     ...toKeywordChips(category, 'category'),
   ];
-
+  
   return (
     <div className="w-full h-screen pb-[120px]">
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[359px] h-[122px] rounded-2xl bg-white/60 shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-4">
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] h-[122px] rounded-2xl bg-white/60 shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 space-y-2.5">
+        <SearchInput
+          id={'search-input'}
+          value={''}
+          onChange={(value: string) => handleChange('search', value)}
+        />
+
         <KeywordFilterPreview
           initialStatus="unselect"
           onClick={() => handleOpen('keyword')}
@@ -33,11 +38,6 @@ export default function MapContent({ center }: MapContentProps) {
           }
         />
       </div>
-      {/* 검색 및 필터 UI */}
-      {/* <MapSearchFilter
-        onSearchClick={handleSearchClick}
-        onFilterClick={handleFilterClick}
-      /> */}
 
       <KakaoMap center={center} level={3} className="w-full h-full" />
     </div>
