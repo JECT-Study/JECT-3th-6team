@@ -6,19 +6,15 @@ import java.util.List;
 
 @Getter
 public class ParameterValidationException extends RuntimeException {
-    
+
     private final List<ValidationError> validationErrors;
-    
+
     public ParameterValidationException(List<ValidationError> validationErrors) {
         super("파라미터 검증에 실패했습니다");
         this.validationErrors = validationErrors;
     }
-    
+
     public ParameterValidationException(ValidationError validationError) {
         this(List.of(validationError));
-    }
-    
-    public ParameterValidationException(String parameterName, Object rejectedValue, String reason) {
-        this(ParameterValidationError.of(parameterName, rejectedValue, reason));
     }
 }

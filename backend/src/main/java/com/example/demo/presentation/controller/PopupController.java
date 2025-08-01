@@ -28,7 +28,7 @@ public class PopupController {
     private final PopupService popupService;
 
     @GetMapping("/map")
-    public ApiResponse<List<PopupMapResponse>> getPopupsOnMap(PopupMapRequest request) {
+    public ApiResponse<List<PopupMapResponse>> getPopupsOnMap(@Valid PopupMapRequest request) {
         List<PopupMapResponse> response = popupService.getPopupsOnMap(request);
         return new ApiResponse<>("지도 내 팝업 조회가 성공했습니다.", response);
     }

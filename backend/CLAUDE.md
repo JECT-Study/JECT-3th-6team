@@ -148,9 +148,36 @@ throw new ParameterValidationException(errors);
 }
 ```
 
+### Unified Error Response System
+All exceptions now use a single `ErrorResponse` class for consistent error handling:
+
+#### ErrorResponse Structure
+```json
+{
+  "code": "ERROR_CODE",
+  "message": "사용자 친화적 메시지",
+  "additionalInfo": "추가 정보 (선택적)",
+  "errors": [  // 파라미터 검증 오류 시에만 포함
+    {
+      "parameterName": "fieldName",
+      "rejectedValue": "invalidValue",
+      "reason": "검증 실패 사유"
+    }
+  ],
+  "timestamp": "2025-01-01T12:00:00",
+  "path": "/api/endpoint"
+}
+```
+
+#### Error Response Types
+1. **Business Errors**: `ErrorResponse.of(BusinessException, path)` - `additionalInfo` 포함
+2. **Validation Errors**: `ErrorResponse.of(ParameterValidationException, path)` - `errors` 배열 포함
+3. **Generic Errors**: `ErrorResponse.builder()` - 기타 시스템 오류
+
 ### Exception Handling Guidelines
 - Use `BusinessException` with appropriate `ErrorType` for business logic errors
 - Use `ParameterValidationException` for request parameter validation failures
-- All validation errors are automatically handled by `GlobalExceptionHandler`
+- All exceptions are automatically handled by `GlobalExceptionHandler` and return unified `ErrorResponse`
 - Error messages should be user-friendly and in Korean
-- Include specific parameter names and rejected values for client debugging
+- Parameter validation errors include detailed field-level information in `errors` array
+- Business errors may include additional context in `additionalInfo` field

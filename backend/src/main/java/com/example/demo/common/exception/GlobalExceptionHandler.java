@@ -34,14 +34,14 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(ParameterValidationException.class)
-    public ResponseEntity<ValidationErrorResponse> handleParameterValidationException(
+    public ResponseEntity<ErrorResponse> handleParameterValidationException(
             ParameterValidationException exception,
             HttpServletRequest request) {
         
         log.warn("Parameter Validation Exception occurred: {}, path: {}", 
                 exception.getMessage(), request.getRequestURI(), exception);
         
-        ValidationErrorResponse errorResponse = ValidationErrorResponse.of(exception, request.getRequestURI());
+        ErrorResponse errorResponse = ErrorResponse.of(exception, request.getRequestURI());
         
         return ResponseEntity
                 .badRequest()
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValidException(
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception,
             HttpServletRequest request) {
         
@@ -64,8 +64,8 @@ public class GlobalExceptionHandler {
         
         ParameterValidationException parameterValidationException = 
                 new ParameterValidationException(validationErrors);
-        ValidationErrorResponse errorResponse = 
-                ValidationErrorResponse.of(parameterValidationException, request.getRequestURI());
+        ErrorResponse errorResponse = 
+                ErrorResponse.of(parameterValidationException, request.getRequestURI());
         
         return ResponseEntity
                 .badRequest()
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<ValidationErrorResponse> handleBindException(
+    public ResponseEntity<ErrorResponse> handleBindException(
             BindException exception,
             HttpServletRequest request) {
         
@@ -88,8 +88,8 @@ public class GlobalExceptionHandler {
         
         ParameterValidationException parameterValidationException = 
                 new ParameterValidationException(validationErrors);
-        ValidationErrorResponse errorResponse = 
-                ValidationErrorResponse.of(parameterValidationException, request.getRequestURI());
+        ErrorResponse errorResponse = 
+                ErrorResponse.of(parameterValidationException, request.getRequestURI());
         
         return ResponseEntity
                 .badRequest()
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ValidationErrorResponse> handleConstraintViolationException(
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
             ConstraintViolationException exception,
             HttpServletRequest request) {
         
@@ -111,8 +111,8 @@ public class GlobalExceptionHandler {
         
         ParameterValidationException parameterValidationException = 
                 new ParameterValidationException(validationErrors);
-        ValidationErrorResponse errorResponse = 
-                ValidationErrorResponse.of(parameterValidationException, request.getRequestURI());
+        ErrorResponse errorResponse = 
+                ErrorResponse.of(parameterValidationException, request.getRequestURI());
         
         return ResponseEntity
                 .badRequest()
@@ -120,7 +120,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ValidationErrorResponse> handleMethodArgumentTypeMismatchException(
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException exception,
             HttpServletRequest request) {
         
@@ -135,8 +135,8 @@ public class GlobalExceptionHandler {
         
         ParameterValidationException parameterValidationException = 
                 new ParameterValidationException(validationError);
-        ValidationErrorResponse errorResponse = 
-                ValidationErrorResponse.of(parameterValidationException, request.getRequestURI());
+        ErrorResponse errorResponse = 
+                ErrorResponse.of(parameterValidationException, request.getRequestURI());
         
         return ResponseEntity
                 .badRequest()
