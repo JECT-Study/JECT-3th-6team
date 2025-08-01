@@ -1,5 +1,7 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.domain.model.popup.PopupQuery;
@@ -69,7 +71,7 @@ public class PopupPortAdapter implements PopupPort {
         // 1. Location, Content 등 연관 엔티티 먼저 저장
         // 2. 저장된 엔티티의 ID를 사용하여 PopupEntity 생성 및 저장
         // 3. 저장된 최종 엔티티들을 다시 도메인으로 변환하여 반환
-        throw new UnsupportedOperationException("Save operation is not yet implemented");
+        throw new BusinessException(ErrorType.FEATURE_NOT_IMPLEMENTED, "Popup save operation");
     }
 
     @Override

@@ -28,7 +28,7 @@ public class MemberController {
     @GetMapping("/me")
     public ApiResponse<MeResponse> getMe(@AuthenticationPrincipal UserPrincipal principal) {
         if (principal == null) {
-            throw new IllegalStateException("인증된 사용자 정보를 가져올 수 없습니다.");
+            throw new BusinessException(ErrorType.AUTHENTICATION_REQUIRED);
         }
         Member member = memberPort.findById(principal.getId())
                 .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(principal.getId())));

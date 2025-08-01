@@ -7,6 +7,8 @@ import com.example.demo.application.dto.popup.PopupFilterRequest;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.dto.popup.PopupCursorResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 
 import com.example.demo.domain.model.BrandStory;
 import com.example.demo.domain.model.popup.Popup;
@@ -63,7 +65,7 @@ public class PopupService {
     @Transactional(readOnly = true)
     public PopupDetailResponse getPopupDetail(Long popupId, Long memberId) {
         var popup = popupPort.findById(popupId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 팝업이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(popupId)));
 
         var brandStory = brandStoryPort.findByPopupId(popupId)
                 .orElse(new BrandStory(Collections.emptyList(), Collections.emptyList()));
