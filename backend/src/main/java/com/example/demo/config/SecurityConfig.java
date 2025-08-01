@@ -3,6 +3,8 @@ package com.example.demo.config;
 import com.example.demo.common.jwt.JwtAuthenticationFilter;
 import com.example.demo.common.jwt.JwtProperties;
 import com.example.demo.common.jwt.JwtTokenProvider;
+import com.example.demo.common.security.CustomAccessDeniedHandler;
+import com.example.demo.common.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +33,8 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AppProperties appProperties;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     
     // TODO: 아키텍처 리팩토링 https://github.com/JECT-Study/JECT-3th-6team/pull/99
 
@@ -80,6 +84,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청만 허용
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -106,6 +114,10 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청만 허용
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 

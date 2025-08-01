@@ -174,10 +174,30 @@ All exceptions now use a single `ErrorResponse` class for consistent error handl
 2. **Validation Errors**: `ErrorResponse.of(ParameterValidationException, path)` - `errors` 배열 포함
 3. **Generic Errors**: `ErrorResponse.builder()` - 기타 시스템 오류
 
+### Spring Security Exception Handling
+스프링 시큐리티 인증/인가 실패 시 통합된 예외 처리:
+
+#### Security Error Types
+- `AUTHENTICATION_REQUIRED`: 인증 토큰이 없는 경우 (401)
+- `INVALID_TOKEN`: 유효하지 않은 JWT 토큰 (401)
+- `EXPIRED_TOKEN`: 만료된 JWT 토큰 (401)
+- `ACCESS_DENIED`: 권한 부족으로 접근 거부 (403)
+
+#### Custom Security Components
+1. **CustomAuthenticationEntryPoint**: 인증 실패 시 JSON 형태의 에러 응답 반환
+2. **CustomAccessDeniedHandler**: 인가 실패 시 JSON 형태의 에러 응답 반환
+3. **Enhanced JwtAuthenticationFilter**: JWT 토큰 검증 실패 유형을 구분하여 처리
+
+#### Security Exception Flow
+1. JWT 필터에서 토큰 검증 실패 시 에러 타입을 request attribute에 설정
+2. AuthenticationEntryPoint에서 에러 타입에 따라 구체적인 ErrorResponse 생성
+3. 모든 보안 예외는 일관된 JSON 형태로 반환
+
 ### Exception Handling Guidelines
 - Use `BusinessException` with appropriate `ErrorType` for business logic errors
 - Use `ParameterValidationException` for request parameter validation failures
 - All exceptions are automatically handled by `GlobalExceptionHandler` and return unified `ErrorResponse`
+- Security exceptions are handled by custom Spring Security components
 - Error messages should be user-friendly and in Korean
 - Parameter validation errors include detailed field-level information in `errors` array
 - Business errors may include additional context in `additionalInfo` field
