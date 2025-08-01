@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 
 import { useGeolocation } from '@/shared/lib';
+
 import { FilterProvider } from '@/features/filtering/lib/FilterContext';
-import MapContent from './MapContent';
+import FilterBottomSheet from '@/features/filtering/ui/FilterBottomSheet';
+import FilterGroupMapContainer from './FilterGroupMapContainer';
 
 export default function MapPage() {
   const { latitude, longitude, error, isLoading } = useGeolocation();
@@ -23,19 +25,10 @@ export default function MapPage() {
     setMounted(true);
   }, []);
 
-  const handleSearchClick = () => {
-    // TODO: 검색 기능 구현
-    console.log('검색 클릭');
-  };
-
-  const handleFilterClick = () => {
-    // TODO: 필터 기능 구현
-    console.log('필터 클릭');
-  };
-
   return (
     <FilterProvider>
-      <MapContent center={center} />
+      <FilterGroupMapContainer center={center} />
+      <FilterBottomSheet />
     </FilterProvider>
   );
 }

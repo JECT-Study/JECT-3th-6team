@@ -8,6 +8,8 @@ interface SearchInputProps {
   placeholder?: string;
   disabled?: boolean;
   id?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export default function SearchInput({
@@ -16,6 +18,8 @@ export default function SearchInput({
   placeholder = '어떤 팝업을 찾으시나요?',
   disabled = false,
   id = '',
+  onFocus,
+  onBlur,
 }: SearchInputProps) {
   return (
     <div className="relative w-full">
@@ -28,6 +32,8 @@ export default function SearchInput({
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           onChange(e.target.value)
         }
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
         disabled={disabled}
         className="w-full px-3 py-3 pl-12 rounded-xl border border-main bg-white text-base font-regular/normal tracking-wide placeholder:text-gray60 text-gray80 focus:outline-none caret-main "
