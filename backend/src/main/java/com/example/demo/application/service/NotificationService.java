@@ -6,6 +6,8 @@ import com.example.demo.application.dto.notification.NotificationReadRequest;
 import com.example.demo.application.dto.notification.NotificationResponse;
 import com.example.demo.application.dto.notification.NotificationDeleteRequest;
 import com.example.demo.application.mapper.NotificationDtoMapper;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.CursorResult;
 import com.example.demo.domain.model.notification.Notification;
 import com.example.demo.domain.model.notification.NotificationQuery;
@@ -53,10 +55,10 @@ public class NotificationService {
             return DEFAULT_SIZE;
         }
         if (size <= 0) {
-            throw new IllegalArgumentException("페이지 크기는 0보다 커야 합니다.");
+            throw new BusinessException(ErrorType.INVALID_PAGE_SIZE, "페이지 크기는 0보다 커야 합니다: " + size);
         }
         if (size > MAX_SIZE) {
-            throw new IllegalArgumentException("페이지 크기는 " + MAX_SIZE + "을 초과할 수 없습니다.");
+            throw new BusinessException(ErrorType.INVALID_PAGE_SIZE, "페이지 크기는 " + MAX_SIZE + "을 초과할 수 없습니다: " + size);
         }
         return size;
     }
@@ -69,7 +71,7 @@ public class NotificationService {
         try {
             return ReadStatus.valueOf(readStatusStr.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("유효하지 않은 읽음 상태입니다: " + readStatusStr);
+            throw new BusinessException(ErrorType.INVALID_READ_STATUS, readStatusStr);
         }
     }
 
@@ -81,7 +83,7 @@ public class NotificationService {
         try {
             return NotificationSortOrder.valueOf(sortStr.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("유효하지 않은 정렬 옵션입니다: " + sortStr);
+            throw new BusinessException(ErrorType.INVALID_SORT_OPTION, sortStr);
         }
     }
 
@@ -89,10 +91,10 @@ public class NotificationService {
         Notification notification = notificationPort.findAllBy(NotificationQuery.findByNotificationId(request.notificationId()))
                 .content().stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다: " + request.notificationId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.NOTIFICATION_NOT_FOUND, String.valueOf(request.notificationId())));
 
         if (!notification.getMember().id().equals(memberId)) {
-            throw new IllegalArgumentException("해당 알림은 다른 회원의 것입니다: " + request.notificationId());
+            throw new BusinessException(ErrorType.ACCESS_DENIED_NOTIFICATION, String.valueOf(request.notificationId()));
         }
 
         notification.read();
@@ -104,10 +106,10 @@ public class NotificationService {
         Notification notification = notificationPort.findAllBy(NotificationQuery.findByNotificationId(request.notificationId()))
                 .content().stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다: " + request.notificationId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.NOTIFICATION_NOT_FOUND, String.valueOf(request.notificationId())));
 
         if (!notification.getMember().id().equals(memberId)) {
-            throw new IllegalArgumentException("해당 알림은 다른 회원의 것입니다: " + request.notificationId());
+            throw new BusinessException(ErrorType.ACCESS_DENIED_NOTIFICATION, String.valueOf(request.notificationId()));
         }
 
         notificationPort.delete(notification);

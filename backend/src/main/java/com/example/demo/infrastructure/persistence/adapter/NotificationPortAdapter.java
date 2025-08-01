@@ -1,5 +1,7 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.CursorResult;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.*;
@@ -47,7 +49,7 @@ public class NotificationPortAdapter implements NotificationPort {
     @Override
     public void delete(Notification notification) {
         if (notification.getId() == null) {
-            throw new IllegalArgumentException("알림 ID가 null입니다. 삭제할 알림은 반드시 ID를 가져야 합니다.");
+            throw new BusinessException(ErrorType.NULL_NOTIFICATION_ID);
         }
         repository.deleteById(notification.getId());
     }
@@ -58,7 +60,7 @@ public class NotificationPortAdapter implements NotificationPort {
             // 단일 알림 조회
             Notification notification = repository.findById(query.getNotificationId())
                     .map(this::entityToDomain)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다: " + query.getNotificationId()));
+                    .orElseThrow(() -> new BusinessException(ErrorType.NOTIFICATION_NOT_FOUND, String.valueOf(query.getNotificationId())));
             return new CursorResult<>(List.of(notification), false);
         }
         List<NotificationEntity> entities = executeQuery(query);
@@ -139,9 +141,7 @@ public class NotificationPortAdapter implements NotificationPort {
     private Notification entityToDomain(NotificationEntity entity) {
         return switch (entity.getSourceDomain()) {
             case "Waiting" -> getWaitingMapper().toDomain(entity);
-            default -> throw new IllegalArgumentException(
-                    "지원하지 않는 소스 도메인입니다: " + entity.getSourceDomain()
-            );
+            default -> throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, entity.getSourceDomain());
         };
     }
 
@@ -165,7 +165,7 @@ public class NotificationPortAdapter implements NotificationPort {
      */
     private Member loadMember(Long memberId) {
         return memberPort.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다: " + memberId));
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(memberId)));
     }
 
     /**
@@ -173,7 +173,7 @@ public class NotificationPortAdapter implements NotificationPort {
      */
     private Waiting loadWaitingEntity(SourceEntityKey key) {
         if (!"Waiting".equals(key.sourceDomain())) {
-            throw new IllegalArgumentException("Waiting 도메인이 아닙니다: " + key.sourceDomain());
+            throw new BusinessException(ErrorType.INVALID_SOURCE_DOMAIN, key.sourceDomain());
         }
 
         WaitingQuery query = WaitingQuery.forWaitingId(key.sourceId());
@@ -181,7 +181,7 @@ public class NotificationPortAdapter implements NotificationPort {
         return byQuery
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기 정보입니다: " + key.sourceId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(key.sourceId())));
     }
 
     /**

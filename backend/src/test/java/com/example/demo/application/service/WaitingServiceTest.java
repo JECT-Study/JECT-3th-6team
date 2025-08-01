@@ -19,6 +19,8 @@ import com.example.demo.application.dto.waiting.WaitingCreateRequest;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
 import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
@@ -189,12 +191,12 @@ class WaitingServiceTest {
             );
 
             // when & then
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            BusinessException exception = assertThrows(
+                    BusinessException.class,
                     () -> waitingService.createWaiting(invalidRequest)
             );
 
-            assertEquals("팝업을 찾을 수 없습니다: 999", exception.getMessage());
+            assertEquals(ErrorType.POPUP_NOT_FOUND, exception.getErrorType());
 
             // verify
             verify(popupPort).findById(999L);
@@ -218,12 +220,12 @@ class WaitingServiceTest {
             );
 
             // when & then
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            BusinessException exception = assertThrows(
+                    BusinessException.class,
                     () -> waitingService.createWaiting(invalidRequest)
             );
 
-            assertEquals("회원을 찾을 수 없습니다: 999", exception.getMessage());
+            assertEquals(ErrorType.MEMBER_NOT_FOUND, exception.getErrorType());
 
             // verify
             verify(popupPort).findById(1L);
@@ -558,7 +560,7 @@ class WaitingServiceTest {
             String invalidStatus = "INVALID_STATUS";
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(BusinessException.class, () ->
                     waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, invalidStatus, null)
             );
 
@@ -617,7 +619,7 @@ class WaitingServiceTest {
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of());
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(BusinessException.class, () ->
                     waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId)
             );
 
@@ -642,7 +644,7 @@ class WaitingServiceTest {
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(BusinessException.class, () ->
                     waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId)
             );
 

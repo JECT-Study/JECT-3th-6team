@@ -1,5 +1,7 @@
 package com.example.demo.domain.model.popup;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
@@ -17,7 +19,7 @@ public record OpeningHours(
 ) {
     public OpeningHours {
         if (openTime.isAfter(closeTime)) {
-            throw new IllegalArgumentException("오픈 시간은 마감 시간보다 늦을 수 없습니다.");
+            throw new BusinessException(ErrorType.INVALID_OPENING_HOURS, String.format("오픈시간: %s, 마감시간: %s", openTime, closeTime));
         }
     }
 } 
