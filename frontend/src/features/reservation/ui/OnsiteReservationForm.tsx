@@ -16,8 +16,8 @@ import {
 } from '@/features/reservation/model/ErrorCodeMap';
 import { useState } from 'react';
 import ReservationCheckModal from '@/features/reservation/ui/ReservationCheckModal';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+
+import usePostReservation from '@/features/reservation/hook/usePostReservation';
 
 export default function OnsiteReservationForm({
   popupId,
@@ -38,7 +38,8 @@ export default function OnsiteReservationForm({
     },
   });
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const router = useRouter();
+
+  const { mutate } = usePostReservation({ popupId });
 
   const headcountError =
     formValue.headCount >= MAX_HEAD_COUNT
@@ -53,10 +54,12 @@ export default function OnsiteReservationForm({
   };
 
   const handleSubmit = async () => {
-    // TODO : 폼 제출 로직 구현
-
-    toast.success('대기 예약 완료');
-    router.push(`/reservation/complete/${popupId}`);
+    mutate({
+      popupId,
+      name: formValue.name,
+      peopleCount: formValue.headCount,
+      email: formValue.email,
+    });
   };
 
   return (
