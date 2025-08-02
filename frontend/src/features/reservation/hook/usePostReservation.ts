@@ -17,7 +17,7 @@ export default function usePostReservation({ popupId }: { popupId: number }) {
     },
     onSuccess: data => {
       // 로컬 스토리지에 저장
-      localStorage.setItem('reservation', JSON.stringify(data));
+      localStorage.setItem(`reservation-[${popupId}]`, JSON.stringify(data));
       toast.success('대기 예약 완료!');
       router.push(`/reservation/complete/${popupId}`);
     },
