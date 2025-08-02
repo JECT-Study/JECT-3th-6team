@@ -14,7 +14,7 @@ export default function FilteredPopupListView({
       <h2 className="font-semibold text-xl text-black">찾은 팝업</h2>
       <div className="flex flex-col gap-y-3 mt-4 pb-[90px]">
         {data.length === 0 ? (
-          <EmptyPopupListFallback />
+          <EmptyPopupListFallback type={'DEFAULT'} />
         ) : (
           data.map((popup, index) => <BadgedPopupCard key={index} {...popup} />)
         )}
