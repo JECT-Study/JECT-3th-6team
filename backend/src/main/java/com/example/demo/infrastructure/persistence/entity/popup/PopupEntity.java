@@ -29,7 +29,7 @@ public class PopupEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private PopupType type;
+    private com.example.demo.domain.model.popup.PopupType type;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;

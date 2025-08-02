@@ -23,7 +23,7 @@ public class PopupEntityMapper {
                 .id(popupEntity.getId())
                 .name(popupEntity.getTitle())
                 .location(location)
-                .type(toDomain(popupEntity.getType()))
+                .type(popupEntity.getType())
                 .build();
     }
 
@@ -43,7 +43,7 @@ public class PopupEntityMapper {
                 .location(toLocationDomain(locationEntity))
                 .schedule(toScheduleDomain(popupEntity, scheduleEntities))
                 .display(toDisplayDomain(imageEntities, contentEntities, socialEntities))
-                .type(toDomain(popupEntity.getType())) // Type conversion
+                .type(popupEntity.getType()) // Type conversion
                 .popupCategories(toCategoriesDomain(categoryEntities))
                 .status(null) // Status는 DB에 저장되지 않고, 도메인 로직으로 결정
                 .build();
@@ -82,22 +82,9 @@ public class PopupEntityMapper {
                 .id(popup.getId())
                 .title(popup.getName())
                 .popupLocationId(null) // location은 별도 저장 후 ID를 설정해야 함
-                .type(toEntity(popup.getType())) // Type conversion
+                .type(popup.getType()) // Type conversion
                 .startDate(popup.getSchedule().dateRange().startDate())
                 .endDate(popup.getSchedule().dateRange().endDate())
                 .build();
     }
-
-    // Type conversion methods
-    private com.example.demo.domain.model.popup.PopupType toDomain(com.example.demo.infrastructure.persistence.entity.popup.PopupType entityType) {
-        if (entityType == null) return null;
-        return com.example.demo.domain.model.popup.PopupType.valueOf(entityType.name());
-    }
-
-    private com.example.demo.infrastructure.persistence.entity.popup.PopupType toEntity(com.example.demo.domain.model.popup.PopupType domainType) {
-        if (domainType == null) return null;
-        return com.example.demo.infrastructure.persistence.entity.popup.PopupType.valueOf(domainType.name());
-    }
-
-    // ... 다른 도메인 -> 엔티티 매핑 메서드들
 } 
