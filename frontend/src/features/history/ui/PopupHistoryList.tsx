@@ -1,8 +1,10 @@
+'use client';
+
 import PopupListView from '@/entities/popup/ui/PopupListView';
-import getPopupHistoryListApi from '@/features/history/api/getPopupHistoryListApi';
+import usePopupHistoryList from '@/features/history/hooks/usePopupHistoryList';
 
-export default async function PopupHistoryList() {
-  const { content } = await getPopupHistoryListApi({});
+export default function PopupHistoryList() {
+  const { data } = usePopupHistoryList({});
 
-  return <PopupListView data={content} />;
+  return <PopupListView data={data.content} />;
 }

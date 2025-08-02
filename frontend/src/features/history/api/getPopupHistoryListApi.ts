@@ -6,7 +6,7 @@ import {
 } from '@/entities/popup/types/PopupListItem';
 import { tagPopupItem } from '@/entities/popup/lib/tagPopupItem';
 
-interface PopupHistoryListRequest {
+export interface PopupHistoryListRequest {
   size?: number;
   lastWaitingId?: number;
   status?: string;
@@ -28,14 +28,12 @@ export default async function getPopupHistoryListApi(
   request: PopupHistoryListRequest
 ): Promise<TaggedPopupHistoryListResponse> {
   try {
-    const response = await (
-      await APIBuilder.get('/me/visits')
-        .params({ ...request })
-        .withCredentials(true)
-        .timeout(5000)
-        .auth()
-        .buildAsync()
-    ).call<PopupHistoryListResponse>();
+    const response = await APIBuilder.get('/me/visits')
+      .params({ ...request })
+      .withCredentials(true)
+      .timeout(5000)
+      .build()
+      .call<PopupHistoryListResponse>();
 
     const { content, lastWaitingId, hasNext } = response.data;
 
