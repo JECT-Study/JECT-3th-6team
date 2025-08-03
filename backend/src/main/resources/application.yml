@@ -58,6 +58,13 @@ app:
       enabled: true          # SSE 하트비트 기능 활성화
       ping-interval: 30000   # 30초마다 ping 전송
 
+aws:
+  ses:
+    region: ${AWS_REGION}
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+    source-email: ${AWS_SES_SOURCE_EMAIL}
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
