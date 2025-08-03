@@ -2,22 +2,22 @@ import { APIBuilder, logError } from '@/shared/lib';
 import NotificationType from '@/features/notification/type/Notification';
 import { ApiError } from '@/shared/type/api';
 
-type NotificationRequest = {
-  size: number;
-  lastNotificationId: number;
-  readStatus: 'READ' | 'UNREAD' | 'ALL';
-  sort: 'UNREAD_FIRST' | 'TIME_DESC';
+export type NotificationRequest = {
+  size?: number;
+  readStatus?: 'READ' | 'UNREAD' | 'ALL';
+  sort?: 'UNREAD_FIRST' | 'TIME_DESC';
+  lastNotificationId?: number;
 };
 
-type NotificationResponse = {
-  contents: NotificationType[];
+export type NotificationResponse = {
+  content: NotificationType[];
   lastNotificationId: number;
   hasNext: boolean;
 };
 
 export default async function getNotificationsApi(
   request: NotificationRequest
-) {
+): Promise<NotificationResponse> {
   try {
     const builder = await APIBuilder.get('/notifications')
       .params(request)
