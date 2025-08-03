@@ -1,10 +1,6 @@
 import { APIBuilder, logError } from '@/shared/lib';
 import { ApiError } from '@/shared/type/api';
-
-export type UserResponse = {
-  email: string;
-  nickname: string;
-};
+import { UserResponse } from '@/entities/user/type/UserResponse';
 
 export default async function getUserApi() {
   try {

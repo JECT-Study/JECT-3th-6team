@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { UserResponse } from '@/entities/user/api/getUserApi';
+
 import { useUserStore } from '@/entities/user/lib/useUserStore';
+import { UserResponse } from '@/entities/user/type/UserResponse';
 
 export default function UserInitProvider({
   children,
@@ -17,10 +18,9 @@ export default function UserInitProvider({
     if (initialUser) {
       setUser({
         email: initialUser.email,
-        nickname: initialUser.nickname,
+        nickname: initialUser.name,
         role: 'user',
       });
-      console.log('유저정보 업데이트');
     }
   }, [initialUser]);
   return <>{children}</>;
