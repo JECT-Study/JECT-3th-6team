@@ -26,6 +26,7 @@ export default function usePopupHistoryList() {
     getNextPageParam: (lastPage: TaggedPopupHistoryListResponse) =>
       lastPage.hasNext ? lastPage.lastWaitingId : null,
     initialPageParam: null,
+    retry: 1,
   });
 
   useQueryEffects(query, {
