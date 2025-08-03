@@ -3,6 +3,8 @@ package com.example.demo.application.mapper;
 import com.example.demo.application.dto.notification.NotificationListResponse;
 import com.example.demo.application.dto.notification.NotificationResponse;
 import com.example.demo.application.dto.notification.RelatedResourceResponse;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.CursorResult;
 import com.example.demo.domain.model.notification.DomainEvent;
 import com.example.demo.domain.model.notification.Notification;
@@ -59,9 +61,7 @@ public class NotificationDtoMapper {
 
         return switch (source) { // Java 17의 Pattern Matching Switch 문법
             case Waiting waiting -> processWaitingEvent(waiting, eventType);
-            default -> throw new IllegalArgumentException(
-                    "지원하지 않는 도메인 이벤트 소스입니다: " + source.getClass().getSimpleName()
-            );
+            default -> throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, source.getClass().getSimpleName());
         };
     }
 

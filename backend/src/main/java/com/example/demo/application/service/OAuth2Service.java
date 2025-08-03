@@ -2,6 +2,8 @@ package com.example.demo.application.service;
 
 import com.example.demo.application.dto.oauth.KakaoTokenResponse;
 import com.example.demo.application.dto.oauth.KakaoUserInfoResponse;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.OAuthAccount;
 import com.example.demo.domain.model.OAuthProvider;
@@ -49,7 +51,7 @@ public class OAuth2Service {
         String providerId = userInfo.id().toString();
         return oAuthAccountPort.findByProviderAndProviderId(OAuthProvider.KAKAO, providerId)
             .map(oauthAccount -> memberPort.findById(oauthAccount.memberId())
-                .orElseThrow(() -> new IllegalStateException("OAuth 계정과 연결된 회원을 찾을 수 없습니다.")))
+                .orElseThrow(() -> new BusinessException(ErrorType.OAUTH_MEMBER_NOT_FOUND)))
             .orElseGet(() -> {
                 String nickname = userInfo.getNickname();
                 String email = userInfo.getEmail();
@@ -78,7 +80,7 @@ public class OAuth2Service {
         KakaoTokenResponse response = restTemplate.postForObject(kakaoTokenUri, request, KakaoTokenResponse.class);
 
         if (response == null) {
-            throw new IllegalStateException("카카오 토큰 응답을 받지 못했습니다.");
+            throw new BusinessException(ErrorType.OAUTH_TOKEN_REQUEST_FAILED);
         }
         return response.accessToken();
     }
@@ -93,7 +95,7 @@ public class OAuth2Service {
         KakaoUserInfoResponse response = restTemplate.postForObject(kakaoUserInfoUri, request, KakaoUserInfoResponse.class);
 
         if (response == null) {
-            throw new IllegalStateException("카카오 사용자 정보 응답을 받지 못했습니다.");
+            throw new BusinessException(ErrorType.OAUTH_USER_INFO_REQUEST_FAILED);
         }
         return response;
     }

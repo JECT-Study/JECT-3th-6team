@@ -1,5 +1,7 @@
 package com.example.demo.domain.model.waiting;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.popup.Popup;
 import jakarta.validation.constraints.Email;
@@ -40,13 +42,13 @@ public record Waiting(
      */
     public Waiting {
         if (peopleCount == null || peopleCount < 1 || peopleCount > 6) {
-            throw new IllegalArgumentException("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: " + peopleCount);
+            throw new BusinessException(ErrorType.INVALID_PEOPLE_COUNT, String.valueOf(peopleCount));
         }
         if (waitingPersonName == null || waitingPersonName.length() < 2 || waitingPersonName.length() > 20) {
-            throw new IllegalArgumentException("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: " + waitingPersonName);
+            throw new BusinessException(ErrorType.INVALID_WAITING_PERSON_NAME, waitingPersonName);
         }
         if (!NAME_PATTERN.matcher(waitingPersonName).matches()) {
-            throw new IllegalArgumentException("대기자 이름에 특수문자는 포함될 수 없습니다. 현재: " + waitingPersonName);
+            throw new BusinessException(ErrorType.INVALID_WAITING_PERSON_NAME, waitingPersonName);
         }
     }
 }

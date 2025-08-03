@@ -8,16 +8,19 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import jakarta.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+
+import static com.example.demo.common.jwt.TokenValidationResult.*;
 
 @Component
 @RequiredArgsConstructor
@@ -40,12 +43,12 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(expirationMillis);
 
         return Jwts.builder()
-            .subject(userPrincipal.getId().toString())
-            .claim("email", userPrincipal.getEmail())
-            .issuedAt(now)
-            .expiration(expiryDate)
-            .signWith(key)
-            .compact();
+                .subject(userPrincipal.getId().toString())
+                .claim("email", userPrincipal.getEmail())
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
     }
 
     public Authentication getAuthentication(String token) {
@@ -59,22 +62,26 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    public boolean validateToken(String token) {
+    public TokenValidationResult validateTokenWithResult(String token) {
         try {
             Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-            return true;
+            return VALID;
+        } catch (ExpiredJwtException e) {
+            return EXPIRED;
         } catch (SecurityException | MalformedJwtException e) {
-            return false;
+            return MALFORMED;
+        } catch (Exception e) {
+            return INVALID;
         }
     }
 
     private Claims parseClaims(String token) {
         try {
             return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }

@@ -17,22 +17,79 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
 
+    /**
+     * 좌표 범위로 팝업을 조회한다 (기본 메서드)
+     */
     @Query("""
-            SELECT DISTINCT p FROM PopupEntity p \
-            JOIN PopupLocationEntity pl ON p.popupLocationId = pl.id \
-            LEFT JOIN PopupCategoryEntity pc ON p.id = pc.popupId \
-            WHERE pl.latitude BETWEEN :#{#query.minLatitude} AND :#{#query.maxLatitude} \
-            AND pl.longitude BETWEEN :#{#query.minLongitude} AND :#{#query.maxLongitude} \
-            AND (:#{#query.type} IS NULL OR CAST(p.type AS string) = CAST(:#{#query.type} AS string)) \
-            AND (
-                ((:#{#query.dateRange.startDate()} IS NULL) OR (:#{#query.dateRange.endDate()} IS NULL))
-                OR
-                (p.startDate <= :#{#query.dateRange.endDate} AND p.endDate >= :#{#query.dateRange.startDate})
-                ) \
-            AND (:#{#query.categories} IS NULL OR pc.name IN (:#{#query.categories}))
-            """
-    )
-    List<PopupEntity> findByMapQuery(@Param("query") PopupMapQuery query);
+            SELECT p FROM PopupEntity p, PopupLocationEntity pl 
+            WHERE p.popupLocationId = pl.id 
+            AND pl.latitude BETWEEN :minLatitude AND :maxLatitude 
+            AND pl.longitude BETWEEN :minLongitude AND :maxLongitude
+            """)
+    List<PopupEntity> findByCoordinateRange(
+            @Param("minLatitude") java.math.BigDecimal minLatitude,
+            @Param("maxLatitude") java.math.BigDecimal maxLatitude,
+            @Param("minLongitude") java.math.BigDecimal minLongitude,
+            @Param("maxLongitude") java.math.BigDecimal maxLongitude
+    );
+
+    /**
+     * 좌표 범위와 팝업 타입으로 팝업을 조회한다
+     */
+    @Query("""
+            SELECT p FROM PopupEntity p, PopupLocationEntity pl 
+            WHERE p.popupLocationId = pl.id 
+            AND pl.latitude BETWEEN :minLatitude AND :maxLatitude 
+            AND pl.longitude BETWEEN :minLongitude AND :maxLongitude
+            AND p.type = :type
+            """)
+    List<PopupEntity> findByCoordinateRangeAndType(
+            @Param("minLatitude") java.math.BigDecimal minLatitude,
+            @Param("maxLatitude") java.math.BigDecimal maxLatitude,
+            @Param("minLongitude") java.math.BigDecimal minLongitude,
+            @Param("maxLongitude") java.math.BigDecimal maxLongitude,
+            @Param("type") com.example.demo.domain.model.popup.PopupType type
+    );
+
+    /**
+     * 좌표 범위와 날짜 범위로 팝업을 조회한다
+     */
+    @Query("""
+            SELECT p FROM PopupEntity p, PopupLocationEntity pl 
+            WHERE p.popupLocationId = pl.id 
+            AND pl.latitude BETWEEN :minLatitude AND :maxLatitude 
+            AND pl.longitude BETWEEN :minLongitude AND :maxLongitude
+            AND p.startDate <= :endDate AND p.endDate >= :startDate
+            """)
+    List<PopupEntity> findByCoordinateRangeAndDateRange(
+            @Param("minLatitude") java.math.BigDecimal minLatitude,
+            @Param("maxLatitude") java.math.BigDecimal maxLatitude,
+            @Param("minLongitude") java.math.BigDecimal minLongitude,
+            @Param("maxLongitude") java.math.BigDecimal maxLongitude,
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate
+    );
+
+    /**
+     * 좌표 범위, 팝업 타입, 날짜 범위로 팝업을 조회한다
+     */
+    @Query("""
+            SELECT p FROM PopupEntity p, PopupLocationEntity pl 
+            WHERE p.popupLocationId = pl.id 
+            AND pl.latitude BETWEEN :minLatitude AND :maxLatitude 
+            AND pl.longitude BETWEEN :minLongitude AND :maxLongitude
+            AND p.type = :type
+            AND p.startDate <= :endDate AND p.endDate >= :startDate
+            """)
+    List<PopupEntity> findByCoordinateRangeAndTypeAndDateRange(
+            @Param("minLatitude") java.math.BigDecimal minLatitude,
+            @Param("maxLatitude") java.math.BigDecimal maxLatitude,
+            @Param("minLongitude") java.math.BigDecimal minLongitude,
+            @Param("maxLongitude") java.math.BigDecimal maxLongitude,
+            @Param("type") com.example.demo.domain.model.popup.PopupType type,
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate
+    );
   
     /**
      * ID로 팝업을 조회한다.

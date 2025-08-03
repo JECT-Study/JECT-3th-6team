@@ -1,5 +1,7 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.CursorResult;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.*;
@@ -15,6 +17,8 @@ import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapp
 import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapper.DomainSpecificMapper;
 import com.example.demo.infrastructure.persistence.mapper.NotificationEntityMapper.SourceEntityKey;
 import com.example.demo.infrastructure.persistence.repository.NotificationJpaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +33,8 @@ public class NotificationPortAdapter implements NotificationPort {
     private final NotificationEntityMapper mapper;
     private final MemberPort memberPort;
     private final WaitingPort waitingPort;
+    @PersistenceContext
+    private final EntityManager em;
 
     // 도메인별 매퍼 (지연 초기화)
     private DomainSpecificMapper<Waiting> waitingMapper;
@@ -41,7 +47,22 @@ public class NotificationPortAdapter implements NotificationPort {
     }
 
     @Override
+    public void delete(Notification notification) {
+        if (notification.getId() == null) {
+            throw new BusinessException(ErrorType.NULL_NOTIFICATION_ID);
+        }
+        repository.deleteById(notification.getId());
+    }
+
+    @Override
     public CursorResult<Notification> findAllBy(NotificationQuery query) {
+        if (query.getNotificationId() != null) {
+            // 단일 알림 조회
+            Notification notification = repository.findById(query.getNotificationId())
+                    .map(this::entityToDomain)
+                    .orElseThrow(() -> new BusinessException(ErrorType.NOTIFICATION_NOT_FOUND, String.valueOf(query.getNotificationId())));
+            return new CursorResult<>(List.of(notification), false);
+        }
         List<NotificationEntity> entities = executeQuery(query);
 
         boolean hasNext = false;
@@ -120,9 +141,7 @@ public class NotificationPortAdapter implements NotificationPort {
     private Notification entityToDomain(NotificationEntity entity) {
         return switch (entity.getSourceDomain()) {
             case "Waiting" -> getWaitingMapper().toDomain(entity);
-            default -> throw new IllegalArgumentException(
-                    "지원하지 않는 소스 도메인입니다: " + entity.getSourceDomain()
-            );
+            default -> throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, entity.getSourceDomain());
         };
     }
 
@@ -146,7 +165,7 @@ public class NotificationPortAdapter implements NotificationPort {
      */
     private Member loadMember(Long memberId) {
         return memberPort.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다: " + memberId));
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(memberId)));
     }
 
     /**
@@ -154,7 +173,7 @@ public class NotificationPortAdapter implements NotificationPort {
      */
     private Waiting loadWaitingEntity(SourceEntityKey key) {
         if (!"Waiting".equals(key.sourceDomain())) {
-            throw new IllegalArgumentException("Waiting 도메인이 아닙니다: " + key.sourceDomain());
+            throw new BusinessException(ErrorType.INVALID_SOURCE_DOMAIN, key.sourceDomain());
         }
 
         WaitingQuery query = WaitingQuery.forWaitingId(key.sourceId());
@@ -162,7 +181,7 @@ public class NotificationPortAdapter implements NotificationPort {
         return byQuery
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기 정보입니다: " + key.sourceId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(key.sourceId())));
     }
 
     /**

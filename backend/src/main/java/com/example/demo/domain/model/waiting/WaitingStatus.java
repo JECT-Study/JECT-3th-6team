@@ -1,5 +1,8 @@
 package com.example.demo.domain.model.waiting;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
+
 /**
  * 대기 상태 enum.
  * 대기의 현재 상태를 나타낸다.
@@ -24,7 +27,7 @@ public enum WaitingStatus {
         try {
             return valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("유효하지 않은 상태입니다: " + status);
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status);
         }
     }
 } 

@@ -1,5 +1,7 @@
 package com.example.demo.infrastructure.persistence.mapper;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.DomainEvent;
 import com.example.demo.domain.model.notification.Notification;
@@ -89,7 +91,7 @@ public class NotificationEntityMapper {
 
         public DomainSpecificMapper<T> build() {
             if (memberLoader == null || sourceEntityLoader == null || domainEventFactory == null) {
-                throw new IllegalStateException("모든 필수 함수형 인터페이스가 설정되어야 합니다.");
+                throw new BusinessException(ErrorType.SYSTEM_CONFIGURATION_ERROR);
             }
             return new DomainSpecificMapper<>(memberLoader, sourceEntityLoader, domainEventFactory);
         }
@@ -120,9 +122,7 @@ public class NotificationEntityMapper {
     private Long extractSourceId(Object source) {
         return switch (source) {
             case Waiting waiting -> waiting.id();
-            default -> throw new IllegalArgumentException(
-                    "지원하지 않는 소스 도메인 타입입니다: " + source.getClass().getSimpleName()
-            );
+            default -> throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, source.getClass().getSimpleName());
         };
     }
 
