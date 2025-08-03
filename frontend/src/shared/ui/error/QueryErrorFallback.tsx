@@ -1,6 +1,6 @@
 import { ApiError } from '@/shared/type/api';
 
-export default function FilteredPopupListErrorFallback({
+export default function QueryErrorFallback({
   onRetry,
   error,
 }: {

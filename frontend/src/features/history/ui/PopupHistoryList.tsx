@@ -13,11 +13,9 @@ export default function PopupHistoryList() {
     }
   });
   return (
-    <div>
+    <div className="flex flex-col">
       <PopupListView data={data.content} />
-      {hasNextPage && (
-        <div ref={lastElementRef} className="h-4 bg-yellow-200" />
-      )}
+      {hasNextPage && <div ref={lastElementRef} className="h-4 " />}
     </div>
   );
 }
