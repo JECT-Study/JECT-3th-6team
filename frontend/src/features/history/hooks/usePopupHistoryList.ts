@@ -30,7 +30,9 @@ export default function usePopupHistoryList() {
 
   useQueryEffects(query, {
     onSuccess: data => {
-      console.log('[onSuccess]:', data);
+      if (process.env.NEXT_PUBLIC_ENV === 'DEVELOP') {
+        console.log('[onSuccess]:', data);
+      }
     },
     onError: error => {
       handleNetworkError(error);
@@ -38,7 +40,9 @@ export default function usePopupHistoryList() {
       throw error;
     },
     onSettled: (data, error) => {
-      console.log('[onSettled]:', data, error);
+      if (process.env.NEXT_PUBLIC_ENV === 'DEVELOP') {
+        console.log('[onSettled]:', data, error);
+      }
     },
   });
 
