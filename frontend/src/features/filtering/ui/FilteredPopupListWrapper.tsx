@@ -1,6 +1,6 @@
 'use client';
 
-import FilteredPopupListErrorFallback from '@/features/filtering/ui/FilteredPopupListErrorFallback';
+import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
 import PopupCardListSuspenseFallback from '@/entities/popup/ui/PopupCardListSuspenseFallback';
 import FilteredPopupList from '@/features/filtering/ui/FilteredPopupList';
 import { QueryErrorResetBoundary } from '@tanstack/react-query';
@@ -14,10 +14,7 @@ export default function FilteredPopupListWrapper() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <FilteredPopupListErrorFallback
-              onRetry={resetErrorBoundary}
-              error={error}
-            />
+            <QueryErrorFallback onRetry={resetErrorBoundary} error={error} />
           )}
         >
           <Suspense fallback={<PopupCardListSuspenseFallback />}>
