@@ -15,7 +15,7 @@ public class AwsSesProperties {
     private String accessKey;
     /** AWS IAM Secret Key */
     private String secretKey;
-    /** SES가 동작하는 AWS Region (예: ap-northeast-2) */
+    /** SES가 동작하는 AWS Region */
     private String region;
     /** 발신자 이메일 (SES에서 인증된 주소) */
     private String sourceEmail;

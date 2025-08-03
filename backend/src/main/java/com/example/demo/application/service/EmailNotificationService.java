@@ -2,6 +2,7 @@ package com.example.demo.application.service;
 
 import com.example.demo.domain.model.email.EmailMessage;
 import com.example.demo.domain.port.EmailSendPort;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.scheduling.annotation.Async;
@@ -34,9 +35,9 @@ public class EmailNotificationService {
     }
 
     @Async
-    public java.util.concurrent.CompletableFuture<Void> sendWaitingEnterEmailAsync(String storeName, String memberName, String toEmail) {
+    public CompletableFuture<Void> sendWaitingEnterEmailAsync(String storeName, String memberName, String toEmail) {
         sendWaitingEnterEmail(storeName, memberName, toEmail);
-        return java.util.concurrent.CompletableFuture.completedFuture(null);
+        return CompletableFuture.completedFuture(null);
     }
 
     private String buildWaitingEnterBody(String storeName, String memberName) {

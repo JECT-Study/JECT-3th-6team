@@ -1,16 +1,12 @@
 package com.example.demo.infrastructure.external;
 
+import com.example.demo.config.AwsSesProperties;
 import com.example.demo.domain.model.email.EmailMessage;
 import com.example.demo.domain.port.EmailSendPort;
 import lombok.RequiredArgsConstructor;
-import com.example.demo.config.AwsSesProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.ses.SesClient;
-import software.amazon.awssdk.services.ses.model.Body;
-import software.amazon.awssdk.services.ses.model.Content;
-import software.amazon.awssdk.services.ses.model.Destination;
-import software.amazon.awssdk.services.ses.model.Message;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 import software.amazon.awssdk.services.ses.model.SendEmailResponse;
 
@@ -30,11 +26,12 @@ public class AwsSesEmailAdapter implements EmailSendPort {
     @Override
     public void sendEmail(EmailMessage email) {
         SendEmailRequest request = SendEmailRequest.builder()
-                .destination(Destination.builder()
-                        .toAddresses(email.to())
-                        .build())
-                .message(buildMessage(email))
                 .source(properties.getSourceEmail())
+                .destination(d -> d.toAddresses(email.to()))
+                .message(msg -> msg
+                        .subject(sub -> sub.data(email.subject()).charset(DEFAULT_CHARSET))
+                        .body(b -> b.html(content -> content.data(email.body()).charset(DEFAULT_CHARSET)))
+                )
                 .build();
 
         try {
@@ -42,22 +39,7 @@ public class AwsSesEmailAdapter implements EmailSendPort {
             log.info("SES 이메일 전송 완료. MessageId: {}", response.messageId());
         } catch (software.amazon.awssdk.services.ses.model.SesException e) {
             log.error("SES 이메일 전송 실패: {}", e.awsErrorDetails().errorMessage());
-            throw e; // 예외는 상위로 전달하여 500 대신 적절한 예외 처리 가능
+            throw e;
         }
-    }
-
-    private Message buildMessage(EmailMessage email) {
-        return Message.builder()
-                .subject(Content.builder()
-                        .data(email.subject())
-                        .charset(DEFAULT_CHARSET)
-                        .build())
-                .body(Body.builder()
-                        .html(Content.builder()
-                                .data(email.body())
-                                .charset(DEFAULT_CHARSET)
-                                .build())
-                        .build())
-                .build();
     }
 }
