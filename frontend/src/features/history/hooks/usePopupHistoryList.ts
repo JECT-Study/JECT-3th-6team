@@ -1,18 +1,31 @@
 'use client';
 
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import getPopupHistoryListApi, {
-  PopupHistoryListRequest,
+  TaggedPopupHistoryListResponse,
 } from '@/features/history/api/getPopupHistoryListApi';
 import { useQueryEffects } from '@/shared/hook/useQueryEffect';
 import handleNetworkError from '@/shared/lib/handleNetworkError';
 
-export default function usePopupHistoryList(request: PopupHistoryListRequest) {
-  const query = useSuspenseQuery({
+export default function usePopupHistoryList() {
+  const initialRequest = {
+    size: 10,
+  };
+
+  const query = useSuspenseInfiniteQuery({
     queryKey: ['popup-history', 'list'],
-    queryFn: () => getPopupHistoryListApi({ ...request }),
+    queryFn: ({ pageParam = null }) => {
+      const request =
+        pageParam !== null
+          ? { ...initialRequest, lastWaitingId: pageParam }
+          : initialRequest;
+      return getPopupHistoryListApi({ ...request });
+    },
     gcTime: 1000 * 60 * 300, // 30분
-    staleTime: 1000 * 60 * 10, // 10분
+    staleTime: 1000 * 60 * 10, // 10분,
+    getNextPageParam: (lastPage: TaggedPopupHistoryListResponse) =>
+      lastPage.hasNext ? lastPage.lastWaitingId : null,
+    initialPageParam: null,
   });
 
   useQueryEffects(query, {
@@ -29,5 +42,8 @@ export default function usePopupHistoryList(request: PopupHistoryListRequest) {
     },
   });
 
-  return query;
+  return {
+    ...query,
+    data: query.data.pages[0],
+  };
 }

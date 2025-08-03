@@ -12,13 +12,13 @@ export interface PopupHistoryListRequest {
   status?: string;
 }
 
-interface PopupHistoryListResponse {
+export interface PopupHistoryListResponse {
   content: RawPopupHistoryListItemType[];
   lastWaitingId: number;
   hasNext: boolean;
 }
 
-interface TaggedPopupHistoryListResponse {
+export interface TaggedPopupHistoryListResponse {
   content: PopupHistoryListItemType[];
   lastWaitingId: number;
   hasNext: boolean;

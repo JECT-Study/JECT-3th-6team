@@ -17,13 +17,13 @@ export interface PopupListRequest {
   size?: number;
 }
 
-interface PopupListResponse {
+export interface PopupListResponse {
   content: RawPopupListItemType[];
   hasNext: boolean;
   lastPopupId: number;
 }
 
-interface TaggedPopupListResponse {
+export interface TaggedPopupListResponse {
   hasNext: boolean;
   lastPopupId: number;
   content: PopupListItemType[];

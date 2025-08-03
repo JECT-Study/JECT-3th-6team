@@ -1,9 +1,10 @@
 'use client';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import getPopupListApi, {
   PopupListRequest,
+  TaggedPopupListResponse,
 } from '@/entities/popup/api/getPopupListApi';
 import dateToSeperatedString from '@/entities/popup/lib/dateToSeperatedString';
 import { useQueryEffects } from '@/shared/hook/useQueryEffect';
@@ -29,18 +30,28 @@ export default function useFilteredPopupList() {
     request.endDate = dateToSeperatedString(end, '-');
   }
 
-  const query = useSuspenseQuery({
+  const query = useSuspenseInfiniteQuery({
     queryKey: ['popup', 'list', { ...request }],
-    queryFn: () => getPopupListApi({ ...request }),
+    queryFn: ({ pageParam = null }) => {
+      const listReq = pageParam
+        ? { ...request, lastPopupId: pageParam }
+        : request;
+      return getPopupListApi({ ...listReq });
+    },
     gcTime: 1000 * 60 * 300, // 30분
     staleTime: 1000 * 60 * 10, // 10분
+    getNextPageParam: (lastPage: TaggedPopupListResponse) =>
+      lastPage.hasNext ? lastPage.lastPopupId : null,
+    initialPageParam: null,
   });
 
   if (query.isLoading) console.log('[isLoading]');
 
   useQueryEffects(query, {
     onSuccess: data => {
-      console.log('[onSuccess]:', data);
+      if (process.env.NEXT_PUBLIC_ENV === 'DEVELOP') {
+        console.log('[onSuccess]:', data);
+      }
     },
     onError: error => {
       handleNetworkError(error);
@@ -48,9 +59,14 @@ export default function useFilteredPopupList() {
       throw error;
     },
     onSettled: (data, error) => {
-      console.log('[onSettled]:', data, error);
+      if (process.env.NEXT_PUBLIC_ENV === 'DEVELOP') {
+        console.log('[onSettled]:', data, error);
+      }
     },
   });
 
-  return query;
+  return {
+    ...query,
+    data: query.data.pages[0],
+  };
 }

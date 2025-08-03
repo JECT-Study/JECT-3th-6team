@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { UseSuspenseQueryResult } from '@tanstack/react-query';
+import type { UseSuspenseInfiniteQueryResult } from '@tanstack/react-query';
 
 type QueryEffectsOptions<TData, TError> = {
   onSuccess?: (data: TData) => void;
@@ -8,7 +8,7 @@ type QueryEffectsOptions<TData, TError> = {
 };
 
 export function useQueryEffects<TData, TError>(
-  query: UseSuspenseQueryResult<TData, TError>,
+  query: UseSuspenseInfiniteQueryResult<TData, TError>,
   options: QueryEffectsOptions<TData, TError>
 ) {
   const { onSuccess, onError, onSettled } = options;
