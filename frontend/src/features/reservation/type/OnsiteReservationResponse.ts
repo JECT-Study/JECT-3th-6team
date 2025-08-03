@@ -1,4 +1,4 @@
-export interface ReservationResponse {
+export interface OnsiteReservationResponse {
   waitingId: number;
   popupName: string;
   name: string;

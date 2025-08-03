@@ -1,6 +1,6 @@
 import { APIBuilder, logError } from '@/shared/lib';
 import { ApiError } from '@/shared/type/api';
-import { ReservationResponse } from '@/features/reservation/type/response';
+import { OnsiteReservationResponse } from '@/features/reservation/type/OnsiteReservationResponse';
 
 export interface OnsiteReservationRequest {
   name: string;
@@ -11,7 +11,7 @@ export interface OnsiteReservationRequest {
 
 export default async function postOnsiteReservationApi(
   request: OnsiteReservationRequest
-): Promise<ReservationResponse> {
+): Promise<OnsiteReservationResponse> {
   const { name, peopleCount, email, popupId } = request;
   try {
     const response = await (
@@ -24,7 +24,7 @@ export default async function postOnsiteReservationApi(
         .withCredentials(true)
         .auth()
         .buildAsync()
-    ).call<ReservationResponse>();
+    ).call<OnsiteReservationResponse>();
 
     return response.data;
   } catch (error) {
