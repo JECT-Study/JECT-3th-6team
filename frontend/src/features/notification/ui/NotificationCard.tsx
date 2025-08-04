@@ -24,7 +24,7 @@ export default function NotificationCard({
   const { notificationTitle, message, isRead, createdAt } = data;
 
   const style = tv({
-    base: 'relative rounded-[10px] flex flex-col gap-y-[10px] p-[16px] hover:bg-sub2/20',
+    base: 'relative rounded-[10px] flex flex-col gap-y-[10px] p-[16px] hover:bg-sub2 bg-white',
     variants: {
       isRead: {
         true: 'border border-gray40',
