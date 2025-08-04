@@ -1,9 +1,11 @@
+'use client';
 import BellIcon from '@/assets/icons/Normal/Icon_Bell.svg';
 import Link from 'next/link';
+import useNotificationListener from '@/features/notification/hook/useNotificationListener';
 
 export default function NotificationBell() {
   // TODO 알림여부에 따라 링 보여지는 여부가 달라짐
-
+  useNotificationListener();
   return (
     <div className={'relative'}>
       <Link href={'/notify'} className={'absolute top-0 right-0 z-3'}>
