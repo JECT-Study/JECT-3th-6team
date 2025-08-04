@@ -37,25 +37,20 @@ export const useGeolocation = () => {
     };
 
     const errorHandler = (error: GeolocationPositionError) => {
-      let errorMessage = '위치 정보를 가져올 수 없습니다.';
-
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage = '위치 정보 접근 권한이 거부되었습니다.';
-          break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage = '위치 정보를 사용할 수 없습니다.';
-          break;
-        case error.TIMEOUT:
-          errorMessage = '위치 정보 요청 시간이 초과되었습니다.';
-          break;
+      // 권한 거부 시에만 에러로 처리
+      if (error.code === error.PERMISSION_DENIED) {
+        setState(prev => ({
+          ...prev,
+          error: '위치 정보 접근 권한이 거부되었습니다.',
+          isLoading: false,
+        }));
+      } else {
+        // 다른 에러들은 무시하고 로딩 상태 유지
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+        }));
       }
-
-      setState(prev => ({
-        ...prev,
-        error: errorMessage,
-        isLoading: false,
-      }));
     };
 
     const options: PositionOptions = {

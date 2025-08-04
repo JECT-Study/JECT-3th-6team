@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { _MapProps } from 'react-kakao-maps-sdk';
 import { ReactNode } from 'react';
@@ -43,13 +43,14 @@ import { ReactNode } from 'react';
  * }
  * ```
  */
-export default function KakaoMap({
-  center,
-  level = 6,
-  children,
-  ...props
-}: _MapProps &
-  React.HTMLAttributes<HTMLDivElement> & { children?: ReactNode }) {
+const KakaoMap = forwardRef<
+  any,
+  _MapProps &
+    React.HTMLAttributes<HTMLDivElement> & {
+      children?: ReactNode;
+      isLoading?: boolean;
+    }
+>(({ center, level = 6, children, isLoading = false, ...props }, ref) => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const imageUrl = '/icons/Color/Icon_map.svg';
@@ -61,7 +62,7 @@ export default function KakaoMap({
         setIsMapLoaded(true);
         setMapError(null);
       } else {
-        setMapError('카카오맵을 불러올 수 없습니다.');
+        setMapError('지도를 불러올 수 없습니다.');
       }
     };
 
@@ -84,7 +85,7 @@ export default function KakaoMap({
   }
 
   // 로딩 상태 처리
-  if (!isMapLoaded) {
+  if (!isMapLoaded || isLoading) {
     return (
       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
         <p className="text-gray-500 text-sm">지도를 불러오는 중...</p>
@@ -95,6 +96,7 @@ export default function KakaoMap({
   return (
     <>
       <Map
+        ref={ref}
         center={center}
         level={level}
         onError={error => {
@@ -115,4 +117,8 @@ export default function KakaoMap({
       </Map>
     </>
   );
-}
+});
+
+KakaoMap.displayName = 'KakaoMap';
+
+export default KakaoMap;

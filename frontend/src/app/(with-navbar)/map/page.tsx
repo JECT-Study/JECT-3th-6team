@@ -12,14 +12,19 @@ export default function MapPage() {
   const { latitude, longitude, error, isLoading } = useGeolocation();
   const [mounted, setMounted] = useState(false);
 
-  // 기본 위치 (서울 시청)
-  const defaultCenter = { lat: 37.5665, lng: 126.978 };
+  // 기본 위치 (서울숲 4번출구 앞)
+  const defaultCenter = { lat: 37.544643, lng: 127.044368 };
+  const [center, setCenter] = useState(defaultCenter);
 
-  // 클라이언트에서만 현재 위치 사용
-  const center =
-    mounted && latitude && longitude
-      ? { lat: latitude, lng: longitude }
-      : defaultCenter;
+  // 위치 결정 로직:
+  // 1. 로딩 중이면 지도 로딩 상태 유지 (지도를 불러오는 중... 표시)
+  // 2. 권한 거부 시에만 기본 위치 사용
+  // 3. 권한 허용 시 현재 위치 사용
+  useEffect(() => {
+    if (latitude && longitude) {
+      setCenter({ lat: latitude, lng: longitude });
+    }
+  }, [latitude, longitude]);
 
   useEffect(() => {
     setMounted(true);
@@ -27,7 +32,7 @@ export default function MapPage() {
 
   return (
     <FilterProvider>
-      <FilterGroupMapContainer center={center} />
+      <FilterGroupMapContainer center={center} isLoading={isLoading} />
       <FilterBottomSheet />
     </FilterProvider>
   );
