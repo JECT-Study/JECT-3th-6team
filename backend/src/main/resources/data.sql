@@ -77,7 +77,8 @@ VALUES (1, 1, '설명 1', 1),
 -- ===================================
 
 INSERT INTO popup_socials (id, popup_id, icon_url, link_url, sort_order)
-VALUES (1, 1, 'http://icon.com', 'http://url.com', 1);
+VALUES (1, 1, 'Instagram', 'https://www.instagram.com', 1),
+       (2, 1, 'Youtube', 'https://www.youtube.com/', 2);
 
 -- ===================================
 -- ✅ [DATA] popup_reviews
