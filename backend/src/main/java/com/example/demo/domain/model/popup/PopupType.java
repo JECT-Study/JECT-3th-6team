@@ -1,5 +1,8 @@
 package com.example.demo.domain.model.popup;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
+
 /**
  * 팝업 유형을 나타내는 열거형.
  * 체험형, 전시형, 판매형 중 하나를 나타낸다.
@@ -34,6 +37,6 @@ public enum PopupType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("지원하지 않는 팝업 타입(한글): " + value);
+        throw new BusinessException(ErrorType.INVALID_POPUP_TYPE, value);
     }
 } 

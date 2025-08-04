@@ -6,7 +6,7 @@ export type ratingType = {
 };
 
 export type searchTagType = {
-  type: string;
+  type: 'EXPERIENTIAL';
   category: string[];
 };
 
@@ -33,21 +33,18 @@ export type RawPopupItemType =
  */
 
 interface RawPopupListItemType {
-  id: number;
-  name: string;
+  popupId: number;
+  popupName: string;
   location: {
-    address_name: string;
-    region_1depth_name: string;
-    region_2depth_name: string;
-    region_3depth_name: string;
-    x: number;
-    y: number;
+    addressName: string;
+    region1depthName: string;
+    region2depthName: string;
+    region3depthName: string;
+    longitude: number;
+    latitude: number;
   };
   rating?: ratingType;
-  period: {
-    startDate: string;
-    endDate: string;
-  };
+  period: string;
   dDay: number;
   imageUrl: string;
   searchTags: searchTagType;

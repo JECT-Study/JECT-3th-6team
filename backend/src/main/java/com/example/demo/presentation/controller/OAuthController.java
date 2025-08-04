@@ -1,6 +1,8 @@
 package com.example.demo.presentation.controller;
 
 import com.example.demo.application.service.OAuth2Service;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.presentation.controller.handler.OAuth2FailureHandler;
 import com.example.demo.presentation.controller.handler.OAuth2SuccessHandler;
@@ -32,7 +34,7 @@ public class OAuthController {
         HttpServletResponse response) throws IOException {
 
         if (error != null) {
-            oAuth2FailureHandler.handleFailure(response, new IllegalStateException("OAuth2 error param received: " + error));
+            oAuth2FailureHandler.handleFailure(response, new BusinessException(ErrorType.OAUTH_ERROR_RECEIVED, error));
             return;
         }
 

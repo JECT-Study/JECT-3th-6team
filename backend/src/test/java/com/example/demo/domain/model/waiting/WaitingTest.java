@@ -1,5 +1,7 @@
 package com.example.demo.domain.model.waiting;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
@@ -93,14 +95,14 @@ class WaitingTest {
         // given
         String nullName = null;
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, nullName, validMember,
                         "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: null", exception.getMessage());
+        assertEquals(ErrorType.INVALID_WAITING_PERSON_NAME, exception.getErrorType());
     }
 
     @Test
@@ -109,14 +111,14 @@ class WaitingTest {
         // given
         String emptyName = "";
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, emptyName, validMember,
                         "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: ", exception.getMessage());
+        assertEquals(ErrorType.INVALID_WAITING_PERSON_NAME, exception.getErrorType());
     }
 
     @Test
@@ -125,14 +127,14 @@ class WaitingTest {
         // given
         String shortName = "홍";
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, shortName, validMember,
                         "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: 홍", exception.getMessage());
+        assertEquals(ErrorType.INVALID_WAITING_PERSON_NAME, exception.getErrorType());
     }
 
     @Test
@@ -141,14 +143,14 @@ class WaitingTest {
         // given
         String longName = "가나다라마바사아자차카타파하가나다라마바사아자차카타파하";
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, longName, validMember,
                         "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기자 이름은 2글자 이상 20글자 이하여야 합니다. 현재: 가나다라마바사아자차카타파하가나다라마바사아자차카타파하", exception.getMessage());
+        assertEquals(ErrorType.INVALID_WAITING_PERSON_NAME, exception.getErrorType());
     }
 
     @Test
@@ -157,14 +159,14 @@ class WaitingTest {
         // given
         String specialCharName = "홍길동!";
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, specialCharName, validMember,
                         "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기자 이름에 특수문자는 포함될 수 없습니다. 현재: 홍길동!", exception.getMessage());
+        assertEquals(ErrorType.INVALID_WAITING_PERSON_NAME, exception.getErrorType());
     }
 
     @Test
@@ -173,14 +175,14 @@ class WaitingTest {
         // given
         Integer nullPeopleCount = null;
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, "홍길동", validMember,
                         "test@example.com", nullPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: null", exception.getMessage());
+        assertEquals(ErrorType.INVALID_PEOPLE_COUNT, exception.getErrorType());
     }
 
     @Test
@@ -189,14 +191,14 @@ class WaitingTest {
         // given
         Integer zeroPeopleCount = 0;
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, "홍길동", validMember,
                         "test@example.com", zeroPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: 0", exception.getMessage());
+        assertEquals(ErrorType.INVALID_PEOPLE_COUNT, exception.getErrorType());
     }
 
     @Test
@@ -205,14 +207,14 @@ class WaitingTest {
         // given
         Integer sevenPeopleCount = 7;
         // when & then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        BusinessException exception = assertThrows(
+                BusinessException.class,
                 () -> new Waiting(
                         1L, validPopup, "홍길동", validMember,
                         "test@example.com", sevenPeopleCount, 1, WaitingStatus.WAITING, LocalDateTime.now()
                 )
         );
-        assertEquals("대기 인원수는 1명 이상 6명 이하여야 합니다. 현재: 7", exception.getMessage());
+        assertEquals(ErrorType.INVALID_PEOPLE_COUNT, exception.getErrorType());
     }
 
     @Test

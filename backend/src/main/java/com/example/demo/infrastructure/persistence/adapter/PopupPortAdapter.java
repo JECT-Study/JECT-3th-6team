@@ -1,5 +1,7 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.domain.model.popup.PopupQuery;
@@ -69,7 +71,7 @@ public class PopupPortAdapter implements PopupPort {
         // 1. Location, Content 등 연관 엔티티 먼저 저장
         // 2. 저장된 엔티티의 ID를 사용하여 PopupEntity 생성 및 저장
         // 3. 저장된 최종 엔티티들을 다시 도메인으로 변환하여 반환
-        throw new UnsupportedOperationException("Save operation is not yet implemented");
+        throw new BusinessException(ErrorType.FEATURE_NOT_IMPLEMENTED, "Popup save operation");
     }
 
     @Override
@@ -116,13 +118,88 @@ public class PopupPortAdapter implements PopupPort {
 
     @Override
     public List<Popup> findByMapQuery(PopupMapQuery query) {
-        List<PopupEntity> popupEntities = popupJpaRepository.findByMapQuery(query);
+        // 1단계: 좌표와 기본 조건으로 팝업 조회
+        List<PopupEntity> popupEntities = findPopupsByConditions(query);
+        
+        // 2단계: 카테고리 필터링 (메모리에서 처리)
+        if (hasCategories(query)) {
+            popupEntities = filterByCategories(popupEntities, query.categories());
+        }
+        
+        // 3단계: 도메인 객체로 변환
         return popupEntities.stream()
                 .map(it -> {
                     PopupLocationEntity popupLocationEntity = popupLocationRepository.findById(it.getPopupLocationId()).orElseThrow();
                     return popupEntityMapper.toDomain(it, popupLocationEntity);
                 })
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * 조건에 따라 적절한 JPA 메서드를 호출한다
+     */
+    private List<PopupEntity> findPopupsByConditions(PopupMapQuery query) {
+        boolean hasType = query.type() != null;
+        boolean hasDateRange = hasValidDateRange(query);
+        
+        if (hasType && hasDateRange) {
+            return popupJpaRepository.findByCoordinateRangeAndTypeAndDateRange(
+                    query.minLatitude(), query.maxLatitude(),
+                    query.minLongitude(), query.maxLongitude(),
+                    query.type(),
+                    query.dateRange().startDate(), query.dateRange().endDate()
+            );
+        } else if (hasType) {
+            return popupJpaRepository.findByCoordinateRangeAndType(
+                    query.minLatitude(), query.maxLatitude(),
+                    query.minLongitude(), query.maxLongitude(),
+                    query.type()
+            );
+        } else if (hasDateRange) {
+            return popupJpaRepository.findByCoordinateRangeAndDateRange(
+                    query.minLatitude(), query.maxLatitude(),
+                    query.minLongitude(), query.maxLongitude(),
+                    query.dateRange().startDate(), query.dateRange().endDate()
+            );
+        } else {
+            return popupJpaRepository.findByCoordinateRange(
+                    query.minLatitude(), query.maxLatitude(),
+                    query.minLongitude(), query.maxLongitude()
+            );
+        }
+    }
+    
+    /**
+     * 유효한 날짜 범위가 있는지 확인한다
+     */
+    private boolean hasValidDateRange(PopupMapQuery query) {
+        return query.dateRange() != null 
+                && query.dateRange().startDate() != null 
+                && query.dateRange().endDate() != null;
+    }
+    
+    /**
+     * 카테고리 조건이 있는지 확인한다
+     */
+    private boolean hasCategories(PopupMapQuery query) {
+        return query.categories() != null && !query.categories().isEmpty();
+    }
+    
+    /**
+     * 카테고리로 팝업을 필터링한다 (메모리에서 처리)
+     */
+    private List<PopupEntity> filterByCategories(List<PopupEntity> popupEntities, List<String> categories) {
+        return popupEntities.stream()
+                .filter(popup -> hasMatchingCategory(popup.getId(), categories))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * 팝업이 지정된 카테고리 중 하나라도 포함하는지 확인한다
+     */
+    private boolean hasMatchingCategory(Long popupId, List<String> categories) {
+        return popupCategoryRepository.findAllByPopupId(popupId).stream()
+                .anyMatch(category -> categories.contains(category.getName()));
     }
 
     /**

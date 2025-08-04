@@ -5,6 +5,8 @@ import com.example.demo.application.dto.waiting.WaitingCreateRequest;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
 import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
@@ -44,14 +46,14 @@ public class WaitingService {
     public WaitingCreateResponse createWaiting(WaitingCreateRequest request) {
         // 1. 팝업 존재 여부 확인
         var popup = popupPort.findById(request.popupId())
-                .orElseThrow(() -> new IllegalArgumentException("팝업을 찾을 수 없습니다: " + request.popupId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 
         // 2. 다음 대기 번호 조회
         Integer nextWaitingNumber = waitingPort.getNextWaitingNumber(request.popupId());
 
         // 3. 회원 정보 조회
         Member member = memberPort.findById(request.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다: " + request.memberId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(request.memberId())));
 
         // 4. 대기 정보 생성
         Waiting waiting = new Waiting(
@@ -100,11 +102,11 @@ public class WaitingService {
             Waiting waiting = waitingPort.findByQuery(new WaitingQuery(waitingId, null, null, null, null, null))
                     .stream()
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다: " + waitingId));
+                    .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(waitingId)));
 
             // 본인의 대기 정보인지 확인
             if (!waiting.member().id().equals(memberId)) {
-                throw new IllegalArgumentException("본인의 대기 정보만 조회할 수 있습니다.");
+                throw new BusinessException(ErrorType.ACCESS_DENIED_WAITING, String.valueOf(waitingId));
             }
 
             WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting);

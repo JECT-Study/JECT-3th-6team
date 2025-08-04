@@ -1,5 +1,7 @@
 package com.example.demo.infrastructure.persistence.adapter;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.*;
 import com.example.demo.domain.model.waiting.Waiting;
@@ -74,9 +76,7 @@ public class ScheduledNotificationPortAdapter implements ScheduledNotificationPo
 
         var notification = switch (entity.getSourceDomain()) {
             case "Waiting" -> getWaitingMapper().toDomain(notificationEntity);
-            default -> throw new IllegalArgumentException(
-                    "지원하지 않는 소스 도메인입니다: " + entity.getSourceDomain()
-            );
+            default -> throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, entity.getSourceDomain());
         };
 
         return new ScheduledNotification(
@@ -107,27 +107,23 @@ public class ScheduledNotificationPortAdapter implements ScheduledNotificationPo
      */
     private Member loadMember(Long memberId) {
         return memberPort.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다: " + memberId));
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(memberId)));
     }
 
     /**
      * Waiting 엔티티 로드
-     * TODO: WaitingPort에 findById 메서드 추가되면 개선 필요
      */
     private Waiting loadWaitingEntity(NotificationEntityMapper.SourceEntityKey key) {
         if (!"Waiting".equals(key.sourceDomain())) {
-            throw new IllegalArgumentException("Waiting 도메인이 아닙니다: " + key.sourceDomain());
+            throw new BusinessException(ErrorType.INVALID_SOURCE_DOMAIN, key.sourceDomain());
         }
 
-        // 임시 구현: 모든 대기 정보를 조회해서 필터링
-        // 실제로는 WaitingPort에 findById 메서드가 필요함
-        WaitingQuery query = WaitingQuery.firstPage(1L, 1000); // 충분히 큰 사이즈로 조회
+        WaitingQuery query = WaitingQuery.forWaitingId(key.sourceId());
         List<Waiting> byQuery = waitingPort.findByQuery(query);
         return byQuery
                 .stream()
-                .filter(waiting -> waiting.id().equals(key.sourceId()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기 정보입니다: " + key.sourceId()));
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(key.sourceId())));
     }
 
     /**

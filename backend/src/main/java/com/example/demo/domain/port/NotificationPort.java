@@ -9,4 +9,6 @@ public interface NotificationPort {
     Notification save(Notification notification);
 
     CursorResult<Notification> findAllBy(NotificationQuery query);
+
+    void delete(Notification notification);
 } 
