@@ -21,7 +21,7 @@ export default function usePopupHistoryList() {
           : initialRequest;
       return getPopupHistoryListApi({ ...request });
     },
-    gcTime: 1000 * 60 * 300, // 30분
+    gcTime: 1000 * 60 * 30, // 30분
     staleTime: 1000 * 60 * 10, // 10분,
     getNextPageParam: (lastPage: TaggedPopupHistoryListResponse) =>
       lastPage.hasNext ? lastPage.lastWaitingId : null,
