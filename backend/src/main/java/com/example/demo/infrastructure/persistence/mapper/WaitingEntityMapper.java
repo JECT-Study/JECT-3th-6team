@@ -42,6 +42,7 @@ public class WaitingEntityMapper {
      */
     public WaitingEntity toEntity(Waiting waiting) {
         return WaitingEntity.builder()
+                .id(waiting.id())
                 .popupId(waiting.popup().getId())
                 .memberId(waiting.member().id())
                 .waitingPersonName(waiting.waitingPersonName())

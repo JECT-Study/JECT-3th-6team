@@ -93,8 +93,8 @@ VALUES (1, 1, 1000, 4, '좋아요'),
 
 INSERT INTO waitings (id, popup_id, waiting_person_name, member_id, contact_email, people_count, waiting_number, status,
                       created_at, modified_at)
-VALUES (100, 1, '김테스트', 1000, 'test@test.com', 2, 1, 'WAITING', '2025-06-28T10:00:00', '2025-06-28T10:00:00'),
-       (101, 1, '이테스트', 1001, 'test2@test.com', 1, 2, 'WAITING', '2025-06-28T11:00:00', '2025-06-28T11:00:00');
+VALUES (100, 1, '김테스트', 1000, 'test@test.com', 2, 0, 'WAITING', '2025-06-28T10:00:00', '2025-06-28T10:00:00'),
+       (101, 1, '이테스트', 1001, 'test2@test.com', 1, 1, 'WAITING', '2025-06-28T11:00:00', '2025-06-28T11:00:00');
 
 -- ===================================
 -- ✅ [DATA] notifications

@@ -48,8 +48,8 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
      * 특정 팝업의 대기중인 모든 대기를 대기번호 순으로 조회한다.
      *
      * @param popupId 팝업 ID
-     * @param status 대기 상태
+     * @param status  대기 상태
      * @return 대기 엔티티 목록 (대기번호 순으로 정렬)
      */
-    List<WaitingEntity> findByPopupIdAndStatusOrderByWaitingNumber(Long popupId, WaitingStatus status);
+    List<WaitingEntity> findByPopupIdAndStatusOrderByWaitingNumberAsc(Long popupId, WaitingStatus status);
 } 

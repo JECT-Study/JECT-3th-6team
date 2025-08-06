@@ -7,13 +7,14 @@ import com.example.demo.domain.port.WaitingPort;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import com.example.demo.infrastructure.persistence.mapper.WaitingEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.WaitingJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class WaitingPortAdapter implements WaitingPort {
 
         // 팝업별 대기 조회
         if (query.popupId() != null) {
-            List<WaitingEntity> entities = waitingJpaRepository.findByPopupIdAndStatusOrderByWaitingNumber(
+            List<WaitingEntity> entities = waitingJpaRepository.findByPopupIdAndStatusOrderByWaitingNumberAsc(
                     query.popupId(), query.status());
             return entities.stream()
                     .map(this::mapEntityToDomain)
@@ -84,12 +85,12 @@ public class WaitingPortAdapter implements WaitingPort {
     @Override
     public Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId) {
         return waitingJpaRepository.findByMemberIdAndPopupId(memberId, popupId)
-            .flatMap(entity -> {
-                var popup = popupPortAdapter.findById(entity.getPopupId()).orElse(null);
-                var member = memberPortAdapter.findById(entity.getMemberId()).orElse(null);
-                if (popup == null || member == null) return Optional.empty();
-                return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
-            });
+                .flatMap(entity -> {
+                    var popup = popupPortAdapter.findById(entity.getPopupId()).orElse(null);
+                    var member = memberPortAdapter.findById(entity.getMemberId()).orElse(null);
+                    if (popup == null || member == null) return Optional.empty();
+                    return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
+                });
     }
 
 } 
