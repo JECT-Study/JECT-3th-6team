@@ -264,4 +264,84 @@ class WaitingTest {
                 validEmail, 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
         ));
     }
+
+    @Test
+    @DisplayName("입장 처리 테스트 - 정상적인 입장")
+    public void test05() {
+        // given
+        Waiting waiting = new Waiting(
+                1L, validPopup, "홍길동", validMember,
+                "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
+        );
+        
+        // when
+        Waiting enteredWaiting = waiting.enter();
+        
+        // then
+        assertNotNull(enteredWaiting.enteredAt());
+        assertEquals(WaitingStatus.VISITED, enteredWaiting.status());
+        assertEquals(waiting.id(), enteredWaiting.id());
+        assertEquals(waiting.popup(), enteredWaiting.popup());
+        assertEquals(waiting.waitingPersonName(), enteredWaiting.waitingPersonName());
+        assertEquals(waiting.member(), enteredWaiting.member());
+        assertEquals(waiting.contactEmail(), enteredWaiting.contactEmail());
+        assertEquals(waiting.peopleCount(), enteredWaiting.peopleCount());
+        assertEquals(waiting.waitingNumber(), enteredWaiting.waitingNumber());
+        assertEquals(waiting.registeredAt(), enteredWaiting.registeredAt());
+    }
+
+    @Test
+    @DisplayName("입장 처리 테스트 - 입장 시간이 현재 시간과 유사한지 확인")
+    public void test05_2() {
+        // given
+        Waiting waiting = new Waiting(
+                1L, validPopup, "홍길동", validMember,
+                "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
+        );
+        LocalDateTime beforeEnter = LocalDateTime.now();
+        
+        // when
+        Waiting enteredWaiting = waiting.enter();
+        
+        // then
+        LocalDateTime afterEnter = LocalDateTime.now();
+        assertNotNull(enteredWaiting.enteredAt());
+        assertTrue(enteredWaiting.enteredAt().isAfter(beforeEnter.minusSeconds(1)));
+        assertTrue(enteredWaiting.enteredAt().isBefore(afterEnter.plusSeconds(1)));
+    }
+
+    @Test
+    @DisplayName("입장 처리 테스트 - 이미 방문 완료된 상태에서 입장 (예외 발생)")
+    public void test05_3() {
+        // given
+        LocalDateTime originalEnteredAt = LocalDateTime.now().minusHours(1);
+        Waiting alreadyVisitedWaiting = new Waiting(
+                1L, validPopup, "홍길동", validMember,
+                "test@example.com", 2, 1, WaitingStatus.VISITED, LocalDateTime.now(), originalEnteredAt
+        );
+        
+        // when & then
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> alreadyVisitedWaiting.enter()
+        );
+        assertEquals(ErrorType.INVALID_WAITING_STATUS, exception.getErrorType());
+    }
+
+    @Test
+    @DisplayName("입장 처리 테스트 - 취소된 상태에서 입장 (예외 발생)")
+    public void test05_4() {
+        // given
+        Waiting canceledWaiting = new Waiting(
+                1L, validPopup, "홍길동", validMember,
+                "test@example.com", 2, 1, WaitingStatus.CANCELED, LocalDateTime.now()
+        );
+        
+        // when & then
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> canceledWaiting.enter()
+        );
+        assertEquals(ErrorType.INVALID_WAITING_STATUS, exception.getErrorType());
+    }
 }

@@ -3,6 +3,7 @@ package com.example.demo.application.service;
 import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
 import com.example.demo.application.dto.waiting.WaitingCreateRequest;
 import com.example.demo.application.dto.waiting.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.WaitingMakeVisitRequest;
 import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.common.exception.BusinessException;
@@ -129,5 +130,24 @@ public class WaitingService {
                 .toList();
 
         return new VisitHistoryCursorResponse(waitingResponses, lastId, hasNext);
+    }
+
+    /**
+     * 대기열 입장 처리
+     */
+    @Transactional
+    public void makeVisit(WaitingMakeVisitRequest request) {
+        // 1. 대기 정보 조회
+        WaitingQuery query = new WaitingQuery(request.waitingId(), null, null, null, null, null);
+        Waiting waiting = waitingPort.findByQuery(query)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(request.waitingId())));
+
+        // 2. 입장 처리
+        Waiting enteredWaiting = waiting.enter();
+
+        // 3. 저장
+        waitingPort.save(enteredWaiting);
     }
 } 
