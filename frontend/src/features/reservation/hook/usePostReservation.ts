@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 export default function usePostReservation({ popupId }: { popupId: number }) {
   const router = useRouter();
-  const query = useMutation({
+  return useMutation({
     retry: false,
     mutationFn: (request: OnsiteReservationRequest) =>
       postOnsiteReservationApi(request),
@@ -27,6 +27,4 @@ export default function usePostReservation({ popupId }: { popupId: number }) {
       router.push(`/reservation/complete/${popupId}`);
     },
   });
-
-  return query;
 }
