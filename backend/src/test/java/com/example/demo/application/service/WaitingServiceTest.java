@@ -1,39 +1,16 @@
 package com.example.demo.application.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.example.demo.application.dto.popup.LocationResponse;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.dto.popup.SearchTagsResponse;
-import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
-import com.example.demo.application.dto.waiting.WaitingCreateRequest;
-import com.example.demo.application.dto.waiting.WaitingCreateResponse;
-import com.example.demo.application.dto.waiting.WaitingResponse;
+import com.example.demo.application.dto.waiting.*;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
-import com.example.demo.domain.model.popup.OpeningHours;
-import com.example.demo.domain.model.popup.Popup;
-import com.example.demo.domain.model.popup.PopupCategory;
-import com.example.demo.domain.model.popup.PopupContent;
-import com.example.demo.domain.model.popup.PopupDisplay;
-import com.example.demo.domain.model.popup.PopupSchedule;
-import com.example.demo.domain.model.popup.PopupStatus;
-import com.example.demo.domain.model.popup.PopupType;
-import com.example.demo.domain.model.popup.Sns;
-import com.example.demo.domain.model.popup.WeeklyOpeningHours;
+import com.example.demo.domain.model.popup.*;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
@@ -41,12 +18,6 @@ import com.example.demo.domain.port.MemberPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -55,6 +26,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -651,6 +633,238 @@ class WaitingServiceTest {
             // verify
             verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
             verify(waitingDtoMapper, never()).toResponse(any());
+        }
+    }
+
+    @DisplayName("makeVisit 메서드 테스트")
+    @Nested
+    class MakeVisitTest {
+        private final Popup validPopup = Popup.builder()
+                .id(1L)
+                .name("테스트 팝업")
+                .location(
+                        new Location(
+                                "서울시 강남구",
+                                "서울특별시",
+                                "강남구",
+                                "역삼동",
+                                127.0012,
+                                37.5665
+                        )
+                )
+                .schedule(
+                        new PopupSchedule(
+                                new DateRange(
+                                        LocalDate.now(),
+                                        LocalDate.now().plusDays(30)
+                                ),
+                                new WeeklyOpeningHours(
+                                        List.of(
+                                                new OpeningHours(
+                                                        DayOfWeek.MONDAY,
+                                                        LocalTime.now(),
+                                                        LocalTime.now().plusHours(1)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .display(
+                        new PopupDisplay(
+                                List.of("http://image.com"),
+                                new PopupContent("팝업 설명", "팝업 공지"),
+                                List.of(new Sns("http://image.com", "http://sns.com"))
+                        )
+                )
+                .type(PopupType.EXHIBITION)
+                .popupCategories(
+                        List.of(new PopupCategory(1L, "예술"))
+                )
+                .status(PopupStatus.IN_PROGRESS)
+                .build();
+
+        private final Member validMember = new Member(1L, "테스트 사용자", "test@example.com");
+
+        @Test
+        @DisplayName("존재하지 않는 대기 ID로 입장 처리 시 WAITING_NOT_FOUND 예외")
+        void makeVisit_WaitingNotFound() {
+            // given
+            Long waitingId = 999L;
+            WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
+
+            when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
+                    .thenReturn(List.of()); // 빈 리스트 반환
+
+            // when & then
+            BusinessException exception = assertThrows(BusinessException.class,
+                    () -> waitingService.makeVisit(request));
+
+            assertEquals(ErrorType.WAITING_NOT_FOUND, exception.getErrorType());
+            assertEquals(String.valueOf(waitingId), exception.getAdditionalInfo());
+        }
+
+        @Test
+        @DisplayName("이미 방문 완료된 대기에서 입장 처리 시 INVALID_WAITING_STATUS 예외")
+        void makeVisit_AlreadyVisited() {
+            // given
+            Long waitingId = 1L;
+            WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
+
+            Waiting visitedWaiting = new Waiting(
+                    waitingId, validPopup, "홍길동", validMember,
+                    "test@example.com", 2, 0, WaitingStatus.VISITED,
+                    LocalDateTime.now(), LocalDateTime.now()
+            );
+
+            when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
+                    .thenReturn(List.of(visitedWaiting));
+
+            // when & then
+            BusinessException exception = assertThrows(BusinessException.class,
+                    () -> waitingService.makeVisit(request));
+
+            assertEquals(ErrorType.INVALID_WAITING_STATUS, exception.getErrorType());
+        }
+
+        @Test
+        @DisplayName("취소된 대기에서 입장 처리 시 INVALID_WAITING_STATUS 예외")
+        void makeVisit_CanceledWaiting() {
+            // given
+            Long waitingId = 1L;
+            WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
+
+            Waiting canceledWaiting = new Waiting(
+                    waitingId, validPopup, "홍길동", validMember,
+                    "test@example.com", 2, 0, WaitingStatus.CANCELED,
+                    LocalDateTime.now()
+            );
+
+            when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
+                    .thenReturn(List.of(canceledWaiting));
+
+            // when & then
+            BusinessException exception = assertThrows(BusinessException.class,
+                    () -> waitingService.makeVisit(request));
+
+            assertEquals(ErrorType.INVALID_WAITING_STATUS, exception.getErrorType());
+        }
+
+        @Test
+        @DisplayName("중간 순번 입장 시 WAITING_NOT_READY 예외 발생")
+        void makeVisit_ReorderMiddleNumber() {
+            // given
+            Long waitingId = 3L;
+            WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
+
+            // 3번 대기가 입장 처리됨
+            Waiting targetWaiting = new Waiting(
+                    3L, validPopup, "김삼번", validMember,
+                    "kim3@example.com", 1, 3, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+
+            // 같은 팝업의 다른 대기들 (1, 2, 4, 5번)
+            Waiting waiting1 = new Waiting(
+                    1L, validPopup, "김영번", validMember,
+                    "kim1@example.com", 1, 0, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+            Waiting waiting2 = new Waiting(
+                    2L, validPopup, "김일번", validMember,
+                    "kim2@example.com", 1, 1, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+            Waiting waiting4 = new Waiting(
+                    4L, validPopup, "김이번", validMember,
+                    "kim4@example.com", 1, 2, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+            Waiting waiting5 = new Waiting(
+                    5L, validPopup, "김사번", validMember,
+                    "kim5@example.com", 1, 4, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+
+            when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
+                    .thenReturn(List.of(targetWaiting));
+
+            // when & then
+            BusinessException exception = assertThrows(BusinessException.class,
+                    () -> waitingService.makeVisit(request));
+
+            assertEquals(ErrorType.WAITING_NOT_READY, exception.getErrorType());
+        }
+
+        @Test
+        @DisplayName("첫 번째 순번 입장 시 모든 뒤 순번들이 앞당겨짐")
+        void makeVisit_ReorderFirstNumber() {
+            // given
+            Long waitingId = 1L;
+            WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
+
+            // 1번 대기가 입장 처리됨
+            Waiting targetWaiting = new Waiting(
+                    1L, validPopup, "김영번", validMember,
+                    "kim1@example.com", 1, 0, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+
+            // 같은 팝업의 다른 대기들 (2, 3, 4번)
+            Waiting waiting2 = new Waiting(
+                    2L, validPopup, "김일번", validMember,
+                    "kim2@example.com", 1, 1, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+            Waiting waiting3 = new Waiting(
+                    3L, validPopup, "김이번", validMember,
+                    "kim3@example.com", 1, 2, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+            Waiting waiting4 = new Waiting(
+                    4L, validPopup, "김삼번", validMember,
+                    "kim4@example.com", 1, 3, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+
+            when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
+                    .thenReturn(List.of(targetWaiting));
+
+            when(waitingPort.findByQuery(WaitingQuery.forPopup(validPopup.getId(), WaitingStatus.WAITING)))
+                    .thenReturn(List.of(waiting2, waiting3, waiting4));
+
+            // when
+            waitingService.makeVisit(request);
+
+            // then
+            // 입장 처리된 대기 1번 + 순번 변경된 대기 3번 = 총 4번 save 호출
+            verify(waitingPort, org.mockito.Mockito.times(4)).save(any(Waiting.class));
+        }
+
+        @Test
+        @DisplayName("단일 대기 입장 시 순번 재배치 없음")
+        void makeVisit_SingleWaiting() {
+            // given
+            Long waitingId = 1L;
+            WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
+
+            Waiting singleWaiting = new Waiting(
+                    1L, validPopup, "김유일", validMember,
+                    "only@example.com", 1, 0, WaitingStatus.WAITING,
+                    LocalDateTime.now()
+            );
+
+            when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
+                    .thenReturn(List.of(singleWaiting));
+
+            when(waitingPort.findByQuery(WaitingQuery.forPopup(validPopup.getId(), WaitingStatus.WAITING)))
+                    .thenReturn(List.of()); // 다른 대기 없음
+
+            // when
+            waitingService.makeVisit(request);
+
+            // then
+            // 입장 처리된 대기만 저장
+            verify(waitingPort, org.mockito.Mockito.times(1)).save(any(Waiting.class));
         }
     }
 }

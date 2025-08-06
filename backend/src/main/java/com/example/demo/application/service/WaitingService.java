@@ -1,10 +1,6 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
-import com.example.demo.application.dto.waiting.WaitingCreateRequest;
-import com.example.demo.application.dto.waiting.WaitingCreateResponse;
-import com.example.demo.application.dto.waiting.WaitingMakeVisitRequest;
-import com.example.demo.application.dto.waiting.WaitingResponse;
+import com.example.demo.application.dto.waiting.*;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
@@ -23,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import com.example.demo.domain.model.CursorResult;
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +92,7 @@ public class WaitingService {
      */
     @Transactional(readOnly = true)
     public VisitHistoryCursorResponse getVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status, Long waitingId) {
-        
+
         // waitingId가 있으면 단건 조회
         if (waitingId != null) {
             Waiting waiting = waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId))
@@ -144,6 +139,9 @@ public class WaitingService {
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(request.waitingId())));
 
+        if (waiting.waitingNumber() != 0) {
+            throw new BusinessException(ErrorType.WAITING_NOT_READY, String.valueOf(request.waitingId()));
+        }
         // 2. 입장 처리
         Waiting enteredWaiting = waiting.enter();
 
@@ -156,15 +154,15 @@ public class WaitingService {
 
     /**
      * 특정 팝업의 대기 순번을 앞당긴다.
-     * 
-     * @param popupId 팝업 ID
+     *
+     * @param popupId              팝업 ID
      * @param enteredWaitingNumber 입장 처리된 대기 번호
      */
     private void reorderWaitingNumbers(Long popupId, Integer enteredWaitingNumber) {
         // 1. 해당 팝업의 모든 대기중인 대기 조회
         WaitingQuery popupQuery = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
         List<Waiting> waitingList = waitingPort.findByQuery(popupQuery);
-        
+
         // 2. 입장 처리된 대기번호보다 큰 번호들만 필터링하여 순번 앞당기기
         List<Waiting> reorderedWaitings = waitingList.stream()
                 .filter(w -> w.waitingNumber() > enteredWaitingNumber)
@@ -181,7 +179,7 @@ public class WaitingService {
                         w.enteredAt()
                 ))
                 .toList();
-        
+
         // 3. 변경된 대기들 모두 저장
         reorderedWaitings.forEach(waitingPort::save);
     }
