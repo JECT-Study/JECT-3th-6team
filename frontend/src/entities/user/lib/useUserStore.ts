@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type User = {
+export type User = {
   email: string;
   nickname: string;
   role: 'user' | 'admin';

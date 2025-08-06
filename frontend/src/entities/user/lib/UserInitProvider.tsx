@@ -2,25 +2,26 @@
 
 import React, { useEffect } from 'react';
 
-import { useUserStore } from '@/entities/user/lib/useUserStore';
-import { UserResponse } from '@/entities/user/type/UserResponse';
+import { User, useUserStore } from '@/entities/user/lib/useUserStore';
 
 export default function UserInitProvider({
   children,
   initialUser,
 }: {
   children: React.ReactNode;
-  initialUser: UserResponse | null;
+  initialUser: Omit<User, 'role'> | null;
 }) {
   const setUser = useUserStore(state => state.setUser);
-
+  const clearUser = useUserStore(state => state.clearUser);
   useEffect(() => {
     if (initialUser) {
       setUser({
         email: initialUser.email,
-        nickname: initialUser.name,
+        nickname: initialUser.nickname,
         role: 'user',
       });
+    } else {
+      clearUser();
     }
   }, [initialUser]);
   return <>{children}</>;

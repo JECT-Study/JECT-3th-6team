@@ -12,25 +12,23 @@ export default function AuthInitializer({
     data: user,
     isLoading,
     isError,
-    error,
   } = useQuery({
     queryKey: ['auth', 'user'],
     queryFn: getUserApi,
-    retry: 1,
+    retry: false,
     staleTime: 5 * 60 * 1000, // 5분
     gcTime: 30 * 60 * 1000, // 30분
     refetchOnWindowFocus: false,
+    throwOnError: false,
+    select: data => (data ? { email: data.email, nickname: data.name } : null),
   });
 
   if (isLoading) {
     return null;
   }
-
   if (isError) {
-    console.error('유저정보 조회에 실패하였습니다.', error);
+    return <UserInitProvider initialUser={null}>{children}</UserInitProvider>;
   }
 
-  return (
-    <UserInitProvider initialUser={user ?? null}>{children}</UserInitProvider>
-  );
+  return <UserInitProvider initialUser={user}>{children}</UserInitProvider>;
 }
