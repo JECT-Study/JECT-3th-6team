@@ -2,65 +2,46 @@
 
 import {
   BottomButtonContainer,
-  ModalContainer,
   NumberInput,
   StandardButton,
   TextInput,
 } from '@/shared/ui';
-import useForm from '../hook/useForm';
+
 import IconReload from '@/assets/icons/Normal/Icon_Reload.svg';
 import {
   ERROR_CODE_MAP,
   MAX_HEAD_COUNT,
   MIN_HEAD_COUNT,
 } from '@/features/reservation/model/ErrorCodeMap';
-import { useState } from 'react';
-import ReservationCheckModal from '@/features/reservation/ui/ReservationCheckModal';
+import {
+  OnsiteReservationFormError,
+  OnsiteReservationFormValue,
+} from '@/features/reservation/hook/useForm';
 
-import usePostReservation from '@/features/reservation/hook/usePostReservation';
+interface OnsiteReservationFormProps {
+  formValue: OnsiteReservationFormValue;
+  error: OnsiteReservationFormError;
+  handleChange: (
+    key: keyof OnsiteReservationFormValue,
+    value: string | number
+  ) => void;
+  handleReset: () => void;
+  isFormValid: boolean;
+  handleModalOpen: () => void;
+}
 
 export default function OnsiteReservationForm({
-  popupId,
-}: {
-  popupId: number;
-}) {
-  const { formValue, error, handleChange, handleReset, isFormValid } = useForm({
-    formType: 'onsite-reservation',
-    initialFormValue: {
-      name: '',
-      headCount: 1,
-      email: '',
-    },
-    initialError: {
-      name: '',
-      headCount: '',
-      email: '',
-    },
-  });
-  const [isOpenModal, setIsOpenModal] = useState(false);
-
-  const { mutate } = usePostReservation({ popupId });
-
+  formValue,
+  error,
+  handleChange,
+  handleReset,
+  isFormValid,
+  handleModalOpen,
+}: OnsiteReservationFormProps) {
   const headcountError =
     formValue.headCount >= MAX_HEAD_COUNT
       ? ERROR_CODE_MAP.ALERT_MAX_HEADCOUNT
       : ERROR_CODE_MAP.NONE;
-
-  const handleModalOpen = () => {
-    setIsOpenModal(true);
-  };
-  const handleModalClose = () => {
-    setIsOpenModal(false);
-  };
-
-  const handleSubmit = async () => {
-    mutate({
-      popupId,
-      name: formValue.name,
-      peopleCount: formValue.headCount,
-      email: formValue.email,
-    });
-  };
 
   return (
     <div>
@@ -122,13 +103,6 @@ export default function OnsiteReservationForm({
           확인
         </StandardButton>
       </BottomButtonContainer>
-      <ModalContainer open={isOpenModal}>
-        <ReservationCheckModal
-          handleModalClose={handleModalClose}
-          handleSubmit={handleSubmit}
-          data={formValue}
-        />
-      </ModalContainer>
     </div>
   );
 }
