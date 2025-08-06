@@ -1,7 +1,9 @@
-export type RelatedResourceType = {
-  type: 'POPUP' | 'WAITING' | 'MY_VISIT_HISTORY';
-  id: number | null;
-};
+type RelatedResource =
+  | { type: 'POPUP'; data: { id: number; storeName: string; address?: string } }
+  | {
+      type: 'WAITING';
+      data: { id: number; waitingNumber: number; registeredAt?: string };
+    };
 
 export type NotificationCodeType =
   | 'WAITING_CONFIRMED'
@@ -15,7 +17,5 @@ export default interface NotificationType {
   message: string;
   createdAt: string;
   isRead: boolean;
-  relatedResource: RelatedResourceType;
-  // TODO : 백엔드와 논의 후 필드명 수정
-  notificationTitle: string;
+  relatedResource: RelatedResource[];
 }
