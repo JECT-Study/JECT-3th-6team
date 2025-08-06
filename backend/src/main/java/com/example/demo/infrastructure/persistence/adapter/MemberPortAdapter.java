@@ -31,4 +31,9 @@ public class MemberPortAdapter implements MemberPort {
         var savedEntity = memberJpaRepository.save(entity);
         return memberEntityMapper.toDomain(savedEntity);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        memberJpaRepository.deleteById(id);
+    }
 } 
