@@ -81,4 +81,11 @@ public class WaitingPortAdapter implements WaitingPort {
                 return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
             });
     }
+
+    @Override
+    public int countWaitingBefore(Long popupId, Integer waitingNumber) {
+        return waitingJpaRepository.countByPopupIdAndWaitingNumberLessThanAndStatus(
+            popupId, waitingNumber, WaitingStatus.WAITING
+        );
+    }
 } 

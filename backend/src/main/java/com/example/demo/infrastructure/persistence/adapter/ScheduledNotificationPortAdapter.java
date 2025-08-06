@@ -82,7 +82,9 @@ public class ScheduledNotificationPortAdapter implements ScheduledNotificationPo
         return new ScheduledNotification(
                 entity.getId(),
                 notification,
-                entity.getTrigger()
+                entity.getTrigger(),
+                entity.getEnterNotificationSentAt(),
+                entity.getActualEnterTime()
         );
     }
 
@@ -132,5 +134,15 @@ public class ScheduledNotificationPortAdapter implements ScheduledNotificationPo
     private DomainEvent<Waiting> createWaitingEvent(NotificationEntityMapper.SourceEventContext<Waiting> context) {
         WaitingEventType eventType = WaitingEventType.valueOf(context.eventType());
         return new WaitingDomainEvent(context.source(), eventType);
+    }
+
+    @Override
+    public void updateEnterNotificationSentAt(Long scheduledNotificationId, LocalDateTime sentAt) {
+        scheduledNotificationJpaRepository.updateEnterNotificationSentAt(scheduledNotificationId, sentAt);
+    }
+
+    @Override
+    public void updateActualEnterTime(Long waitingId, LocalDateTime actualEnterTime) {
+        scheduledNotificationJpaRepository.updateActualEnterTimeByWaitingId(waitingId, actualEnterTime);
     }
 }

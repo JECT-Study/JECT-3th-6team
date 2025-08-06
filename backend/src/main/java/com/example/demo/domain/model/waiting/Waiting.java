@@ -23,7 +23,9 @@ public record Waiting(
         Integer peopleCount,
         Integer waitingNumber,
         WaitingStatus status,
-        LocalDateTime registeredAt
+        LocalDateTime registeredAt,
+        LocalDateTime enterNotificationSentAt,
+        LocalDateTime actualEnterTime
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
@@ -50,5 +52,15 @@ public record Waiting(
         if (!NAME_PATTERN.matcher(waitingPersonName).matches()) {
             throw new BusinessException(ErrorType.INVALID_WAITING_PERSON_NAME, waitingPersonName);
         }
+    }
+
+    /**
+     * 기존 생성자와 호환성을 위한 편의 생성자
+     */
+    public Waiting(Long id, Popup popup, String waitingPersonName, Member member,
+                   String contactEmail, Integer peopleCount, Integer waitingNumber,
+                   WaitingStatus status, LocalDateTime registeredAt) {
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount,
+             waitingNumber, status, registeredAt, null, null);
     }
 }

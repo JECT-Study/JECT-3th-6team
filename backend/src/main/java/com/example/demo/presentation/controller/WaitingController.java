@@ -54,4 +54,20 @@ public class WaitingController {
 
         return ResponseEntity.ok(new ApiResponse<>("성공적으로 조회되었습니다.", response));
     }
+
+    /**
+     * 입장 처리 - 웨이팅 상태를 VISITED로 변경
+     *
+     * @param principal 인증된 사용자 정보
+     * @param waitingId 입장 처리할 웨이팅 ID
+     * @return 성공 응답
+     */
+    @PatchMapping("/waitings/{waitingId}/enter")
+    public ResponseEntity<ApiResponse<Void>> processWaitingEnter(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long waitingId
+    ) {
+        waitingService.processWaitingEnter(waitingId, principal.getId());
+        return ResponseEntity.ok(new ApiResponse<>("입장 처리 완료", null));
+    }
 } 

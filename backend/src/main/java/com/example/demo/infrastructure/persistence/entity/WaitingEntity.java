@@ -5,6 +5,8 @@ import com.example.demo.domain.model.waiting.WaitingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 /**
  * 대기 엔티티.
  * 팝업에 대한 대기 정보를 저장한다.
@@ -43,4 +45,10 @@ public class WaitingEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private WaitingStatus status;
+
+    @Column(name = "enter_notification_sent_at")
+    private LocalDateTime enterNotificationSentAt;
+
+    @Column(name = "actual_enter_time")
+    private LocalDateTime actualEnterTime;
 } 

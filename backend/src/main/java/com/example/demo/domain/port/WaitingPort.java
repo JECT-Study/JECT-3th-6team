@@ -37,5 +37,14 @@ public interface WaitingPort {
      */
     Integer getNextWaitingNumber(Long popupId);
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
+
+    /**
+     * 특정 팝업에서 지정된 대기 번호보다 앞선 순번의 WAITING 상태 대기자 수를 조회
+     *
+     * @param popupId 팝업 ID
+     * @param waitingNumber 기준이 되는 대기 번호
+     * @return 앞선 순번의 WAITING 상태 대기자 수
+     */
+    int countWaitingBefore(Long popupId, Integer waitingNumber);
     
 } 

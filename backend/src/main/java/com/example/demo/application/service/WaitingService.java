@@ -14,8 +14,10 @@ import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.MemberPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.PopupPort;
+import com.example.demo.domain.port.ScheduledNotificationPort;
 import com.example.demo.domain.port.WaitingPort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import com.example.demo.domain.model.CursorResult;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,6 +36,7 @@ public class WaitingService {
     private final PopupPort popupPort;
     private final MemberPort memberPort;
     private final NotificationPort notificationPort;
+    private final ScheduledNotificationPort scheduledNotificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
     private final WaitingNotificationService waitingNotificationService;
 
@@ -129,5 +133,49 @@ public class WaitingService {
                 .toList();
 
         return new VisitHistoryCursorResponse(waitingResponses, lastId, hasNext);
+    }
+
+    /**
+     * 입장 처리 - 웨이팅 상태를 VISITED로 변경하고 실제 입장 시간을 기록
+     *
+     * @param waitingId 웨이팅 ID
+     * @param memberId 회원 ID (권한 확인용)
+     */
+    @Transactional
+    public void processWaitingEnter(Long waitingId, Long memberId) {
+        // 1. 웨이팅 조회 및 권한 확인
+        Waiting waiting = waitingPort.findByQuery(new WaitingQuery(waitingId, null, null, null, null, null))
+            .stream().findFirst()
+            .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(waitingId)));
+
+        if (!waiting.member().id().equals(memberId)) {
+            throw new BusinessException(ErrorType.ACCESS_DENIED_WAITING, String.valueOf(waitingId));
+        }
+
+        // 2. 이미 입장 처리된 경우 무시
+        if (waiting.status() == WaitingStatus.VISITED) {
+            log.debug("이미 입장 처리된 웨이팅입니다 - 웨이팅 ID: {}", waitingId);
+            return;
+        }
+
+        // 3. 상태를 VISITED로 변경 및 입장 시간 기록
+        LocalDateTime now = LocalDateTime.now();
+        Waiting updatedWaiting = new Waiting(
+            waiting.id(), waiting.popup(), waiting.waitingPersonName(), waiting.member(),
+            waiting.contactEmail(), waiting.peopleCount(), waiting.waitingNumber(),
+            WaitingStatus.VISITED, waiting.registeredAt(),
+            waiting.enterNotificationSentAt(), now // actualEnterTime 설정
+        );
+
+        waitingPort.save(updatedWaiting);
+
+        // 4. 해당 웨이팅의 스케줄된 알림들의 실제 입장 시간 업데이트
+        try {
+            scheduledNotificationPort.updateActualEnterTime(waitingId, now);
+            log.info("입장 처리 완료 - 웨이팅 ID: {}, 멤버 ID: {}, 입장 시간: {}", waitingId, memberId, now);
+        } catch (Exception e) {
+            log.error("스케줄된 알림 업데이트 실패 - 웨이팅 ID: {}", waitingId, e);
+            // 입장 처리는 성공했으므로 예외를 던지지 않음
+        }
     }
 } 

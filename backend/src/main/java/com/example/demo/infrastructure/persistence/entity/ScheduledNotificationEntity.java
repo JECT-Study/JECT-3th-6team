@@ -44,4 +44,10 @@ public class ScheduledNotificationEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ScheduledNotificationTrigger trigger;
+
+    @Column(name = "enter_notification_sent_at")
+    private LocalDateTime enterNotificationSentAt;
+
+    @Column(name = "actual_enter_time")
+    private LocalDateTime actualEnterTime;
 } 

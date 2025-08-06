@@ -5,6 +5,7 @@ import com.example.demo.domain.model.notification.ScheduledNotification;
 import com.example.demo.domain.model.notification.ScheduledNotificationQuery;
 import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.ScheduledNotificationPort;
@@ -78,22 +79,19 @@ public class ScheduledNotificationBatchService {
 
     /**
      * 입장 시작 트리거 조건 체크 정책
-     * 정책: 예상 입장 시간이 현재 시간을 지났는가?
+     * 정책: 자신보다 선순위에 WAITING 상태인 대기자가 없는가?
      */
     private boolean checkEnterNowTrigger(ScheduledNotification scheduledNotification) {
         try {
-            // 알림에서 웨이팅 정보 추출
             Waiting waiting = extractWaitingFromNotification(scheduledNotification);
             if (waiting == null) return false;
 
-            // 예상 입장 시간 계산
-            LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-
-            // 현재 시간이 예상 입장 시간을 지났는지 확인
-            boolean triggered = LocalDateTime.now().isAfter(estimatedEnterTime);
+            // 자신보다 선순위에 WAITING 상태인 대기자가 있는지 확인
+            int waitingCount = waitingPort.countWaitingBefore(waiting.popup().id(), waiting.waitingNumber());
+            boolean triggered = waitingCount == 0; // 선순위 대기자가 없으면 입장 알림
 
             if (triggered) {
-                log.debug("입장 시작 트리거 조건 만족 - 웨이팅 ID: {}, 예상 입장 시간: {}", waiting.id(), estimatedEnterTime);
+                log.debug("입장 시작 트리거 조건 만족 - 웨이팅 ID: {}, 현재 순번: {}", waiting.id(), waiting.waitingNumber());
             }
 
             return triggered;
@@ -106,17 +104,18 @@ public class ScheduledNotificationBatchService {
 
     /**
      * 입장 시간 초과 트리거 조건 체크 정책
-     * 정책: 예상 입장 시간 + 5분이 현재 시간을 지났는가?
+     * 정책: 입장 알림 발송 후 5분 초과 시 (아직 VISITED 상태가 아닌 경우)
      */
     private boolean checkEnterTimeOverTrigger(ScheduledNotification scheduledNotification) {
         try {
+            LocalDateTime enterNotificationSentAt = scheduledNotification.getEnterNotificationSentAt();
+            if (enterNotificationSentAt == null) return false; // 입장 알림이 아직 발송되지 않음
+
             Waiting waiting = extractWaitingFromNotification(scheduledNotification);
             if (waiting == null) return false;
+            if (waiting.status() == WaitingStatus.VISITED) return false; // 이미 입장 처리됨
 
-            // 예상 입장 시간 + 5분 계산
-            LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-            LocalDateTime timeOverThreshold = estimatedEnterTime.plusMinutes(5);
-
+            LocalDateTime timeOverThreshold = enterNotificationSentAt.plusMinutes(5);
             boolean triggered = LocalDateTime.now().isAfter(timeOverThreshold);
 
             if (triggered) {
@@ -133,20 +132,18 @@ public class ScheduledNotificationBatchService {
 
     /**
      * 리뷰 요청 트리거 조건 체크 정책
-     * 정책: 예상 입장 시간 + 2시간이 현재 시간을 지났는가?
+     * 정책: 실제 입장 처리(VISITED 상태) + 2시간 후
      */
     private boolean checkReviewRequestTrigger(ScheduledNotification scheduledNotification) {
         try {
-            Waiting waiting = extractWaitingFromNotification(scheduledNotification);
-            if (waiting == null) return false;
+            LocalDateTime actualEnterTime = scheduledNotification.getActualEnterTime();
+            if (actualEnterTime == null) return false; // 아직 입장하지 않음
 
-            // 예상 입장 시간 + 2시간 계산
-            LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-            LocalDateTime reviewRequestTime = estimatedEnterTime.plusHours(2);
-
+            LocalDateTime reviewRequestTime = actualEnterTime.plusHours(2);
             boolean triggered = LocalDateTime.now().isAfter(reviewRequestTime);
 
             if (triggered) {
+                Waiting waiting = extractWaitingFromNotification(scheduledNotification);
                 log.debug("리뷰 요청 트리거 조건 만족 - 웨이팅 ID: {}, 리뷰 요청 시간: {}", waiting.id(), reviewRequestTime);
             }
 
@@ -160,21 +157,21 @@ public class ScheduledNotificationBatchService {
 
     /**
      * 3팀 전 알림 트리거 조건 체크 정책
-     * 정책: 현재 웨이팅이 4번째 순번(앞에 3팀)에 도달했는가?
+     * 정책: 자신보다 선순위의 WAITING 상태 대기자가 3명 이하인가?
      */
     private boolean checkEnter3TeamsBeforeTrigger(ScheduledNotification scheduledNotification) {
         try {
             Waiting waiting = extractWaitingFromNotification(scheduledNotification);
             if (waiting == null) return false;
 
-            // 현재 실제 대기 순번 계산
-            int currentPosition = calculateCurrentWaitingPosition(waiting);
+            // 자신보다 선순위의 WAITING 상태 대기자 수 확인
+            int waitingAhead = waitingPort.countWaitingBefore(waiting.popup().id(), waiting.waitingNumber());
 
-            // 4번째 순번(앞에 3팀)에 도달했는지 확인
-            boolean triggered = currentPosition <= 4;
+            // 앞에 3팀 이하가 남았는지 확인
+            boolean triggered = waitingAhead <= 3;
 
             if (triggered) {
-                log.debug("3팀 전 알림 트리거 조건 만족 - 웨이팅 ID: {}, 현재 순번: {}", waiting.id(), currentPosition);
+                log.debug("3팀 전 알림 트리거 조건 만족 - 웨이팅 ID: {}, 앞선 대기자: {}명", waiting.id(), waitingAhead);
             }
 
             return triggered;
@@ -196,7 +193,17 @@ public class ScheduledNotificationBatchService {
             // 1. 실제 알림 저장 (DB 저장)
             Notification savedNotification = notificationPort.save(notification);
 
-            // 2. SSE를 통한 실시간 알림 발송 (연결된 클라이언트가 있는 경우에만)
+            // 2. 입장 알림인 경우 발송 시간 기록
+            if (scheduledNotification.getScheduledNotificationTrigger() == ScheduledNotificationTrigger.WAITING_ENTER_NOW) {
+                try {
+                    scheduledNotificationPort.updateEnterNotificationSentAt(scheduledNotification.getId(), LocalDateTime.now());
+                    log.debug("입장 알림 발송 시간 기록 완료 - 스케줄 ID: {}", scheduledNotification.getId());
+                } catch (Exception e) {
+                    log.warn("입장 알림 발송 시간 기록 실패 - 스케줄 ID: {}", scheduledNotification.getId(), e);
+                }
+            }
+
+            // 3. SSE를 통한 실시간 알림 발송 (연결된 클라이언트가 있는 경우에만)
             if (notificationEventPort.isConnected(memberId)) {
                 notificationEventPort.sendRealTimeNotification(memberId, savedNotification);
                 log.debug("실시간 알림 발송 완료 - 멤버 ID: {}, 알림 ID: {}", memberId, savedNotification.getId());
