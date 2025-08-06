@@ -37,5 +37,6 @@ public interface WaitingPort {
      */
     Integer getNextWaitingNumber(Long popupId);
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
+
     
 } 

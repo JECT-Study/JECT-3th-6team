@@ -43,4 +43,13 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
     Optional<Integer> findMaxWaitingNumberByPopupId(@Param("popupId") Long popupId);
 
     Optional<WaitingEntity> findByMemberIdAndPopupId(Long memberId, Long popupId);
+
+    /**
+     * 특정 팝업의 대기중인 모든 대기를 대기번호 순으로 조회한다.
+     *
+     * @param popupId 팝업 ID
+     * @param status 대기 상태
+     * @return 대기 엔티티 목록 (대기번호 순으로 정렬)
+     */
+    List<WaitingEntity> findByPopupIdAndStatusOrderByWaitingNumber(Long popupId, WaitingStatus status);
 } 

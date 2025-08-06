@@ -45,6 +45,16 @@ public class WaitingPortAdapter implements WaitingPort {
                     .collect(Collectors.toList());
         }
 
+        // 팝업별 대기 조회
+        if (query.popupId() != null) {
+            List<WaitingEntity> entities = waitingJpaRepository.findByPopupIdAndStatusOrderByWaitingNumber(
+                    query.popupId(), query.status());
+            return entities.stream()
+                    .map(this::mapEntityToDomain)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+
         List<WaitingEntity> waitingEntities = switch (query.sortOrder()) {
             case RESERVED_FIRST_THEN_DATE_DESC ->
                     waitingJpaRepository.findByMemberIdOrderByStatusReservedFirstThenCreatedAtDesc(
@@ -81,4 +91,5 @@ public class WaitingPortAdapter implements WaitingPort {
                 return Optional.of(waitingEntityMapper.toDomain(entity, popup, member));
             });
     }
+
 } 

@@ -100,7 +100,7 @@ public class WaitingService {
         
         // waitingId가 있으면 단건 조회
         if (waitingId != null) {
-            Waiting waiting = waitingPort.findByQuery(new WaitingQuery(waitingId, null, null, null, null, null))
+            Waiting waiting = waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId))
                     .stream()
                     .findFirst()
                     .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(waitingId)));
@@ -138,7 +138,7 @@ public class WaitingService {
     @Transactional
     public void makeVisit(WaitingMakeVisitRequest request) {
         // 1. 대기 정보 조회
-        WaitingQuery query = new WaitingQuery(request.waitingId(), null, null, null, null, null);
+        WaitingQuery query = WaitingQuery.forWaitingId(request.waitingId());
         Waiting waiting = waitingPort.findByQuery(query)
                 .stream()
                 .findFirst()
@@ -147,7 +147,42 @@ public class WaitingService {
         // 2. 입장 처리
         Waiting enteredWaiting = waiting.enter();
 
-        // 3. 저장
+        // 3. 입장 처리된 대기 저장
         waitingPort.save(enteredWaiting);
+
+        // 4. 같은 팝업의 나머지 대기자들 순번 앞당기기
+        reorderWaitingNumbers(waiting.popup().getId(), waiting.waitingNumber());
+    }
+
+    /**
+     * 특정 팝업의 대기 순번을 앞당긴다.
+     * 
+     * @param popupId 팝업 ID
+     * @param enteredWaitingNumber 입장 처리된 대기 번호
+     */
+    private void reorderWaitingNumbers(Long popupId, Integer enteredWaitingNumber) {
+        // 1. 해당 팝업의 모든 대기중인 대기 조회
+        WaitingQuery popupQuery = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
+        List<Waiting> waitingList = waitingPort.findByQuery(popupQuery);
+        
+        // 2. 입장 처리된 대기번호보다 큰 번호들만 필터링하여 순번 앞당기기
+        List<Waiting> reorderedWaitings = waitingList.stream()
+                .filter(w -> w.waitingNumber() > enteredWaitingNumber)
+                .map(w -> new Waiting(
+                        w.id(),
+                        w.popup(),
+                        w.waitingPersonName(),
+                        w.member(),
+                        w.contactEmail(),
+                        w.peopleCount(),
+                        w.waitingNumber() - 1,  // 순번 1 감소
+                        w.status(),
+                        w.registeredAt(),
+                        w.enteredAt()
+                ))
+                .toList();
+        
+        // 3. 변경된 대기들 모두 저장
+        reorderedWaitings.forEach(waitingPort::save);
     }
 } 
