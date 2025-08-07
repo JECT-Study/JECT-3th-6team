@@ -4,8 +4,9 @@ import NotificationType from '@/features/notification/type/Notification';
 export const getStoreNameFromNotification = (
   notification: NotificationType
 ) => {
-  const { relatedResource } = notification;
-  const popupObject = relatedResource.find(
+  const { relatedResources } = notification;
+
+  const popupObject = relatedResources?.find(
     resource => resource.type === 'POPUP'
   );
   return popupObject?.data.storeName;

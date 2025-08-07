@@ -17,5 +17,5 @@ export default interface NotificationType {
   message: string;
   createdAt: string;
   isRead: boolean;
-  relatedResource: RelatedResourceType[];
+  relatedResources: RelatedResourceType[];
 }
