@@ -97,10 +97,7 @@ public class WaitingNotificationService {
         // 2. 입장 시간 초과 알림 (ENTER_TIME_OVER 정책) 
         schedules.add(createEnterTimeOverSchedule(waiting, estimatedEnterTime));
 
-        // 3. 리뷰 요청 알림 (REVIEW_REQUEST 정책)
-        schedules.add(createReviewRequestSchedule(waiting, estimatedEnterTime));
-
-        // 4. 3팀 전 알림 (ENTER_3TEAMS_BEFORE 정책) - 동적 트리거
+        // 3. 3팀 전 알림 (ENTER_3TEAMS_BEFORE 정책) - 동적 트리거
         schedules.add(createEnter3TeamsBeforeSchedule(waiting));
 
         return schedules;
@@ -134,21 +131,6 @@ public class WaitingNotificationService {
                 .build();
 
         return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_TIME_OVER);
-    }
-
-    /**
-     * 리뷰 요청 알림 스케줄 생성 (REVIEW_REQUEST 정책)
-     * 정책: 입장 시간 + 2시간 후 "방문하신 팝업은 어떠셨나요?" 알림
-     */
-    private ScheduledNotification createReviewRequestSchedule(Waiting waiting, LocalDateTime enterTime) {
-        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.REVIEW_REQUEST);
-        Notification notification = Notification.builder()
-                .member(waiting.member())
-                .event(event)
-                .content("방문하신 팝업은 어떠셨나요? 소중한 후기를 남겨주세요!")
-                .build();
-
-        return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_REVIEW_REQUEST);
     }
 
     /**

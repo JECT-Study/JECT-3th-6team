@@ -5,6 +5,7 @@ import com.example.demo.domain.model.notification.ScheduledNotification;
 import com.example.demo.domain.model.notification.ScheduledNotificationQuery;
 import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.ScheduledNotificationPort;
@@ -71,33 +72,19 @@ public class ScheduledNotificationBatchService {
         return switch (trigger) {
             case WAITING_ENTER_NOW -> checkEnterNowTrigger(scheduledNotification);
             case WAITING_ENTER_TIME_OVER -> checkEnterTimeOverTrigger(scheduledNotification);
-            case WAITING_REVIEW_REQUEST -> checkReviewRequestTrigger(scheduledNotification);
             case WAITING_ENTER_3TEAMS_BEFORE -> checkEnter3TeamsBeforeTrigger(scheduledNotification);
         };
     }
 
     /**
      * 입장 시작 트리거 조건 체크 정책
-     * 정책: 예상 입장 시간이 현재 시간을 지났는가?
+     * 정책: 현재 입장이 가능한 순번인가?
      */
     private boolean checkEnterNowTrigger(ScheduledNotification scheduledNotification) {
         try {
             // 알림에서 웨이팅 정보 추출
             Waiting waiting = extractWaitingFromNotification(scheduledNotification);
-            if (waiting == null) return false;
-
-            // 예상 입장 시간 계산
-            LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-
-            // 현재 시간이 예상 입장 시간을 지났는지 확인
-            boolean triggered = LocalDateTime.now().isAfter(estimatedEnterTime);
-
-            if (triggered) {
-                log.debug("입장 시작 트리거 조건 만족 - 웨이팅 ID: {}, 예상 입장 시간: {}", waiting.id(), estimatedEnterTime);
-            }
-
-            return triggered;
-
+            return waiting != null && waiting.waitingNumber() == 0 && waiting.status() == WaitingStatus.WAITING;
         } catch (Exception e) {
             log.error("입장 시작 트리거 조건 체크 실패", e);
             return false;
@@ -106,54 +93,18 @@ public class ScheduledNotificationBatchService {
 
     /**
      * 입장 시간 초과 트리거 조건 체크 정책
-     * 정책: 예상 입장 시간 + 5분이 현재 시간을 지났는가?
+     * 정책: 입장 가능 시간 + 5분이 현재 시간을 지났는가?
      */
     private boolean checkEnterTimeOverTrigger(ScheduledNotification scheduledNotification) {
         try {
             Waiting waiting = extractWaitingFromNotification(scheduledNotification);
             if (waiting == null) return false;
 
-            // 예상 입장 시간 + 5분 계산
-            LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-            LocalDateTime timeOverThreshold = estimatedEnterTime.plusMinutes(5);
+            LocalDateTime canEnterAt = waiting.canEnterAt();
 
-            boolean triggered = LocalDateTime.now().isAfter(timeOverThreshold);
-
-            if (triggered) {
-                log.debug("입장 시간 초과 트리거 조건 만족 - 웨이팅 ID: {}, 초과 기준 시간: {}", waiting.id(), timeOverThreshold);
-            }
-
-            return triggered;
-
+            return canEnterAt.plusMinutes(5).isBefore(LocalDateTime.now());
         } catch (Exception e) {
             log.error("입장 시간 초과 트리거 조건 체크 실패", e);
-            return false;
-        }
-    }
-
-    /**
-     * 리뷰 요청 트리거 조건 체크 정책
-     * 정책: 예상 입장 시간 + 2시간이 현재 시간을 지났는가?
-     */
-    private boolean checkReviewRequestTrigger(ScheduledNotification scheduledNotification) {
-        try {
-            Waiting waiting = extractWaitingFromNotification(scheduledNotification);
-            if (waiting == null) return false;
-
-            // 예상 입장 시간 + 2시간 계산
-            LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-            LocalDateTime reviewRequestTime = estimatedEnterTime.plusHours(2);
-
-            boolean triggered = LocalDateTime.now().isAfter(reviewRequestTime);
-
-            if (triggered) {
-                log.debug("리뷰 요청 트리거 조건 만족 - 웨이팅 ID: {}, 리뷰 요청 시간: {}", waiting.id(), reviewRequestTime);
-            }
-
-            return triggered;
-
-        } catch (Exception e) {
-            log.error("리뷰 요청 트리거 조건 체크 실패", e);
             return false;
         }
     }

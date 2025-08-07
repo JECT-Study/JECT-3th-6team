@@ -149,35 +149,23 @@ public class WaitingService {
         waitingPort.save(enteredWaiting);
 
         // 4. 같은 팝업의 나머지 대기자들 순번 앞당기기
-        reorderWaitingNumbers(waiting.popup().getId(), waiting.waitingNumber());
+        reorderWaitingNumbers(waiting.popup().getId());
     }
 
     /**
      * 특정 팝업의 대기 순번을 앞당긴다.
      *
-     * @param popupId              팝업 ID
-     * @param enteredWaitingNumber 입장 처리된 대기 번호
+     * @param popupId 팝업 ID
      */
-    private void reorderWaitingNumbers(Long popupId, Integer enteredWaitingNumber) {
+    private void reorderWaitingNumbers(Long popupId) {
         // 1. 해당 팝업의 모든 대기중인 대기 조회
         WaitingQuery popupQuery = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
         List<Waiting> waitingList = waitingPort.findByQuery(popupQuery);
 
         // 2. 입장 처리된 대기번호보다 큰 번호들만 필터링하여 순번 앞당기기
         List<Waiting> reorderedWaitings = waitingList.stream()
-                .filter(w -> w.waitingNumber() > enteredWaitingNumber)
-                .map(w -> new Waiting(
-                        w.id(),
-                        w.popup(),
-                        w.waitingPersonName(),
-                        w.member(),
-                        w.contactEmail(),
-                        w.peopleCount(),
-                        w.waitingNumber() - 1,  // 순번 1 감소
-                        w.status(),
-                        w.registeredAt(),
-                        w.enteredAt()
-                ))
+                .filter(w -> w.waitingNumber() > 0)
+                .map(Waiting::minusWaitingNumber)
                 .toList();
 
         // 3. 변경된 대기들 모두 저장
