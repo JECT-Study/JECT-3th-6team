@@ -1,4 +1,4 @@
-type RelatedResource =
+export type RelatedResourceType =
   | { type: 'POPUP'; data: { id: number; storeName: string; address?: string } }
   | {
       type: 'WAITING';
@@ -17,5 +17,5 @@ export default interface NotificationType {
   message: string;
   createdAt: string;
   isRead: boolean;
-  relatedResource: RelatedResource[];
+  relatedResource: RelatedResourceType[];
 }

@@ -6,6 +6,7 @@ import { tv } from 'tailwind-variants';
 import formatRelativeTime from '../lib/formatRelativeTime';
 import { cn } from '@/lib/utils';
 import { HTMLAttributes } from 'react';
+import { getStoreNameFromNotification } from '@/features/notification/lib/getStoreNameFromNotification';
 
 interface NotificationCardProps extends HTMLAttributes<HTMLDivElement> {
   data: NotificationType;
@@ -21,8 +22,8 @@ export default function NotificationCard({
   onClick,
   ...rest
 }: NotificationCardProps) {
-  const { notificationTitle, message, isRead, createdAt } = data;
-
+  const { message, isRead, createdAt } = data;
+  const notificationTitle = getStoreNameFromNotification(data);
   const style = tv({
     base: 'relative rounded-[10px] flex flex-col gap-y-[10px] p-[16px] hover:bg-sub2 bg-white',
     variants: {

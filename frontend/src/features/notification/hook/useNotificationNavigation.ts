@@ -1,14 +1,24 @@
 import { useRouter } from 'next/navigation';
-import { NotificationCodeType } from '@/features/notification/type/Notification';
+import {
+  NotificationCodeType,
+  RelatedResourceType,
+} from '@/features/notification/type/Notification';
 import NotificationCodeRouterMap from '@/features/notification/lib/notificationRouter';
+import { getIdFromNotification } from '@/features/notification/lib/getIdFromNotification';
 
 export default function useNotificationNavigation() {
   const router = useRouter();
 
-  return (code: NotificationCodeType, id: number | null) => {
-    if (!(code === 'ENTER_3TEAMS_BEFORE') && id === null) return;
+  return (
+    code: NotificationCodeType,
+    relatedResource: RelatedResourceType[]
+  ) => {
+    const waitingId = getIdFromNotification({
+      relatedResource,
+      type: 'WAITING',
+    });
 
-    const nextPath = NotificationCodeRouterMap[code]?.(id!);
+    const nextPath = NotificationCodeRouterMap[code]?.(waitingId!);
     if (nextPath) router.push(nextPath);
   };
 }

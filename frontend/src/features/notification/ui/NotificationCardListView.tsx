@@ -21,14 +21,14 @@ export default function NotificationCardListView({
       {data.map(notification => {
         const {
           notificationId,
-          relatedResource: { id },
+          relatedResource,
           notificationCode: code,
         } = notification;
         return (
           <NotificationCard
             data={notification}
             key={notificationId}
-            onClick={() => handleClick(code, id)}
+            onClick={() => handleClick(code, relatedResource)}
             onClose={() => console.log('close')}
           />
         );
