@@ -6,15 +6,18 @@ import getNotificationsApi, {
 import { useQueryEffects } from '@/shared/hook/useQueryEffect';
 import handleNetworkError from '@/shared/lib/handleNetworkError';
 
-export default function useNotificationList() {
+export default function useNotificationList({
+  readStatus = 'ALL',
+  sort = 'UNREAD_FIRST',
+}: Partial<Pick<NotificationRequest, 'readStatus' | 'sort'>> = {}) {
   const initialRequest: Omit<NotificationRequest, 'lastNotificationId'> = {
     size: 10,
-    readStatus: 'ALL',
-    sort: 'UNREAD_FIRST',
+    readStatus: readStatus,
+    sort: sort,
   };
 
   const query = useSuspenseInfiniteQuery({
-    queryKey: ['notification', 'list'],
+    queryKey: ['notification', 'list', { readStatus, sort }],
     queryFn: ({ pageParam = null }) => {
       const request =
         pageParam !== null
@@ -27,7 +30,7 @@ export default function useNotificationList() {
     initialPageParam: null,
     gcTime: 1000 * 60 * 5, // 5분
     staleTime: 1000 * 60, // 1분
-    retry: 1,
+    retry: false,
   });
 
   // TODO : 중복되는 로직 공통으로 빼기
