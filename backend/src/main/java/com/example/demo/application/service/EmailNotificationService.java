@@ -27,7 +27,7 @@ public class EmailNotificationService {
      * @param request 입장 알림 요청 정보
      */
     public void sendWaitingEntryNotification(WaitingEntryNotificationRequest request) {
-        String subject = String.format("[%s] 입장 알림", request.storeName());
+        String subject = String.format("[%s] 지금 입장해주세요!", request.storeName());
         String body = emailTemplateService.buildWaitingEntryTemplate(request);
 
         EmailMessage message = new EmailMessage(request.memberEmail(), subject, body);

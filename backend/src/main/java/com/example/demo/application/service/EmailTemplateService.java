@@ -27,7 +27,7 @@ public class EmailTemplateService {
         return """
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <h2 style="color: #333; margin: 0;">[%s] 입장 알림</h2>
+                    <h2 style="color: #333; margin: 0;">[%s] 지금 입장해주세요!</h2>
                     <div style="margin: 20px 0;">
                         <div style="display: inline-block; background: linear-gradient(45deg, #FF6B35, #FFD93D); 
                                    width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px;"></div>
