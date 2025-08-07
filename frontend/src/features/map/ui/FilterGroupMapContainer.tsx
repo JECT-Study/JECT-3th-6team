@@ -40,11 +40,11 @@ export default function FilterGroupMapContainer({
   ];
 
   return (
-    <div className="w-full h-screen pb-[120px] relative">
+    <div className="w-full h-screen pb-[100px] relative">
       {/* 검색 포커스 시 지도 영역만 오버레이 */}
       {isSearchFocused && (
-        <div className="absolute top-0 left-0 right-0 bottom-[120px] z-30 bg-white">
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] h-75px] rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3">
+        <div className="absolute top-0 left-0 right-0 bottom-[100px] z-30 bg-white">
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] h-[75px] rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3">
             <SearchInput
               id={'search-input'}
               value={searchValue}
