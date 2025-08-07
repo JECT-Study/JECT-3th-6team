@@ -123,12 +123,12 @@ public record Waiting(
             throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
         }
         return new Waiting(id, popup, waitingPersonName, member, contactEmail, peopleCount,
-                waitingNumber, WaitingStatus.VISITED, registeredAt, LocalDateTime.now(), null);
+                waitingNumber, WaitingStatus.VISITED, registeredAt, LocalDateTime.now(), canEnterAt);
     }
 
     public Waiting minusWaitingNumber() {
         LocalDateTime canEnterAt = waitingNumber == 1 ? LocalDateTime.now() : null;
-        
+
         return new Waiting(
                 id,
                 popup,
