@@ -25,4 +25,11 @@ public interface MemberPort {
      * @return 저장된 회원 정보
      */
     Member save(Member member);
+
+    /**
+     * 회원 정보를 삭제한다.
+     *
+     * @param id 회원 ID
+     */
+    void deleteById(Long id);
 } 

@@ -1,17 +1,26 @@
-import getPopupListApi from '@/entities/popup/api/getPopupListApi';
-import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
+'use client';
 
-export default async function FilteredPopupList() {
-  const data = await getPopupListApi();
+import useFilteredPopupList from '@/entities/popup/hook/useFilteredPopuplist';
+import FilteredPopupListView from './FilteredPopupListView';
+import { useIntersectionObserver } from '@/shared/hook/useIntersectionObserver';
+
+export default function FilteredPopupList() {
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useFilteredPopupList();
+  const lastElementRef = useIntersectionObserver(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
+  if (!data) return null;
 
   return (
-    <div className={'flex flex-col gap-y-2 px-5 pt-4.5  bg-white'}>
-      <h2 className={'font-semibold text-xl text-black '}>찾은 팝업</h2>
-      <div className={'flex flex-col gap-y-3 mt-4 pb-[90px]'}>
-        {data.content.map((popup, index) => (
-          <BadgedPopupCard {...popup} key={index} />
-        ))}
-      </div>
+    <div className="flex flex-col">
+      <FilteredPopupListView data={data.content} />
+      {/* 관찰용 엘리먼트 */}
+      {hasNextPage && (
+        <div ref={lastElementRef} className="h-4 bg-yellow-200" />
+      )}
     </div>
   );
 }

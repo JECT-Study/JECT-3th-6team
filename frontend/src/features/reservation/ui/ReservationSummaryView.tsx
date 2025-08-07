@@ -7,6 +7,7 @@ import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { BottomButtonContainer, StandardButton } from '@/shared/ui';
 import { useRouter } from 'next/navigation';
 import { formatKoreanDateTime } from '@/entities/popup/lib/formatKoreanDateTime';
+import { OnsiteReservationResponse } from '@/features/reservation/type/OnsiteReservationResponse';
 
 type ContentBlockProps = {
   label: string;
@@ -29,13 +30,18 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({
   </div>
 );
 
-export default function ReservationSummaryView() {
+export default function ReservationSummaryView({
+  data,
+}: {
+  data: OnsiteReservationResponse;
+}) {
+  const { name, email, peopleCount, registeredAt } = data;
   const router = useRouter();
   const displayData = [
-    { label: '대기자 명', value: '이윤재' },
-    { label: '대기자 수', value: 3 },
-    { label: '대기자 이메일', value: 'asdf@gmail.coms' },
-    { label: '대기 일자', value: formatKoreanDateTime('2025-06-26T16:00:00') },
+    { label: '대기자 명', value: name },
+    { label: '대기자 수', value: peopleCount },
+    { label: '대기자 이메일', value: email },
+    { label: '대기 일자', value: formatKoreanDateTime(registeredAt) },
   ];
 
   return (

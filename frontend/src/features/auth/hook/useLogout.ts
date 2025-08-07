@@ -2,14 +2,21 @@
 
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/entities/user/lib/useUserStore';
+import postLogoutApi from '@/features/auth/api/postLogoutApi';
 
 export function useLogout() {
   const clearUser = useUserStore(state => state.clearUser);
   const router = useRouter();
 
-  return () => {
-    // ✅ 여기에 logout API 호출 로직 작성
-    clearUser();
-    router.push('/');
+  return async () => {
+    try {
+      await postLogoutApi();
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    } finally {
+      // 서버 응답 성공/실패와 관계없이 로컬 상태 초기화
+      clearUser();
+      router.push('/');
+    }
   };
 }

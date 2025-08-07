@@ -1,4 +1,4 @@
-import { StandardButton } from '@/shared/ui';
+import { ModalContainer, StandardButton } from '@/shared/ui';
 import { OnsiteReservationFormValue } from '@/features/reservation/hook/useForm';
 import React from 'react';
 
@@ -6,6 +6,8 @@ interface ReservationCheckModalProps {
   data: OnsiteReservationFormValue;
   handleModalClose: () => void;
   handleSubmit: () => void;
+  isOpenModal: boolean;
+  isPending: boolean;
 }
 
 interface ContentBlockProps {
@@ -30,6 +32,8 @@ export default function ReservationCheckModal({
   data,
   handleModalClose,
   handleSubmit,
+  isOpenModal,
+  isPending,
 }: ReservationCheckModalProps) {
   const displayData = [
     { label: '예약자 명', value: data.name },
@@ -38,47 +42,51 @@ export default function ReservationCheckModal({
   ];
 
   return (
-    <div
-      className={
-        'max-w-[350px] bg-white px-5 py-5 rounded-[20px] flex flex-col gap-[20px]'
-      }
-    >
-      <h2
-        className={'text-main font-semibold leading-6 text-[17px] text-center'}
-      >
-        확정 전 예약내용을 한번 더 확인해주세요!
-      </h2>
-
-      {/*예약내용*/}
+    <ModalContainer open={isOpenModal}>
       <div
         className={
-          'w-full flex flex-col gap-y-[30px]  justify-center items-center bg-sub2 rounded-2xl py-[22px] px-3'
+          'max-w-[350px] bg-white px-5 py-5 rounded-[20px] flex flex-col gap-[20px]'
         }
       >
-        {displayData.map(({ label, value }, index) => (
-          <ContentBlock label={label} value={value} key={index} />
-        ))}
-      </div>
+        <h2
+          className={
+            'text-main font-semibold leading-6 text-[17px] text-center'
+          }
+        >
+          확정 전 예약내용을 한번 더 확인해주세요!
+        </h2>
 
-      {/*버튼*/}
-      <div className={'w-full flex gap-x-2'}>
-        <StandardButton
-          onClick={handleModalClose}
-          disabled={false}
-          size={'fit'}
-          className={'rounded-[10px]'}
+        {/*예약내용*/}
+        <div
+          className={
+            'w-full flex flex-col gap-y-[30px]  justify-center items-center bg-sub2 rounded-2xl py-[22px] px-3'
+          }
         >
-          수정
-        </StandardButton>
-        <StandardButton
-          onClick={handleSubmit}
-          disabled={false}
-          size={'full'}
-          color={'primary'}
-        >
-          웨이팅 확정
-        </StandardButton>
+          {displayData.map(({ label, value }, index) => (
+            <ContentBlock label={label} value={value} key={index} />
+          ))}
+        </div>
+
+        {/*버튼*/}
+        <div className={'w-full flex gap-x-2'}>
+          <StandardButton
+            onClick={handleModalClose}
+            disabled={false}
+            size={'fit'}
+            className={'rounded-[10px]'}
+          >
+            수정
+          </StandardButton>
+          <StandardButton
+            onClick={handleSubmit}
+            disabled={isPending}
+            size={'full'}
+            color={'primary'}
+          >
+            {isPending ? '예약중' : '웨이팅 확정'}
+          </StandardButton>
+        </div>
       </div>
-    </div>
+    </ModalContainer>
   );
 }
