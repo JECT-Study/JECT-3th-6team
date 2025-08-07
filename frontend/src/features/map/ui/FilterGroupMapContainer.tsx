@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
@@ -10,6 +10,8 @@ import KeywordFilterPreview, {
   KeywordChip,
 } from '@/features/filtering/ui/KeywordFilterPreview';
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
+import useSearchMyLocation from '@/features/map/hook/useSearchMyLocation';
+import useMapSearch from '@/features/map/hook/useMapSearch';
 
 interface MapContentProps {
   center: { lat: number; lng: number };
@@ -22,64 +24,20 @@ export default function FilterGroupMapContainer({
 }: MapContentProps) {
   const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
   const { popupType, category } = filter.keyword;
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
   const mapRef = useRef<any>(null);
+  const { handleMoveToCurrentLocation } = useSearchMyLocation();
+  const {
+    searchValue,
+    isSearchFocused,
+    handleSearchFocus,
+    handleSearchBlur,
+    handleChange,
+  } = useMapSearch();
 
   const keywords: KeywordChip[] = [
     ...toKeywordChips(popupType, 'category'),
     ...toKeywordChips(category, 'category'),
   ];
-
-  const handleSearchFocus = () => {
-    setIsSearchFocused(true);
-  };
-
-  const handleSearchBlur = () => {
-    setIsSearchFocused(false);
-  };
-
-  const handleChange = (value: string) => {
-    setSearchValue(value);
-    // TODO : 검색 로직 구현
-    console.log('search', value);
-  };
-
-  const handleMoveToCurrentLocation = () => {
-    if (mapRef.current) {
-      const map = mapRef.current;
-      if (map && map.panTo) {
-        // 현재 위치 정보를 가져와서 지도 이동
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            const currentPos = new window.kakao.maps.LatLng(
-              position.coords.latitude,
-              position.coords.longitude
-            );
-            // const currentPos = {
-            //   lat: position.coords.latitude,
-            //   lng: position.coords.longitude,
-            // };
-            map.panTo(currentPos);
-          },
-          error => {
-            if (error.code === error.PERMISSION_DENIED) {
-              alert(
-                '위치 권한이 필요합니다. 브라우저 설정에서 위치 권한을 허용해주세요.'
-              );
-            } else {
-              alert('현재 위치를 가져올 수 없습니다.');
-            }
-          },
-          {
-            enableHighAccuracy: true, // 높은 정확도
-            timeout: 10000, // 10초 내로 위치 정보 얻지 못하면 타임아웃 에러 발생
-            maximumAge: 60000, // 1분 이내 캐시된 위치 사용
-          }
-        );
-      }
-    }
-  };
 
   return (
     <div className="w-full h-screen pb-[120px] relative">
@@ -130,7 +88,9 @@ export default function FilterGroupMapContainer({
         </>
       )}
 
-      <MyLocationButton onMoveToCurrentLocation={handleMoveToCurrentLocation} />
+      <MyLocationButton
+        onMoveToCurrentLocation={() => handleMoveToCurrentLocation(mapRef)}
+      />
     </div>
   );
 }
