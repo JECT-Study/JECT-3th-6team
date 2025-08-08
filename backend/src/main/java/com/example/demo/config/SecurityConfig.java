@@ -23,7 +23,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,21 +34,21 @@ public class SecurityConfig {
     private final AppProperties appProperties;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    
+
     // TODO: 아키텍처 리팩토링 https://github.com/JECT-Study/JECT-3th-6team/pull/99
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
+
         // application.yml에서 설정된 frontend-url 사용
         configuration.setAllowedOrigins(Arrays.asList(appProperties.getFrontendUrl()));
-        
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true); // 쿠키 인증을 위해 필수
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Set-Cookie"));
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -79,9 +78,14 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/index.html",
                                 "/index.js",
+                                "/admin-popup-create.html",
+                                "/admin-popup-create.js",
                                 "/api/notifications/stream-test" // 테스트용 SSE 엔드포인트 허용
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청만 허용
+                        .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
+                        .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
+                        .requestMatchers("/admin-popup-create.html").permitAll()
+                        .requestMatchers("/admin-popup-create.js").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions
@@ -110,9 +114,18 @@ public class SecurityConfig {
                                 "/error",
                                 "/favicon.ico",
                                 "/h2-console/**",
-                                "/oauth/**" // /oauth/kakao/callback 등을 허용
+                                "/oauth/**", // /oauth/kakao/callback 등을 허용
+                                "/static/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/index.html",
+                                "/index.js",
+                                "/admin-popup-create.html",
+                                "/admin-popup-create.js"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청만 허용
+                        .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
+                        .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions
