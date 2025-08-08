@@ -1,34 +1,35 @@
 'use client';
-import { useQuery } from '@tanstack/react-query';
-import getUserApi from '../api/getUserApi';
-import UserInitProvider from '@/entities/user/lib/UserInitProvider';
 
-export default function AuthInitializer({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useQuery({
+import { useEffect } from 'react';
+import { useUserStore } from '@/entities/user/lib/useUserStore';
+import { useQuery } from '@tanstack/react-query';
+import getUserApi from '@/entities/user/api/getUserApi';
+
+export default function AuthInitializer() {
+  const setUser = useUserStore(state => state.setUser);
+  const clearUser = useUserStore(state => state.clearUser);
+
+  const { data: user, isError } = useQuery({
     queryKey: ['auth', 'user'],
-    queryFn: getUserApi,
+    queryFn: () => getUserApi(),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5분
-    gcTime: 30 * 60 * 1000, // 30분
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-    throwOnError: false,
     select: data => (data ? { email: data.email, nickname: data.name } : null),
+    throwOnError: false,
   });
 
-  if (isLoading) {
-    return null;
-  }
-  if (isError) {
-    return <UserInitProvider initialUser={null}>{children}</UserInitProvider>;
-  }
+  useEffect(() => {
+    if (user) {
+      setUser({
+        email: user.email,
+        nickname: user.nickname,
+        role: 'user',
+      });
+    } else if (isError) {
+      clearUser();
+    }
+  }, [user, isError, setUser, clearUser]);
 
-  return <UserInitProvider initialUser={user}>{children}</UserInitProvider>;
+  return null;
 }
