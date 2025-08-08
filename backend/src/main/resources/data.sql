@@ -384,3 +384,15 @@ VALUES
 (507, 1001, 'Waiting', 101, 'ENTER_NOW', '지금 입장해주세요!', 'UNREAD', NULL, '2025-06-28T08:00:00', '2025-06-28T08:00:00'),
 (508, 1000, 'Waiting', 100, 'ENTER_TIME_OVER', '입장 시간이 지났습니다.', 'read', '2025-06-28T07:30:00', '2025-06-28T07:00:00',
  '2025-06-28T07:00:00');
+
+-- ===================================
+-- ✅ [IDENTITY RESTART] prevent conflicts for auto-increment when inserting new data at runtime
+-- ===================================
+
+ALTER TABLE popups ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE popup_locations ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE popup_weekly_schedules ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE popup_images ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE popup_contents ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE popup_socials ALTER COLUMN id RESTART WITH 1000;
+ALTER TABLE popup_categories ALTER COLUMN id RESTART WITH 1000;

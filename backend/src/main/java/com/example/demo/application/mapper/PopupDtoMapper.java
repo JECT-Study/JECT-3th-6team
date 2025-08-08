@@ -1,26 +1,10 @@
 package com.example.demo.application.mapper;
 
-import com.example.demo.application.dto.popup.BrandStoryResponse;
-import com.example.demo.application.dto.popup.DayOfWeekInfoResponse;
-import com.example.demo.application.dto.popup.LocationResponse;
-import com.example.demo.application.dto.popup.PeriodResponse;
-import com.example.demo.application.dto.popup.PopupDetailInfoResponse;
-import com.example.demo.application.dto.popup.PopupFilterRequest;
-import com.example.demo.application.dto.popup.PopupMapRequest;
-import com.example.demo.application.dto.popup.PopupMapResponse;
-import com.example.demo.application.dto.popup.PopupSummaryResponse;
-import com.example.demo.application.dto.popup.SearchTagsResponse;
-import com.example.demo.application.dto.popup.SnsResponse;
+import com.example.demo.application.dto.popup.*;
 import com.example.demo.domain.model.BrandStory;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
-import com.example.demo.domain.model.popup.OpeningHours;
-import com.example.demo.domain.model.popup.Popup;
-import com.example.demo.domain.model.popup.PopupCategory;
-import com.example.demo.domain.model.popup.PopupMapQuery;
-import com.example.demo.domain.model.popup.PopupQuery;
-import com.example.demo.domain.model.popup.PopupType;
-import com.example.demo.domain.model.popup.Sns;
+import com.example.demo.domain.model.popup.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -51,7 +35,7 @@ public class PopupDtoMapper {
         List<String> descriptions = List.of(
                 popup.getDisplay().content().introduction(),
                 popup.getDisplay().content().notice()
-            );
+        );
 
         return new PopupDetailInfoResponse(dayOfWeekInfos, descriptions);
     }
@@ -64,6 +48,62 @@ public class PopupDtoMapper {
         String value = openTime.equals("휴무") ? "휴무" : openTime + " ~ " + closeTime;
 
         return new DayOfWeekInfoResponse(openingHours.dayOfWeek().toString(), value);
+    }
+
+    public Popup toDomain(PopupCreateRequest request) {
+        DateRange dateRange = new DateRange(request.startDate(), request.endDate());
+
+        List<OpeningHours> openingHours = request.weeklyOpeningHours().stream()
+                .map(it -> new OpeningHours(
+                        java.time.DayOfWeek.valueOf(it.dayOfWeek()),
+                        java.time.LocalTime.parse(it.openTime()),
+                        java.time.LocalTime.parse(it.closeTime())
+                ))
+                .toList();
+
+        WeeklyOpeningHours weeklyOpeningHours = new WeeklyOpeningHours(openingHours);
+        PopupSchedule schedule = new PopupSchedule(dateRange, weeklyOpeningHours);
+
+        Location location = new Location(
+                request.location().addressName(),
+                request.location().region1DepthName(),
+                request.location().region2DepthName(),
+                request.location().region3DepthName(),
+                request.location().longitude(),
+                request.location().latitude()
+        );
+
+        var content = new com.example.demo.domain.model.popup.PopupContent(
+                request.content().introduction(),
+                request.content().notice()
+        );
+        List<Sns> sns = request.sns().stream()
+                .map(it -> new Sns(it.iconUrl(), it.linkUrl()))
+                .toList();
+        PopupDisplay display = new PopupDisplay(request.imageUrls(), content, sns);
+
+        List<PopupCategory> categories = request.categoryIds().stream()
+                .map(id -> new PopupCategory(id, null)) // name은 저장 시 Category 조회로 채움
+                .toList();
+
+        return Popup.builder()
+                .id(null)
+                .name(request.name())
+                .location(location)
+                .schedule(schedule)
+                .display(display)
+                .type(PopupType.valueOf(request.type()))
+                .popupCategories(categories)
+                .build();
+    }
+
+    public PopupCreateResponse toCreateResponse(Popup popup) {
+        return new PopupCreateResponse(
+                popup.getId(),
+                popup.getName(),
+                popup.getType() != null ? popup.getType().name() : null,
+                popup.getDisplay() != null ? popup.getDisplay().imageUrls() : java.util.Collections.emptyList()
+        );
     }
 
     public PeriodResponse toPeriodResponse(DateRange dateRange) {
@@ -121,7 +161,7 @@ public class PopupDtoMapper {
                 type,
                 categories,
                 dateRange
-                );
+        );
     }
 
     public List<PopupMapResponse> toPopupMapResponses(List<Popup> popups) {
@@ -138,7 +178,7 @@ public class PopupDtoMapper {
                 popup.getId(),
                 BigDecimal.valueOf(popup.getLocation().latitude()),
                 BigDecimal.valueOf(popup.getLocation().longitude())
-                );
+        );
     }
 
     public PopupQuery toQuery(PopupFilterRequest request) {
@@ -157,7 +197,7 @@ public class PopupDtoMapper {
                     null, // region1DepthName 무시
                     request.lastPopupId(),
                     request.keyword().trim()
-                    );
+            );
         }
 
         List<String> mappedTypes = null;
@@ -176,8 +216,9 @@ public class PopupDtoMapper {
                 (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName(),
                 request.lastPopupId(),
                 null
-                );
+        );
     }
+
     public PopupSummaryResponse toPopupSummaryResponse(Popup popup) {
         if (popup == null) return null;
 
@@ -189,8 +230,9 @@ public class PopupDtoMapper {
                 calculateDDay(popup.getSchedule().dateRange().endDate()),
                 formatPeriod(popup.getSchedule().dateRange()),
                 toSearchTagsResponse(popup)
-                );
+        );
     }
+
     private long calculateDDay(LocalDate endDate) {
         if (endDate == null) return -1;
         return endDate.toEpochDay() - LocalDate.now().toEpochDay();
