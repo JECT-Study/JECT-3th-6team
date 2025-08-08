@@ -22,7 +22,7 @@ export type OnsiteReservationFormValue = {
   email: string;
 };
 
-type OnsiteReservationFormError = {
+export type OnsiteReservationFormError = {
   name: string;
   headCount: string;
   email: string;

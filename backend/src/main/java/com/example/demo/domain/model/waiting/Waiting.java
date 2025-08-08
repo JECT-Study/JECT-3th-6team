@@ -23,7 +23,8 @@ public record Waiting(
         Integer peopleCount,
         Integer waitingNumber,
         WaitingStatus status,
-        LocalDateTime registeredAt
+        LocalDateTime registeredAt,
+        LocalDateTime enteredAt
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
@@ -38,6 +39,7 @@ public record Waiting(
      * @param waitingNumber     대기 번호
      * @param status            대기 상태
      * @param registeredAt      등록 시간
+     * @param enteredAt         입장 시간
      * @throws IllegalArgumentException 유효하지 않은 인원수인 경우
      */
     public Waiting {
@@ -50,5 +52,46 @@ public record Waiting(
         if (!NAME_PATTERN.matcher(waitingPersonName).matches()) {
             throw new BusinessException(ErrorType.INVALID_WAITING_PERSON_NAME, waitingPersonName);
         }
+    }
+
+    /**
+     * 기존 필드만으로 대기 정보를 생성한다.
+     *
+     * @param id                대기 ID
+     * @param popup             팝업 정보
+     * @param waitingPersonName 대기자 이름
+     * @param member            회원 정보
+     * @param contactEmail      대기자 이메일
+     * @param peopleCount       대기 인원수
+     * @param waitingNumber     대기 번호
+     * @param status            대기 상태
+     * @param registeredAt      등록 시간
+     */
+    public Waiting(
+            Long id,
+            Popup popup,
+            String waitingPersonName,
+            Member member,
+            String contactEmail,
+            Integer peopleCount,
+            Integer waitingNumber,
+            WaitingStatus status,
+            LocalDateTime registeredAt
+    ) {
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null);
+    }
+
+    /**
+     * 입장 처리를 수행한다.
+     *
+     * @return 입장 시간이 설정된 새로운 Waiting 객체
+     * @throws BusinessException 대기중 상태가 아닌 경우
+     */
+    public Waiting enter() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+        return new Waiting(id, popup, waitingPersonName, member, contactEmail, peopleCount,
+                waitingNumber, WaitingStatus.VISITED, registeredAt, LocalDateTime.now());
     }
 }

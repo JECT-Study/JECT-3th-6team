@@ -1,11 +1,29 @@
-import PopupListView from '@/entities/popup/ui/PopupListView';
-import popupList from '@/entities/popup/api/data';
+'use client';
+
+import PopupHistoryList from '@/features/history/ui/PopupHistoryList';
+import { Suspense } from 'react';
+import PopupCardListSuspenseFallback from '@/entities/popup/ui/PopupCardListSuspenseFallback';
+import { QueryErrorResetBoundary } from '@tanstack/react-query';
+import { ErrorBoundary } from 'react-error-boundary';
+import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
 
 export default function HistoryPage() {
   return (
-    <div className={'w-full h-full flex flex-col px-[20px]'}>
-      <h1 className={'font-semibold text-2xl my-[26px]'}>내 방문</h1>
-      <PopupListView data={popupList} />
+    <div>
+      <QueryErrorResetBoundary>
+        {({ reset }) => (
+          <ErrorBoundary
+            onReset={reset}
+            fallbackRender={({ error, resetErrorBoundary }) => (
+              <QueryErrorFallback onRetry={resetErrorBoundary} error={error} />
+            )}
+          >
+            <Suspense fallback={<PopupCardListSuspenseFallback />}>
+              <PopupHistoryList />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+      </QueryErrorResetBoundary>
     </div>
   );
 }

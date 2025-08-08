@@ -1,5 +1,5 @@
 import PageHeader from '@/shared/ui/header/PageHeader';
-import { OnsiteReservationForm } from '@/features/reservation';
+import OnsiteReservationContainer from '@/features/reservation/ui/OnsiteReservationContainer';
 
 export default async function ReservationOnsitePopupPage({
   params,
@@ -10,7 +10,7 @@ export default async function ReservationOnsitePopupPage({
   return (
     <div>
       <PageHeader title={'현장 대기'} />
-      <OnsiteReservationForm popupId={popupId} />
+      <OnsiteReservationContainer popupId={popupId} />
     </div>
   );
 }

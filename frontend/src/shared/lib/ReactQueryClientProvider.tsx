@@ -15,6 +15,7 @@ const makeQueryClient = () => {
     defaultOptions: {
       queries: {
         staleTime: 30 * 1000,
+        throwOnError: true,
       },
       dehydrate: {
         shouldDehydrateQuery: query =>

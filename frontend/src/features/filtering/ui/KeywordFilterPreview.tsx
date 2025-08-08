@@ -94,7 +94,7 @@ export default function KeywordFilterPreview({
   return (
     <div className="relative w-full h-[40px]">
       {renderIcon()}
-      <div className="absolute top-0 left-0 w-full h-[40px] border border-sub rounded-full z-0 pl-[50px] pr-[15px] flex items-center">
+      <div className="absolute top-0 left-0 w-full h-[40px] border border-sub rounded-full z-0 pl-[50px] pr-[15px] flex items-center bg-white">
         {status === 'unselect' ? renderPlaceholder() : renderChips()}
       </div>
     </div>

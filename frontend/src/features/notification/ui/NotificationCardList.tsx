@@ -1,29 +1,22 @@
 'use client';
 
-import dummyNotificationList from '@/features/notification/api/DummyNotification';
-import NotificationCard from '@/features/notification/ui/NotificationCard';
-import useNotificationNavigation from '@/features/notification/hook/useNotificationNavigation';
+import useNotificationList from '@/features/notification/hook/useNotificationList';
+import { useIntersectionObserver } from '@/shared/hook/useIntersectionObserver';
+import NotificationCardListView from '@/features/notification/ui/NotificationCardListView';
 
 export default function NotificationCardList() {
-  const handleClick = useNotificationNavigation();
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useNotificationList();
+  const lastElementRef = useIntersectionObserver(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
 
   return (
-    <div className={'px-[20px] flex flex-col gap-[12px] mt-[20px]'}>
-      {dummyNotificationList.map(notification => {
-        const {
-          notificationId,
-          relatedResource: { id },
-          notificationCode: code,
-        } = notification;
-        return (
-          <NotificationCard
-            data={notification}
-            key={notificationId}
-            onClick={() => handleClick(code, id)}
-            onClose={() => console.log('close')}
-          />
-        );
-      })}
+    <div className="flex flex-col">
+      <NotificationCardListView data={data.content} />
+      {hasNextPage && <div ref={lastElementRef} className="h-4 " />}
     </div>
   );
 }

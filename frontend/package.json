@@ -2,8 +2,9 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -27,7 +28,8 @@
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^1.0.0",
     "vaul": "^1.1.2",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.6",
+    "react-error-boundary": "^6.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

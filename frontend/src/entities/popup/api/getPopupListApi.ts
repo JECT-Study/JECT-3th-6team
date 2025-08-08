@@ -1,39 +1,51 @@
 import { APIBuilder, logError } from '@/shared/lib';
 import {
-  PopupItemType,
-  RawPopupItemType,
+  PopupListItemType,
+  RawPopupListItemType,
 } from '@/entities/popup/types/PopupListItem';
 import { tagPopupItem } from '@/entities/popup/lib/tagPopupItem';
 import { ApiError } from 'next/dist/server/api-utils';
 
-interface PopupListResponse {
-  content: RawPopupItemType[];
+export interface PopupListRequest {
+  popupId?: number;
+  type?: string[]; // type=체험형&type=전시형
+  category?: string[]; // category=패션&category=예술
+  startDate?: string; // startDate=2025-07-01
+  endDate?: string;
+  region1DepthName?: string;
+  lastPopupId?: number;
+  size?: number;
+}
+
+export interface PopupListResponse {
+  content: RawPopupListItemType[];
   hasNext: boolean;
   lastPopupId: number;
 }
 
-interface TaggedPopupListResponse {
+export interface TaggedPopupListResponse {
   hasNext: boolean;
   lastPopupId: number;
-  content: PopupItemType[];
+  content: PopupListItemType[];
 }
 
-export default async function getPopupListApi(): Promise<TaggedPopupListResponse> {
+export default async function getPopupListApi(
+  request: PopupListRequest
+): Promise<TaggedPopupListResponse> {
   try {
-    const response = await APIBuilder.get('/popups')
-      .timeout(5000)
-      .setCache('force-cache')
-      .build()
-      .call<PopupListResponse>();
+    const response = await (
+      await APIBuilder.get('/popups')
+        .timeout(5000)
+        .params({ ...request })
+        .buildAsync()
+    ).call<PopupListResponse>();
     const { content, hasNext, lastPopupId } = response.data;
 
     // 기본 팝업 리스트 아이템용 태그 부착
-    const TaggedData: PopupItemType[] = content.map(item =>
-      tagPopupItem(item, 'DEFAULT')
-    );
+    const TaggedData = content.map(item => tagPopupItem(item, 'DEFAULT'));
 
     return {
-      content: TaggedData,
+      content: TaggedData as PopupListItemType[],
       lastPopupId: lastPopupId,
       hasNext: hasNext,
     };
