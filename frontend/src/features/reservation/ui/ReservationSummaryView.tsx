@@ -35,7 +35,7 @@ export default function ReservationSummaryView({
 }: {
   data: OnsiteReservationResponse;
 }) {
-  const { name, email, peopleCount, registeredAt } = data;
+  const { name, email, peopleCount, registeredAt, waitingId } = data;
   const router = useRouter();
   const displayData = [
     { label: '대기자 명', value: name },
@@ -78,7 +78,7 @@ export default function ReservationSummaryView({
       </div>
       <BottomButtonContainer hasShadow={false}>
         <StandardButton
-          onClick={() => router.push('/')}
+          onClick={() => router.push(`/waiting/${waitingId}`)}
           disabled={false}
           color={'primary'}
         >
