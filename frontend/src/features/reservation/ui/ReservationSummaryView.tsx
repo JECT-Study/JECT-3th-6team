@@ -50,7 +50,7 @@ export default function ReservationSummaryView({
         {/*이미지와 팝업 이름*/}
         <div className={'flex items-center gap-x-[16px]'}>
           <Image
-            src={ExImage}
+            src={data.popupImageUrl || ExImage}
             alt="popup image"
             width={80}
             height={80}
@@ -58,11 +58,11 @@ export default function ReservationSummaryView({
           />
           <div className={'flex flex-col gap-y-2 items-start'}>
             <h2 className={'text-xl font-semibold text-black'}>
-              젠틀 몬스터 팝업
+              {data.popupName}
             </h2>
             <p className={'text-sm text-medium flex items-center gap-x-1'}>
               <IconMap width={20} height={20} fill={'var(--color-gray60)'} />
-              <span>서울, 용산구 한남동 61-2</span>
+              <span>{data.location.addressName}</span>
             </p>
           </div>
         </div>

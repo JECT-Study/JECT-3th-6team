@@ -35,7 +35,7 @@ const PopupCardImage = ({
 }) => (
   <div className="relative w-[140px] min-h-[144px] overflow-hidden">
     <Image
-      src={ExImage ?? image}
+      src={image || ExImage}
       alt={`${popupName}-popup-image`}
       className="object-cover h-full"
       width={140}
