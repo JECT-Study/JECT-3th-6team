@@ -16,6 +16,7 @@ export default async function getUserApi() {
   } catch (error) {
     if (error instanceof ApiError) {
       logError(error, '사용자 정보 조회 과정');
+      if (error.status === 401) return;
     }
     throw error;
   }
