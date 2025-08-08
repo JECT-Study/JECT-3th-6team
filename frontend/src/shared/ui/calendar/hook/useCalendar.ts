@@ -31,7 +31,7 @@ export default function useCalendar(props: MonthlyCalendarProps) {
       return;
     }
     // mode=== 'range'
-    if (!tempRange || (tempRange.start && tempRange.end)) {
+    if (!tempRange?.start || (tempRange.start && tempRange.end)) {
       const next = {
         start: date,
         end: null,
