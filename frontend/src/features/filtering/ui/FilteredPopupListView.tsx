@@ -1,13 +1,16 @@
 import { PopupListItemType } from '@/entities/popup/types/PopupListItem';
 import EmptyPopupListFallback from '@/entities/popup/ui/EmptyPopupListFallback';
 import { BadgedPopupCard } from '@/entities/popup';
+import React from 'react';
 
 interface FilteredPopupListViewProps {
-  data: PopupListItemType[]; // 타입에 따라 수정
+  data: PopupListItemType[];
+  lastElementRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function FilteredPopupListView({
   data,
+  lastElementRef,
 }: FilteredPopupListViewProps) {
   return (
     <div className="flex flex-col gap-y-2 px-5 pt-4.5 bg-white">
@@ -18,6 +21,7 @@ export default function FilteredPopupListView({
         ) : (
           data.map((popup, index) => <BadgedPopupCard key={index} {...popup} />)
         )}
+        <div ref={lastElementRef} className="h-4 " />
       </div>
     </div>
   );

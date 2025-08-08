@@ -36,7 +36,7 @@ export default function ReservationWaitingFloating() {
         router.push(`/waiting/${data.waitingId}`);
       }}
     >
-      <div className="w-full h-[72px] rounded-full  bg-white shadow-card flex items-center justify-between px-[16px] cursor-pointer hover:bg-sub2">
+      <div className="w-full h-[72px] rounded-full  bg-white shadow-card flex items-center justify-between px-[16px] cursor-pointer hover:bg-sub2 transition-colors duration-300">
         {/*이미지와 사용자 이름*/}
         <div className={'flex items-center gap-x-[12px]'}>
           <div

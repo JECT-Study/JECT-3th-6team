@@ -16,11 +16,10 @@ export default function FilteredPopupList() {
 
   return (
     <div className="flex flex-col">
-      <FilteredPopupListView data={data.content} />
-      {/* 관찰용 엘리먼트 */}
-      {hasNextPage && (
-        <div ref={lastElementRef} className="h-4 bg-yellow-200" />
-      )}
+      <FilteredPopupListView
+        data={data.content}
+        lastElementRef={lastElementRef}
+      />
     </div>
   );
 }
