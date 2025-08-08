@@ -16,7 +16,7 @@ export default function WaitingCountView({
             {data.name} 님, 앞으로
           </span>
           <span className={'text-[36px] font-semibold'}>
-            <em className={'text-main not-italic'}>{data.peopleCount}팀</em>{' '}
+            <em className={'text-main not-italic'}>{data.waitingNumber}팀</em>{' '}
             남았어요!
           </span>
         </div>
