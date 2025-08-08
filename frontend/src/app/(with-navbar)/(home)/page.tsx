@@ -4,12 +4,13 @@ import FilterSelectButtonGroup from '@/features/filtering/ui/FilterSelectButtonG
 import FilterKeywordSelect from '@/features/filtering/ui/FilterKeywordSelect';
 import FilteredPopupListWrapper from '@/features/filtering/ui/FilteredPopupListWrapper';
 import NotificationModal from '@/features/notification/ui/NotificationModal';
-
+import ReservationWaitingFloating from '@/features/waiting/ui/ReservationWaitingFloating';
 
 export default function Home() {
   return (
     <FilterProvider>
       <NotificationModal />
+      <ReservationWaitingFloating />
       <FilterSelectButtonGroup />
       <FilterKeywordSelect />
       <FilterBottomSheet />
