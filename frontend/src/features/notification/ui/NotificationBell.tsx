@@ -7,6 +7,7 @@ import getNotificationsApi, {
   NotificationResponse,
 } from '@/features/notification/api/getNotificationsApi';
 import { useUserStore } from '@/entities/user/lib/useUserStore';
+import useNotificationListener from '@/features/notification/hook/useNotificationListener';
 
 const DefaultBell = () => {
   return (
@@ -18,6 +19,8 @@ const DefaultBell = () => {
 
 export default function NotificationBell() {
   const isLoggedIn = useUserStore(state => state.userState.isLoggedIn);
+  useNotificationListener();
+
   const { data, isError, isLoading } = useQuery<NotificationResponse>({
     queryKey: ['notification', 'unread-list'],
     queryFn: () =>
@@ -39,7 +42,7 @@ export default function NotificationBell() {
   return (
     <div className={'relative'}>
       <DefaultBell />
-      {data?.content?.length > 0 && (
+      {data?.content && data?.content?.length > 0 && (
         <span className="relative flex size-2 z-10">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-200 opacity-85"></span>
           <span className="relative inline-flex size-2 rounded-full bg-red-500"></span>
