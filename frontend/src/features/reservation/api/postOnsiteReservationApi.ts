@@ -18,7 +18,7 @@ export default async function postOnsiteReservationApi(
       await APIBuilder.post(`/popups/${popupId}/waitings`, {
         name,
         peopleCount,
-        email,
+        contactEmail: email,
       })
         .timeout(5000)
         .withCredentials(true)
@@ -30,6 +30,7 @@ export default async function postOnsiteReservationApi(
   } catch (error) {
     if (error instanceof ApiError) {
       logError(error, '현장 대기 예약 과정');
+      console.error(error.code);
     }
     throw error;
   }
