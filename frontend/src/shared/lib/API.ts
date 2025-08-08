@@ -59,7 +59,7 @@ export default class API {
     // 기본 URL 설정
     const baseURL = this.baseURL || BASE_URL;
     const fullUrl = `${baseURL}${finalUrl}`;
-    console.log('fullUrl', fullUrl);
+
     // 헤더 설정
     const headers: Record<string, string> = {
       'Content-Type': 'application/json; charset=utf-8',
