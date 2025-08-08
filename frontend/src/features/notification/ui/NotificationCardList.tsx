@@ -21,8 +21,8 @@ export default function NotificationCardList() {
       <NotificationCardListView
         data={data.content}
         handleDelete={deleteNotification}
+        lastElementRef={lastElementRef}
       />
-      {hasNextPage && <div ref={lastElementRef} className="h-4 " />}
     </div>
   );
 }

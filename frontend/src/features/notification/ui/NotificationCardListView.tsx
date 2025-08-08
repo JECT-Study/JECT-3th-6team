@@ -8,11 +8,13 @@ import EmptyNotificationView from '@/features/notification/ui/EmptyNotificationV
 interface NotificationCardListViewProps {
   data: NotificationType[];
   handleDelete: (notificationId: number) => void;
+  lastElementRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function NotificationCardListView({
   data,
   handleDelete,
+  lastElementRef,
 }: NotificationCardListViewProps) {
   const handleClick = useNotificationNavigation();
 
@@ -31,6 +33,7 @@ export default function NotificationCardListView({
           />
         );
       })}
+      <div className="h-6 " ref={lastElementRef} />
     </div>
   );
 }
