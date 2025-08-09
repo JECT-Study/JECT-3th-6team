@@ -6,6 +6,8 @@ import com.example.demo.application.dto.popup.PopupMapResponse;
 import com.example.demo.application.dto.popup.PopupFilterRequest;
 import com.example.demo.application.dto.popup.PopupSummaryResponse;
 import com.example.demo.application.dto.popup.PopupCursorResponse;
+import com.example.demo.application.dto.popup.PopupCreateRequest;
+import com.example.demo.application.dto.popup.PopupCreateResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
 import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
@@ -92,5 +94,12 @@ public class PopupService {
         return waitingPort.findByMemberIdAndPopupId(memberId, popupId)
                 .map(Waiting::status)
                 .orElse(WaitingStatus.NONE);
+    }
+
+    @Transactional
+    public PopupCreateResponse create(PopupCreateRequest request) {
+        Popup domain = popupDtoMapper.toDomain(request);
+        Popup saved = popupPort.save(domain);
+        return popupDtoMapper.toCreateResponse(saved);
     }
 } 
