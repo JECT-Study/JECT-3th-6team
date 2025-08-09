@@ -1,5 +1,4 @@
 import { ChangeEvent } from 'react';
-import Image from 'next/image';
 import SearchIcon from '@/assets/icons/Normal/Icon_Search.svg';
 
 interface SearchInputProps {

@@ -15,7 +15,6 @@ import useSearchMyLocation from '@/features/map/hook/useSearchMyLocation';
 import useMapSearch from '@/features/map/hook/useMapSearch';
 import { getMapPopupListApi } from '@/entities/map/api';
 import { useQuery } from '@tanstack/react-query';
-import { mapPopupList } from '@/entities/map/api/data';
 
 interface MapContentProps {
   center: { lat: number; lng: number };
