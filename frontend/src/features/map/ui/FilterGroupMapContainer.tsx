@@ -94,7 +94,7 @@ export default function FilterGroupMapContainer({
             className="w-full h-full"
             isLoading={isLoading}
           >
-            {data.map(popup => (
+            {popupList?.popupList?.map(popup => (
               <MapMarker
                 key={popup.id}
                 position={{ lat: popup.latitude, lng: popup.longitude }}

@@ -2,13 +2,13 @@ import { useCallback } from 'react';
 
 interface UseSearchMyLocationReturn {
   handleMoveToCurrentLocation: (
-    mapRef: React.RefObject<kakao.maps.Map>
+    mapRef: React.RefObject<kakao.maps.Map | null>
   ) => void;
 }
 
 export default function useSearchMyLocation(): UseSearchMyLocationReturn {
   const handleMoveToCurrentLocation = useCallback(
-    (mapRef: React.RefObject<kakao.maps.Map>) => {
+    (mapRef: React.RefObject<kakao.maps.Map | null>) => {
       if (mapRef.current) {
         const map = mapRef.current;
         if (map && map.panTo) {
