@@ -20,8 +20,8 @@ export const popupDetailData = {
     y: 37.0789561558879,
   },
   period: {
-    startDate: '2025-06-01',
-    endDate: '2025-06-25',
+    startDate: '2025.06.01',
+    endDate: '2025.06.25',
   },
   brandStory: {
     imageUrls: [
@@ -33,8 +33,12 @@ export const popupDetailData = {
     ],
     sns: [
       {
-        icon: 'http://icon.com',
-        url: 'https://naver.com',
+        icon: Instagram,
+        url: 'https://instagram.com/musinsa_official',
+      },
+      {
+        icon: Facebook,
+        url: 'https://facebook.com/musinsa',
       },
     ],
   },
