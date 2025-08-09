@@ -18,12 +18,18 @@ import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
-import { popupDetailData } from './data';
+// import { popupDetailData } from './data';
 
 export default function ProductDetail() {
   const router = useRouter();
   const params = useParams();
   const popupId = params.popupId as string;
+
+  const { data: popupDetailData } = useQuery({
+    queryKey: ['popupDetail', popupId],
+    queryFn: () => getDetailPopupApi(popupId),
+  });
+
   const {
     thumbnails,
     dDay,
