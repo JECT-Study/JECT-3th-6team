@@ -6,6 +6,10 @@ import FilteredPopupListWrapper from '@/features/filtering/ui/FilteredPopupListW
 import NotificationModal from '@/features/notification/ui/NotificationModal';
 import ReservationWaitingFloating from '@/features/waiting/ui/ReservationWaitingFloating';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'default-no-store';
+
 export default function Home() {
   return (
     <FilterProvider>
