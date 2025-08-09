@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
+import { MapMarker } from 'react-kakao-maps-sdk';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import KeywordFilterPreview, {
@@ -12,6 +13,9 @@ import KeywordFilterPreview, {
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
 import useSearchMyLocation from '@/features/map/hook/useSearchMyLocation';
 import useMapSearch from '@/features/map/hook/useMapSearch';
+import { getMapPopupListApi } from '@/entities/map/api';
+import { useQuery } from '@tanstack/react-query';
+import { mapPopupList } from '@/entities/map/api/data';
 
 interface MapContentProps {
   center: { lat: number; lng: number };
@@ -26,18 +30,24 @@ export default function FilterGroupMapContainer({
   const { popupType, category } = filter.keyword;
   const mapRef = useRef<any>(null);
   const { handleMoveToCurrentLocation } = useSearchMyLocation();
-  const {
-    searchValue,
-    isSearchFocused,
-    handleSearchFocus,
-    handleSearchBlur,
-    handleChange,
-  } = useMapSearch();
+  const { searchValue, isSearchFocused, handleSearchBlur, handleChange } =
+    useMapSearch();
 
   const keywords: KeywordChip[] = [
     ...toKeywordChips(popupType, 'category'),
     ...toKeywordChips(category, 'category'),
   ];
+
+  const { data: popupList } = useQuery({
+    queryKey: ['mapPopupList'],
+    queryFn: () =>
+      getMapPopupListApi({
+        minLatitude: 37.541673,
+        maxLatitude: 37.545894,
+        minLongitude: 127.041309,
+        maxLongitude: 127.047804,
+      }),
+  });
 
   return (
     <div className="w-full h-screen pb-[100px] relative">
@@ -49,7 +59,7 @@ export default function FilterGroupMapContainer({
               id={'search-input'}
               value={searchValue}
               onChange={handleChange}
-              onFocus={handleSearchFocus}
+              // onFocus={handleSearchFocus}
               onBlur={handleSearchBlur}
             />
           </div>
@@ -64,7 +74,7 @@ export default function FilterGroupMapContainer({
               id={'search-input'}
               value={searchValue}
               onChange={handleChange}
-              onFocus={handleSearchFocus}
+              // onFocus={handleSearchFocus}
               onBlur={handleSearchBlur}
             />
 
@@ -84,7 +94,18 @@ export default function FilterGroupMapContainer({
             level={3}
             className="w-full h-full"
             isLoading={isLoading}
-          />
+          >
+            {data.map(popup => (
+              <MapMarker
+                key={popup.id}
+                position={{ lat: popup.latitude, lng: popup.longitude }}
+                image={{
+                  src: '/icons/Color/Icon_NormalMinus.svg',
+                  size: { width: 32, height: 32 },
+                }}
+              />
+            ))}
+          </KakaoMap>
         </>
       )}
 

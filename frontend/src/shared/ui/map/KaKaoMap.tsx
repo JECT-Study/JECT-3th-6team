@@ -105,15 +105,14 @@ const KakaoMap = forwardRef<
         }}
         {...props}
       >
-        {children || (
-          <MapMarker
-            position={center}
-            image={{
-              src: imageUrl,
-              size: { width: 40, height: 40 },
-            }}
-          />
-        )}
+        <MapMarker
+          position={center}
+          image={{
+            src: imageUrl,
+            size: { width: 40, height: 40 },
+          }}
+        />
+        {children}
       </Map>
     </>
   );

@@ -18,7 +18,6 @@ export type NotificationResponse = {
 export default async function getNotificationsApi(
   request: NotificationRequest
 ): Promise<NotificationResponse> {
-) {
   try {
     const builder = await APIBuilder.get('/notifications')
       .params(request)

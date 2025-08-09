@@ -4,3 +4,4 @@ export { default as API } from './API';
 export { default as APIBuilder } from './APIBuilder';
 export { default as logError } from './logError';
 export { default as ReactQueryClientProvider } from './ReactQueryClientProvider';
+export { getMapBounds } from './useGetMapBounds';
