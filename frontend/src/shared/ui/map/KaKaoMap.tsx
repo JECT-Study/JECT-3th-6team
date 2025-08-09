@@ -44,7 +44,7 @@ import { ReactNode } from 'react';
  * ```
  */
 const KakaoMap = forwardRef<
-  any,
+  kakao.maps.Map,
   _MapProps &
     React.HTMLAttributes<HTMLDivElement> & {
       children?: ReactNode;

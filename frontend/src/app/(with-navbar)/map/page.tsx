@@ -9,7 +9,7 @@ import FilterBottomSheet from '@/features/filtering/ui/FilterBottomSheet';
 import FilterGroupMapContainer from '@/features/map/ui/FilterGroupMapContainer';
 
 export default function MapPage() {
-  const { latitude, longitude, error, isLoading } = useGeolocation();
+  const { latitude, longitude, isLoading } = useGeolocation();
 
   // 기본 위치 (서울숲 4번출구 앞)
   const defaultCenter = { lat: 37.544643, lng: 127.044368 };

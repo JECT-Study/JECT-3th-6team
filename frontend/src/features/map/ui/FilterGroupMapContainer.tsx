@@ -28,7 +28,7 @@ export default function FilterGroupMapContainer({
 }: MapContentProps) {
   const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
   const { popupType, category } = filter.keyword;
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<kakao.maps.Map>(null);
   const { handleMoveToCurrentLocation } = useSearchMyLocation();
   const { searchValue, isSearchFocused, handleSearchBlur, handleChange } =
     useMapSearch();
