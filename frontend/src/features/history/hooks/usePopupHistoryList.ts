@@ -46,9 +46,12 @@ export default function usePopupHistoryList() {
       }
     },
   });
-
+  const mergedData = {
+    ...query.data.pages[0],
+    content: query.data.pages.flatMap(p => p.content),
+  };
   return {
     ...query,
-    data: query.data.pages[0],
+    data: mergedData,
   };
 }

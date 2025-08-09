@@ -30,7 +30,9 @@ public class WaitingEntityMapper {
                 entity.getPeopleCount(),
                 entity.getWaitingNumber(),
                 entity.getStatus(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getEnteredAt(),
+                entity.getCanEnterAt()
         );
     }
 
@@ -50,6 +52,8 @@ public class WaitingEntityMapper {
                 .peopleCount(waiting.peopleCount())
                 .waitingNumber(waiting.waitingNumber())
                 .status(waiting.status())
+                .enteredAt(waiting.enteredAt())
+                .canEnterAt(waiting.canEnterAt())
                 .build();
     }
 } 

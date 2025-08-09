@@ -1,5 +1,6 @@
 import { useNotificationStore } from '@/features/notification/hook/useNotificationStore';
 import { useEffect, useRef } from 'react';
+import { useUserStore } from '@/entities/user/lib/useUserStore';
 
 /**
  * 홈 페이지 진입시 단한번 백엔드로 연결 요청 (new EventSource('/api/notifications/stream))
@@ -10,8 +11,9 @@ import { useEffect, useRef } from 'react';
 export default function useNotificationListener() {
   const addNotification = useNotificationStore(state => state.add);
   const eventSourceRef = useRef<EventSource | null>(null);
-
+  const isLoggedIn = useUserStore(state => state.userState.isLoggedIn);
   useEffect(() => {
+    if (!isLoggedIn) return;
     if (eventSourceRef.current) return;
 
     const eventSource = new EventSource(

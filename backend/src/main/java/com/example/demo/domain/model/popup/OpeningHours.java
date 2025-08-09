@@ -1,7 +1,5 @@
 package com.example.demo.domain.model.popup;
 
-import com.example.demo.common.exception.BusinessException;
-import com.example.demo.common.exception.ErrorType;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
@@ -13,13 +11,8 @@ import java.time.LocalTime;
  * @param closeTime 마감 시간
  */
 public record OpeningHours(
-    DayOfWeek dayOfWeek,
-    LocalTime openTime,
-    LocalTime closeTime
+        DayOfWeek dayOfWeek,
+        LocalTime openTime,
+        LocalTime closeTime
 ) {
-    public OpeningHours {
-        if (openTime.isAfter(closeTime)) {
-            throw new BusinessException(ErrorType.INVALID_OPENING_HOURS, String.format("오픈시간: %s, 마감시간: %s", openTime, closeTime));
-        }
-    }
 } 

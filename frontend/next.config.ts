@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
       fullUrl: true, // 요청하는 전체 URL을 로깅하도록 설정
     },
   },
+  images: {
+    domains: ['example.com'],
+  },
 
   webpack: config => {
     const fileLoaderRule = config.module.rules.find(

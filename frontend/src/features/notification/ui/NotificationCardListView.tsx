@@ -7,10 +7,14 @@ import EmptyNotificationView from '@/features/notification/ui/EmptyNotificationV
 
 interface NotificationCardListViewProps {
   data: NotificationType[];
+  handleDelete: (notificationId: number) => void;
+  lastElementRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function NotificationCardListView({
   data,
+  handleDelete,
+  lastElementRef,
 }: NotificationCardListViewProps) {
   const handleClick = useNotificationNavigation();
 
@@ -19,20 +23,17 @@ export default function NotificationCardListView({
   return (
     <div className={'px-[20px] flex flex-col gap-[12px] mt-[20px]'}>
       {data.map(notification => {
-        const {
-          notificationId,
-          relatedResource: { id },
-          notificationCode: code,
-        } = notification;
+        const { notificationId } = notification;
         return (
           <NotificationCard
             data={notification}
             key={notificationId}
-            onClick={() => handleClick(code, id)}
-            onClose={() => console.log('close')}
+            onClick={() => handleClick(notification)}
+            onClose={() => handleDelete(notificationId)}
           />
         );
       })}
+      <div className="h-6 " ref={lastElementRef} />
     </div>
   );
 }

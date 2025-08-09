@@ -11,7 +11,7 @@ import {
 } from '@/shared/ui/calendar/lib/calendarStyleVariants';
 
 export type DateRange = {
-  start: Date;
+  start: Date | null;
   end: Date | null;
 };
 export interface SingleModeProps {

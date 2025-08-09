@@ -14,7 +14,7 @@ export const dateToPeriodString = (startDate: Date, endDate: Date) => {
   const endMonth = endDate.getMonth() + 1;
   const endDay = endDate.getDate();
 
-  return `${startMonth}월 ${startDay}일 ~ ${endMonth}월 ${endDay}일`;
+  return `${startMonth}.${startDay} ~ ${endMonth}.${endDay}`;
 };
 
 /**

@@ -27,7 +27,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableConfigurationProperties({JwtProperties.class, AppProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, AppProperties.class, GmailSmtpProperties.class})
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;

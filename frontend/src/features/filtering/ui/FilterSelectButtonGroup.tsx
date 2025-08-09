@@ -21,7 +21,7 @@ export default function FilterSelectButtonGroup() {
             stroke="var(--color-main)"
           />
         }
-        label={dateToPeriodString(filter.date.start, filter.date.end!)}
+        label={dateToPeriodString(filter.date.start!, filter.date.end!)}
         onClick={() => handleOpen('date')}
       />
 
