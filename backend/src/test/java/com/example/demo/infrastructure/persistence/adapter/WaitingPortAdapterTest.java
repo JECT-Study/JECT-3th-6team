@@ -90,13 +90,13 @@ class WaitingPortAdapterTest {
     class GetNextWaitingNumberTest {
 
         @Test
-        @DisplayName("해당 팝업에 대기가 없으면 1을 반환한다")
+        @DisplayName("해당 팝업에 대기가 없으면 0을 반환한다")
         void shouldReturnOneWhenNoWaitings() {
             // when
             Integer nextNumber = waitingPortAdapter.getNextWaitingNumber(popup.getId());
 
             // then
-            assertThat(nextNumber).isEqualTo(1);
+            assertThat(nextNumber).isEqualTo(0);
         }
 
         @Test

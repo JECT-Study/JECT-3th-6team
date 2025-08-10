@@ -122,11 +122,35 @@ public record Waiting(
         if (status != WaitingStatus.WAITING) {
             throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
         }
-        return new Waiting(id, popup, waitingPersonName, member, contactEmail, peopleCount,
-                waitingNumber, WaitingStatus.VISITED, registeredAt, LocalDateTime.now(), canEnterAt);
+
+        if (waitingNumber != 0) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호가 0이 아닙니다.");
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.VISITED,
+                registeredAt,
+                LocalDateTime.now(),
+                canEnterAt
+        );
     }
 
     public Waiting minusWaitingNumber() {
+        if (waitingNumber == 0) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호는 0 이상이어야 합니다.");
+        }
+
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
         LocalDateTime canEnterAt = waitingNumber == 1 ? LocalDateTime.now() : null;
 
         return new Waiting(
@@ -137,7 +161,7 @@ public record Waiting(
                 contactEmail,
                 peopleCount,
                 waitingNumber - 1, // 대기 번호 감소
-                status,
+                WaitingStatus.WAITING,
                 registeredAt,
                 enteredAt,
                 canEnterAt
