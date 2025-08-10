@@ -36,7 +36,14 @@ public class ScheduledWaitingEnterService {
             log.info("%d번 팝업 자동 입장 시작: %s".formatted(popupId, LocalDateTime.now()));
             WaitingQuery query = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
             List<Waiting> allWaitingInPopup = waitingPort.findByQuery(query);
-            Waiting zeroWaitingNumperWaiting = allWaitingInPopup.stream().filter(it -> it.waitingNumber() == 0).findFirst().orElseThrow();
+
+            if (allWaitingInPopup.isEmpty()) {
+                continue;
+            }
+            
+            Waiting zeroWaitingNumperWaiting = allWaitingInPopup.stream().filter(it -> it.waitingNumber() == 0)
+                    .findFirst()
+                    .orElse(null);
 
             Waiting enter = zeroWaitingNumperWaiting.enter();
             allWaitingInPopup.stream()
@@ -45,6 +52,7 @@ public class ScheduledWaitingEnterService {
                     .forEach(waitingPort::save);
 
             waitingPort.save(enter);
+            log.info("%d번 팝업 자동 입장 종료: %s".formatted(popupId, LocalDateTime.now()));
         }
         log.info("팝업 자동 입장 스케줄러 종료 : %s".formatted(LocalDateTime.now()));
     }
