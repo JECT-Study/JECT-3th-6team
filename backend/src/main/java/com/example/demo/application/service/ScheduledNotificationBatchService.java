@@ -1,10 +1,12 @@
 package com.example.demo.application.service;
 
+import com.example.demo.application.dto.notification.WaitingEntryNotificationRequest;
 import com.example.demo.domain.model.notification.Notification;
 import com.example.demo.domain.model.notification.ScheduledNotification;
 import com.example.demo.domain.model.notification.ScheduledNotificationQuery;
 import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingEventType;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
@@ -33,6 +35,7 @@ public class ScheduledNotificationBatchService {
     private final NotificationPort notificationPort;
     private final WaitingPort waitingPort;
     private final NotificationEventPort notificationEventPort;
+    private final EmailNotificationService emailNotificationService;
 
     /**
      * 30초마다 스케줄된 알림들을 체크하여 트리거 조건 만족 시 발송
@@ -154,6 +157,14 @@ public class ScheduledNotificationBatchService {
             } else {
                 log.debug("SSE 연결이 없는 회원입니다. 실시간 알림을 스킵합니다. - 멤버 ID: {}", memberId);
             }
+            // 3. 이메일 알림이 필요한 경우 발송
+            // TODO : 이메일 알림 정책이 일반 알림 정책과 다른 부분 고려해 리팩토링
+            String eventType = notification.getEvent().getEventType();
+
+            if (eventType.equals(WaitingEventType.ENTER_NOW.name())) {
+                Waiting waiting = extractWaitingFromNotification(scheduledNotification);
+                sendEntryEmailNotification(waiting);
+            }
 
             log.info("스케줄된 알림 발송 완료 - 멤버 ID: {}, 트리거: {}, 알림 ID: {}",
                     memberId,
@@ -201,5 +212,49 @@ public class ScheduledNotificationBatchService {
     private List<ScheduledNotification> getPendingScheduledNotifications() {
         ScheduledNotificationQuery query = new ScheduledNotificationQuery();
         return scheduledNotificationPort.findAllByQuery(query);
+    }
+
+    /**
+     * 입장 알림 이메일 발송
+     */
+    private void sendEntryEmailNotification(Waiting waiting) {
+        try {
+            // Waiting에서 필요한 정보 추출
+            var popup = waiting.popup();
+            var location = popup.getLocation();
+
+            // 매장 위치 링크 생성 (카카오맵)
+            String storeLocation = generateMapLink(location);
+
+            // 이메일 발송 요청 DTO 생성
+            var request = new WaitingEntryNotificationRequest(
+                    popup.getName(),                    // 스토어명
+                    waiting.waitingPersonName(),        // 대기자명
+                    waiting.peopleCount(),              // 대기자 수
+                    waiting.contactEmail(),             // 대기자 이메일
+                    waiting.registeredAt(),             // 대기 일자
+                    storeLocation                       // 매장 위치 링크
+            );
+
+            // 비동기로 이메일 발송
+            emailNotificationService.sendWaitingEntryNotificationAsync(request);
+
+            log.info("입장 알림 이메일 발송 요청 완료 - 웨이팅 ID: {}, 수신자: {}",
+                    waiting.id(), waiting.contactEmail());
+
+        } catch (Exception e) {
+            log.error("입장 알림 이메일 발송 실패 - 웨이팅 ID: {}", waiting.id(), e);
+        }
+    }
+
+    /**
+     * 매장 위치 링크 생성 (카카오맵)
+     */
+    private String generateMapLink(com.example.demo.domain.model.Location location) {
+        return String.format("https://map.kakao.com/link/map/%s,%s,%s",
+                location.addressName(),
+                location.latitude(),
+                location.longitude()
+        );
     }
 } 
