@@ -11,7 +11,6 @@ import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
 import com.example.demo.domain.port.ScheduledNotificationPort;
-import com.example.demo.domain.port.WaitingPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,7 +32,6 @@ public class ScheduledNotificationBatchService {
 
     private final ScheduledNotificationPort scheduledNotificationPort;
     private final NotificationPort notificationPort;
-    private final WaitingPort waitingPort;
     private final NotificationEventPort notificationEventPort;
     private final EmailNotificationService emailNotificationService;
 
@@ -125,7 +123,7 @@ public class ScheduledNotificationBatchService {
             int currentPosition = calculateCurrentWaitingPosition(waiting);
 
             // 4번째 순번(앞에 3팀)에 도달했는지 확인
-            boolean triggered = currentPosition <= 4;
+            boolean triggered = currentPosition == 3; // 0부터 시작하므로 3이 4번째 순번
 
             if (triggered) {
                 log.debug("3팀 전 알림 트리거 조건 만족 - 웨이팅 ID: {}, 현재 순번: {}", waiting.id(), currentPosition);
@@ -190,14 +188,6 @@ public class ScheduledNotificationBatchService {
                 .getSource();
     }
 
-    /**
-     * 예상 입장 시간 계산 (WaitingNotificationService와 동일한 로직)
-     */
-    private LocalDateTime calculateEstimatedEnterTime(Waiting waiting) {
-        int teamsAhead = waiting.waitingNumber() - 1;
-        int estimatedWaitMinutes = teamsAhead * 15; // 팀당 15분
-        return waiting.registeredAt().plusMinutes(estimatedWaitMinutes);
-    }
 
     /**
      * 현재 실제 대기 순번 계산
