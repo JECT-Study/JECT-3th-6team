@@ -25,7 +25,7 @@ export default function OnsiteReservationContainer({
     },
   });
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const { mutate, isPending } = usePostReservation({ popupId });
+  const { mutate, isPending } = usePostReservation();
 
   const handleModalOpen = () => {
     setIsOpenModal(true);
