@@ -79,7 +79,16 @@ public class WaitingPortAdapter implements WaitingPort {
 
     @Override
     public Integer getNextWaitingNumber(Long popupId) {
-        return waitingJpaRepository.findMaxWaitingNumberByPopupId(popupId).orElse(0) + 1;
+        List<WaitingEntity> allWaitng = waitingJpaRepository.findByPopupIdAndStatusOrderByWaitingNumberAsc(popupId, WaitingStatus.WAITING);
+
+        if (allWaitng.isEmpty()) {
+            return 0; // 아무도 대기하지 않는 경우 0 반환
+        }
+        
+        return allWaitng.stream()
+                .mapToInt(WaitingEntity::getWaitingNumber)
+                .max()
+                .orElse(0) + 1; // 최대 대기 번호 + 1 반환
     }
 
     @Override

@@ -2,9 +2,9 @@ package com.example.demo.domain.port;
 
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
+
 import java.util.List;
 import java.util.Optional;
-import com.example.demo.domain.model.CursorResult;
 
 /**
  * 대기 저장소 포트 인터페이스.
@@ -30,13 +30,14 @@ public interface WaitingPort {
     List<Waiting> findByQuery(WaitingQuery query);
 
     /**
-     * 팝업의 다음 대기 번호를 조회한다.
+     * 팝업의 다음 대기 번호를 조회한다. 아무도 대기하지 않는 경우 0을 반환한다.
      *
      * @param popupId 팝업 ID
      * @return 다음 대기 번호
      */
     Integer getNextWaitingNumber(Long popupId);
+
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
 
-    
+
 } 

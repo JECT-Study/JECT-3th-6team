@@ -1,6 +1,5 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.dto.notification.WaitingEntryNotificationRequest;
 import com.example.demo.domain.model.notification.Notification;
 import com.example.demo.domain.model.notification.ScheduledNotification;
 import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
@@ -32,7 +31,6 @@ public class WaitingNotificationService {
     private final NotificationPort notificationPort;
     private final ScheduledNotificationPort scheduledNotificationPort;
     private final NotificationEventPort notificationEventPort;
-    private final EmailNotificationService emailNotificationService;
 
     // === 알림 정책 상수 ===
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
@@ -117,9 +115,6 @@ public class WaitingNotificationService {
                 .content("지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!")
                 .build();
 
-        // 이메일 알림도 함께 발송
-        sendEntryEmailNotification(waiting);
-
         return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_NOW);
     }
 
@@ -177,49 +172,5 @@ public class WaitingNotificationService {
 
         return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!",
                 dateText, dayText, peopleCount);
-    }
-
-    /**
-     * 입장 알림 이메일 발송
-     */
-    private void sendEntryEmailNotification(Waiting waiting) {
-        try {
-            // Waiting에서 필요한 정보 추출
-            var popup = waiting.popup();
-            var location = popup.getLocation();
-            
-            // 매장 위치 링크 생성 (카카오맵)
-            String storeLocation = generateMapLink(location);
-            
-            // 이메일 발송 요청 DTO 생성
-            var request = new WaitingEntryNotificationRequest(
-                popup.getName(),                    // 스토어명
-                waiting.waitingPersonName(),        // 대기자명
-                waiting.peopleCount(),              // 대기자 수
-                waiting.contactEmail(),             // 대기자 이메일
-                waiting.registeredAt(),             // 대기 일자
-                storeLocation                       // 매장 위치 링크
-            );
-            
-            // 비동기로 이메일 발송
-            emailNotificationService.sendWaitingEntryNotificationAsync(request);
-            
-            log.info("입장 알림 이메일 발송 요청 완료 - 웨이팅 ID: {}, 수신자: {}", 
-                waiting.id(), waiting.contactEmail());
-                
-        } catch (Exception e) {
-            log.error("입장 알림 이메일 발송 실패 - 웨이팅 ID: {}", waiting.id(), e);
-        }
-    }
-    
-    /**
-     * 매장 위치 링크 생성 (카카오맵)
-     */
-    private String generateMapLink(com.example.demo.domain.model.Location location) {
-        return String.format("https://map.kakao.com/link/map/%s,%s,%s", 
-            location.addressName(),
-            location.latitude(),
-            location.longitude()
-        );
     }
 }

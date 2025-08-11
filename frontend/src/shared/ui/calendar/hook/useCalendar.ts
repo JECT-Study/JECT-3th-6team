@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { addMonths, isSameMonth, subMonths } from 'date-fns';
+import { addDays, addMonths, isSameMonth, subMonths } from 'date-fns';
 import {
   DateRange,
   MonthlyCalendarProps,
 } from '@/shared/ui/calendar/MonthlyCalendar';
 import { isSameDay } from '@/shared/ui/calendar/lib/calendarUtils';
+import { toast } from 'sonner';
 
 type TempRangeType = {
   start: Date | null;
@@ -42,10 +43,17 @@ export default function useCalendar(props: MonthlyCalendarProps) {
     } else {
       // 두번째로 클릭된 경우, date와 start를 비교
       const { start } = tempRange;
-      const next =
-        start! < date
-          ? { start: start, end: date }
-          : { start: date, end: start };
+      let next: DateRange;
+
+      if (isSameDay(date, start!)) {
+        next = { start: start!, end: addDays(start!, 1) };
+        toast.info('같은 날짜는 선택할 수 없어서 다음 날로 자동 설정했어요.');
+      } else {
+        next =
+          date < start
+            ? { start: date, end: start }
+            : { start: start!, end: date };
+      }
       setTempRange(next);
       onSelect(next as DateRange);
       return;

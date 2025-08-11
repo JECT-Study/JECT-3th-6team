@@ -8,7 +8,7 @@ import {
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import IconStar from '@/assets/icons/Normal/Icon_Star.svg';
 import IconBracketRight from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
-import ExImage from '/public/images/popup-ex.png';
+import DefaultImage from '/public/images/default-popup-image.png';
 
 const PopupCardLink = ({
   children,
@@ -35,7 +35,7 @@ const PopupCardImage = ({
 }) => (
   <div className="relative w-[140px] min-h-[144px] overflow-hidden">
     <Image
-      src={image || ExImage}
+      src={image || DefaultImage}
       alt={`${popupName}-popup-image`}
       className="object-cover h-full"
       width={140}

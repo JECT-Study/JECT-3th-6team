@@ -271,12 +271,12 @@ class WaitingTest {
         // given
         Waiting waiting = new Waiting(
                 1L, validPopup, "홍길동", validMember,
-                "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
+                "test@example.com", 2, 0, WaitingStatus.WAITING, LocalDateTime.now()
         );
-        
+
         // when
         Waiting enteredWaiting = waiting.enter();
-        
+
         // then
         assertNotNull(enteredWaiting.enteredAt());
         assertEquals(WaitingStatus.VISITED, enteredWaiting.status());
@@ -296,13 +296,13 @@ class WaitingTest {
         // given
         Waiting waiting = new Waiting(
                 1L, validPopup, "홍길동", validMember,
-                "test@example.com", 2, 1, WaitingStatus.WAITING, LocalDateTime.now()
+                "test@example.com", 2, 0, WaitingStatus.WAITING, LocalDateTime.now()
         );
         LocalDateTime beforeEnter = LocalDateTime.now();
-        
+
         // when
         Waiting enteredWaiting = waiting.enter();
-        
+
         // then
         LocalDateTime afterEnter = LocalDateTime.now();
         assertNotNull(enteredWaiting.enteredAt());
@@ -319,7 +319,7 @@ class WaitingTest {
                 1L, validPopup, "홍길동", validMember,
                 "test@example.com", 2, 1, WaitingStatus.VISITED, LocalDateTime.now(), originalEnteredAt
         );
-        
+
         // when & then
         BusinessException exception = assertThrows(
                 BusinessException.class,
@@ -336,7 +336,7 @@ class WaitingTest {
                 1L, validPopup, "홍길동", validMember,
                 "test@example.com", 2, 1, WaitingStatus.CANCELED, LocalDateTime.now()
         );
-        
+
         // when & then
         BusinessException exception = assertThrows(
                 BusinessException.class,

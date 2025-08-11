@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import ExImage from '/public/images/popup-ex.png';
+import DefaultImage from '/public/images/default-popup-image.png';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { BottomButtonContainer, StandardButton } from '@/shared/ui';
 import { useRouter } from 'next/navigation';
@@ -50,7 +50,7 @@ export default function ReservationSummaryView({
         {/*이미지와 팝업 이름*/}
         <div className={'flex items-center gap-x-[16px]'}>
           <Image
-            src={data.popupImageUrl || ExImage}
+            src={data.popupImageUrl || DefaultImage}
             alt="popup image"
             width={80}
             height={80}
