@@ -26,17 +26,6 @@ export default function useFilter(initialFilter: FilterState) {
   };
 
   const handleReset = (type: FilterType) => {
-    if (type === 'date') {
-      setTempState(prev => ({
-        ...prev,
-        date: {
-          start: null,
-          end: null,
-        },
-      }));
-      return;
-    }
-
     setTempState({
       ...filter,
       [type]: initialFilter[type],
