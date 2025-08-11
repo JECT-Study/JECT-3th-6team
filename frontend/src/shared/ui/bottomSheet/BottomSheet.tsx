@@ -30,12 +30,18 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   return (
     <Drawer open={isOpen} onClose={onClose}>
-      <DrawerContent className={'min-w-[320px] max-w-[430px] mx-auto'}>
-        <DrawerHeader>
+      <DrawerContent
+        className={'min-w-[320px] max-w-[430px] mx-auto  max-h-[80dvh] w-full'}
+      >
+        <DrawerHeader className="shrink-0">
           <DrawerTitle>{drawerTitle}</DrawerTitle>
         </DrawerHeader>
-        <div className={'px-4'}>{children}</div>
-        <DrawerFooter>
+        <div
+          className={'px-4 flex-1 min-h-0 overflow-y-auto overscroll-contain'}
+        >
+          {children}
+        </div>
+        <DrawerFooter className="shrink-0 pb-[calc(env(safe-area-inset-bottom)+12px)]">
           <div className={'flex justify-between gap-x-2'}>
             <StandardButton
               onClick={handleReset}
