@@ -26,7 +26,7 @@ export default function SelectButton({
       )}
     >
       <>{Icon}</>
-      <span className="text-gray60 font-semibold text-[12px] flex-1 ">
+      <span className="text-gray60 font-semibold text-[14px] flex-1 ">
         {label}
       </span>
       <IconBracketDown width={22} height={22} fill={'var(--color-gray60)'} />
