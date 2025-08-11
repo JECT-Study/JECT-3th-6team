@@ -5,8 +5,7 @@ import {
   PopupListItemType,
 } from '@/entities/popup/types/PopupListItem';
 import { PopupBadge } from '@/entities/popup/ui/PopupBadge';
-import { dateToPeriodString, periodStringToDate } from './dateToPeriodString';
-import { region1DepthShortMap } from '@/entities/popup/constants/region1DepthNameShort';
+import { dateToPeriodKRString, periodStringToDate } from './dateToPeriodString';
 import { formatSearchTags } from '@/entities/popup/lib/formatSearchTags';
 
 type PopupItemMapperMap = {
@@ -27,10 +26,13 @@ const mapPopupListItemToViewProps = (
 ): PopupCardViewProps => {
   const renderedBadge = <PopupBadge data={data} />;
   const [startDate, endDate] = data.period.split(' ~ ');
-  const periodStr = dateToPeriodString(new Date(startDate), new Date(endDate));
+  const periodStr = dateToPeriodKRString(
+    new Date(startDate),
+    new Date(endDate)
+  );
 
   const { region1depthName, region2depthName } = data.location;
-  const renderLocation = `${region1DepthShortMap[region1depthName]}, ${region2depthName}`;
+  const renderLocation = `${region1depthName}, ${region2depthName}`;
   const renderTag = formatSearchTags(data.searchTags);
   return {
     popupId: data.popupId,
@@ -52,10 +54,10 @@ const mapHistoryItemToViewProps = (
 
   //  "2025-06-01 ~ 2025-06-25" 을 '6월 1일 ~ 6월 25일' 로 변환
   const { startDate, endDate } = periodStringToDate(data.popup.period);
-  const renderedPeriod = dateToPeriodString(startDate, endDate);
+  const renderedPeriod = dateToPeriodKRString(startDate, endDate);
 
   const { region1depthName, region2depthName } = data.popup.location;
-  const renderLocation = `${region1DepthShortMap[region1depthName]}, ${region2depthName}`;
+  const renderLocation = `${region1depthName}, ${region2depthName}`;
   const renderTag = formatSearchTags(data.popup.searchTags);
 
   return {
