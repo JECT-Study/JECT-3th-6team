@@ -1,6 +1,9 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+
+import { getPopupDetailApi } from '@/entities/popup/detail/api/api';
 
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
@@ -18,12 +21,40 @@ import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
-import { popupDetailData } from './data';
+import { LoadingFallback } from '@/shared/ui/loading/LoadingFallback';
+import { QueryErrorFallback } from '@/shared/ui/error/QueryErrorFallback';
 
 export default function ProductDetail() {
   const router = useRouter();
   const params = useParams();
   const popupId = params.popupId as string;
+
+  const {
+    data: popupDetailData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['popupDetail', popupId],
+    queryFn: () => getPopupDetailApi(popupId),
+  });
+
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
+
+  if (isError) {
+    return <QueryErrorFallback error={error} />;
+  }
+
+  if (!popupDetailData) {
+    return (
+      <QueryErrorFallback
+        error={new Error('팝업 데이터를 찾을 수 없습니다.')}
+      />
+    );
+  }
+
   const {
     thumbnails,
     dDay,
