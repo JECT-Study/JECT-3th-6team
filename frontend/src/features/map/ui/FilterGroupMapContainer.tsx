@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
@@ -16,26 +16,28 @@ import useMapSearch from '@/features/map/hook/useMapSearch';
 import { getMapPopupListApi } from '@/entities/map/api';
 import { useQuery } from '@tanstack/react-query';
 
-interface MapContentProps {
-  center: { lat: number; lng: number };
-  isLoading?: boolean;
-}
+export default function FilterGroupMapContainer() {
+  // 기본 위치 (서울숲 4번출구 앞)
+  const defaultCenter = { lat: 37.544643, lng: 127.044368 };
+  const [center, setCenter] = useState(defaultCenter);
 
-export default function FilterGroupMapContainer({
-  center,
-  isLoading = false,
-}: MapContentProps) {
   const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
   const { popupType, category } = filter.keyword;
   const mapRef = useRef<kakao.maps.Map>(null);
   const { handleMoveToCurrentLocation } = useSearchMyLocation();
   const { searchValue, isSearchFocused, handleSearchBlur, handleChange } =
     useMapSearch();
+  const popupListIconSrc = '/icons/Color/Icon_NormalMinus.svg';
 
   const keywords: KeywordChip[] = [
     ...toKeywordChips(popupType, 'category'),
     ...toKeywordChips(category, 'category'),
   ];
+
+  // 위치 결정 로직:
+  // 1. 로딩 중이면 지도 로딩 상태 유지 (지도를 불러오는 중... 표시)
+  // 2. 로딩 완료 후 기본 위치(서울숲역 4번출구) 사용
+  // 3. 내위치찾기 버튼 클릭 시 현재 위치 추적 - 이때 권한설정 팝업
 
   const { data: popupList } = useQuery({
     queryKey: ['mapPopupList'],
@@ -92,14 +94,13 @@ export default function FilterGroupMapContainer({
             center={center}
             level={3}
             className="w-full h-full"
-            isLoading={isLoading}
           >
             {popupList?.popupList?.map(popup => (
               <MapMarker
                 key={popup.id}
                 position={{ lat: popup.latitude, lng: popup.longitude }}
                 image={{
-                  src: '/icons/Color/Icon_NormalMinus.svg',
+                  src: popupListIconSrc,
                   size: { width: 32, height: 32 },
                 }}
               />
@@ -109,7 +110,9 @@ export default function FilterGroupMapContainer({
       )}
 
       <MyLocationButton
-        onMoveToCurrentLocation={() => handleMoveToCurrentLocation(mapRef)}
+        onMoveToCurrentLocation={() =>
+          handleMoveToCurrentLocation(mapRef, setCenter)
+        }
       />
     </div>
   );
