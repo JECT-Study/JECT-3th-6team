@@ -1,6 +1,6 @@
 'use client';
 
-import BottomSheet from '@/shared/ui/bottomSheet/BottomSheet';
+import BottomSheet from '@/shared/ui/bottomSheet/bottomSheet';
 import OptionTitle from '@/features/filtering/ui/OptionTitle';
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import OptionComponent from '@/features/filtering/ui/OptionComponent';
