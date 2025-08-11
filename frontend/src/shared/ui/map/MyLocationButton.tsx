@@ -1,4 +1,3 @@
-import IconCurrentLocation from '@/assets/icons/Normal/Icon_Current_Location.svg';
 import IconSearchCurrentLocation from '@/assets/icons/Color/Icon_SearchCurrentLocation.svg';
 
 interface MyLocationButtonProps {

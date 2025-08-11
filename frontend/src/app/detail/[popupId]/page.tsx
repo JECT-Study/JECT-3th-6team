@@ -21,8 +21,8 @@ import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
-import { LoadingFallback } from '@/shared/ui/loading/LoadingFallback';
-import { QueryErrorFallback } from '@/shared/ui/error/QueryErrorFallback';
+import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
+import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
 
 export default function ProductDetail() {
   const router = useRouter();

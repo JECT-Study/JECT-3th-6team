@@ -1,7 +1,6 @@
 import { APIBuilder } from '@/shared/lib';
 import { POPUP_DETAIL_ENDPOINTS } from '@/entities/popup/detail/api/endpoints';
 import { PopupDetailResponseDto } from '@/entities/popup/detail/types/type';
-import { ApiError } from 'next/dist/server/api-utils';
 
 export const getPopupDetailApi = async (popupId: string) => {
   const response = await APIBuilder.get(
