@@ -55,9 +55,7 @@ export default function KeywordOption({
     <div className={'w-full mb-14 flex flex-col gap-y-[24px]'}>
       <KeywordFilterPreview
         initialStatus={'select'}
-        onClick={() => {
-          alert('click');
-        }}
+        onClick={() => {}}
         keywords={keywords}
         onDelete={onDelete}
       />
