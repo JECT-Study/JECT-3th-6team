@@ -34,6 +34,7 @@ export default function NotificationBell() {
     retry: false,
     enabled: isLoggedIn,
     throwOnError: false,
+    refetchOnWindowFocus: 'always',
   });
 
   if (isError) return <DefaultBell />;
