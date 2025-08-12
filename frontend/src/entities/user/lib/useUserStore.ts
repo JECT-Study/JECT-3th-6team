@@ -22,6 +22,7 @@ type Store = {
   clearUser: () => void;
   setUser: (user: User) => void;
   _hasHydrated: boolean; // client에서 hydration완료 여부 확인용
+  _setHasHydrated: (v: boolean) => void;
 };
 
 export const useUserStore = create<Store>()(
@@ -31,6 +32,7 @@ export const useUserStore = create<Store>()(
       clearUser: () => set({ userState: initialUserState }),
       setUser: (user: User) => set({ userState: { isLoggedIn: true, user } }),
       _hasHydrated: false,
+      _setHasHydrated: v => set({ _hasHydrated: v }),
     }),
     {
       name: 'user',
@@ -39,9 +41,7 @@ export const useUserStore = create<Store>()(
           ? createJSONStorage(() => localStorage)
           : undefined,
       onRehydrateStorage: () => state => {
-        // rehydrate 직전에 호출: 필요시 초기화 로직 가능
-        // rehydrate 직후 호출: 플래그 true
-        if (state) state._hasHydrated = true;
+        state?._setHasHydrated(true);
       },
     }
   )

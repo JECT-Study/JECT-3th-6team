@@ -4,7 +4,7 @@ import './globals.css';
 import localFont from 'next/font/local';
 import { Toaster } from '@/shared/ui';
 import { ReactQueryClientProvider } from '@/shared/lib';
-import AuthProvider from '@/entities/user/lib/AuthProvider';
+import AuthProvider from '@/features/auth/lib/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'Popup App',
