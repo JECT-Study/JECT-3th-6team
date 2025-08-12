@@ -1,14 +1,13 @@
 'use client';
 
-import { useRouter, useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
 import { getPopupDetailApi } from '@/entities/popup/detail/api/api';
 
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
-import { CircleMap } from '@/shared/ui';
-import { BottomButtonContainer } from '@/shared/ui';
+import { BottomButtonContainer, CircleMap } from '@/shared/ui';
 import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
 import { MediumText } from '@/shared/ui/text/MediumText';
