@@ -31,7 +31,10 @@ export default function NotificationModal() {
             key={noti.notificationId}
             data={noti}
             onClose={() => remove(noti.notificationId)}
-            onClick={() => handleCardClick(noti)}
+            onClick={() => {
+              remove(noti.notificationId);
+              handleCardClick(noti);
+            }}
           />
         ))}
       </div>
