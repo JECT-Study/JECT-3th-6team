@@ -39,7 +39,7 @@ export interface PopupDetailPopupDetail {
 
 type PopupDetailStatus = 'NONE' | 'WAITING' | 'VISITED';
 
-export interface PopupDetailItem {
+export interface PopupDetailResponseDto {
   id: number;
   thumbnails: string[];
   dDay: number;
@@ -51,5 +51,3 @@ export interface PopupDetailItem {
   popupDetail: PopupDetailPopupDetail;
   status: PopupDetailStatus;
 }
-
-export interface PopupDetailResponseDto extends PopupDetailItem {}
