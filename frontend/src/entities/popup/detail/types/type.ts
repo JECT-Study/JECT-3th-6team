@@ -1,12 +1,5 @@
 export interface PopupDetailRequestDto {
-  minLatitude: number;
-  maxLatitude: number;
-  minLongitude: number;
-  maxLongitude: number;
-  type?: string;
-  category?: string;
-  startDate?: string;
-  endDate?: string;
+  popupId: number;
 }
 
 export interface PopupDetailSearchTags {
@@ -15,12 +8,12 @@ export interface PopupDetailSearchTags {
 }
 
 export interface PopupDetailLocation {
-  address_name: string;
-  region1depth_name: string;
-  region2depth_name: string;
-  region3depth_name: string;
-  x: number;
-  y: number;
+  addressName: string;
+  region1depthName: string;
+  region2depthName: string;
+  region3depthName: string;
+  longitude: number;
+  latitude: number;
 }
 
 export interface PopupDetailPeriod {
@@ -59,6 +52,4 @@ export interface PopupDetailItem {
   status: PopupDetailStatus;
 }
 
-export interface PopupDetailResponseDto {
-  popupDetail: PopupDetailItem[];
-}
+export interface PopupDetailResponseDto extends PopupDetailItem {}

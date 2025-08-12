@@ -1,51 +1,26 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { ImageCarousel } from './ImageCarousel';
+import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
 import { MediumText } from '@/shared/ui/text/MediumText';
 import { RegularText } from '@/shared/ui/text/RegularText';
 
-interface BrandStory {
-  imageUrls: string[];
-  sns: Array<{
-    icon: string;
-    url: string;
-  }>;
-}
-
-interface PopupDetail {
-  dayOfWeeks: Array<{
-    dayOfWeek: string;
-    value: string;
-  }>;
-  descriptions: string[];
-}
+import {
+  PopupDetailBrandStory,
+  PopupDetailPopupDetail,
+} from '@/entities/popup/detail/types/type';
+import { convertDayOfWeekToKorean } from '@/entities/popup/lib/convertDayOfWeekToKorean';
 
 interface DescriptionTabProps {
-  brandStory: BrandStory;
-  popupDetail: PopupDetail;
+  brandStory: PopupDetailBrandStory;
+  popupDetail: PopupDetailPopupDetail;
 }
-
-const convertDayOfWeekToKorean = (dayOfWeek: string): string => {
-  const dayOfWeekMap: Record<string, string> = {
-    MONDAY: '월',
-    TUESDAY: '화',
-    WEDNESDAY: '수',
-    THURSDAY: '목',
-    FRIDAY: '금',
-    SATURDAY: '토',
-    SUNDAY: '일',
-  };
-
-  return dayOfWeekMap[dayOfWeek];
-};
 
 export function DescriptionTab({
   brandStory,
   popupDetail,
 }: DescriptionTabProps) {
   return (
-    // <TabsContent value="description" className="px-5 py-6">
     <div>
       {/* 브랜드 정보 */}
       <MediumText className="mt-5 font-semibold">브랜드 정보</MediumText>
@@ -59,22 +34,26 @@ export function DescriptionTab({
             <span>브랜드 SNS로 연결</span>
           </div>
           <div className="flex items-center gap-2">
-            {brandStory.sns.map((snsItem, index) => (
-              <Link
-                key={index}
-                href={snsItem.url}
-                target="_blank"
-                className="cursor-pointer"
-              >
-                <Image
-                  src={`/icons/Color/Icon_NaverBlog.svg`}
-                  alt="sns"
-                  width={26}
-                  height={26}
-                  className="w-6.5 h-6.5"
-                />
-              </Link>
-            ))}
+            {brandStory.sns.map((snsItem, index) => {
+              const brandStorySNSIcon = `/icons/Color/Icon_${snsItem.icon}.svg`;
+
+              return (
+                <Link
+                  key={index}
+                  href={snsItem.url}
+                  target="_blank"
+                  className="cursor-pointer"
+                >
+                  <Image
+                    src={brandStorySNSIcon}
+                    alt="sns"
+                    width={26}
+                    height={26}
+                    className="w-6.5 h-6.5"
+                  />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -108,6 +87,5 @@ export function DescriptionTab({
       </div>
       <div className="border-t border-gray40 mt-5 -mx-5"></div>
     </div>
-    // </TabsContent>
   );
 }
