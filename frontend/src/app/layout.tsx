@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import localFont from 'next/font/local';
-import { Toaster } from '@/shared/ui';
 import { ReactQueryClientProvider } from '@/shared/lib';
 import AuthProvider from '@/features/auth/lib/AuthProvider';
 
@@ -36,19 +35,7 @@ export default function RootLayout({
             src={KAKAO_SDK_URL}
             strategy="beforeInteractive"
           />
-          <AuthProvider>
-            <div className="min-h-screen bg-gray40">
-              <div className="w-full min-w-[320px] max-w-[430px] mx-auto bg-white min-h-screen">
-                {/* <Header /> */}
-
-                {/* 메인 콘텐츠 영역 */}
-                <Toaster position="top-center" richColors />
-                <main className="flex-1">{children}</main>
-
-                {/* <BottomNav /> */}
-              </div>
-            </div>
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </ReactQueryClientProvider>
       </body>
     </html>

@@ -45,7 +45,7 @@ export default async function LoginFailPage({
           다시 로그인
         </Link>
         <Link
-          href="/"
+          href="/frontend/public"
           className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-100 transition"
         >
           홈으로
