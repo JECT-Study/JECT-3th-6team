@@ -88,9 +88,20 @@
   </fieldset>
 
   <fieldset>
-    <legend>이미지 URL</legend>
-    <div id="imageUrlList" class="items"></div>
-    <button class="btn" id="addImage" type="button">+ 추가</button>
+    <legend>이미지</legend>
+    <div class="row">
+      <div style="flex: 1;">
+        <h3 style="font-size: 14px; margin: 0 0 8px;">이미지 업로드</h3>
+        <input type="file" id="imageFile" accept="image/*" style="margin-bottom: 8px;" />
+        <button class="btn" id="uploadImage" type="button">업로드</button>
+        <div id="uploadStatus" class="muted" style="margin-top: 4px;"></div>
+      </div>
+      <div style="flex: 1;">
+        <h3 style="font-size: 14px; margin: 0 0 8px;">이미지 URL 목록</h3>
+        <div id="imageUrlList" class="items"></div>
+        <button class="btn" id="addImage" type="button">+ URL 직접 추가</button>
+      </div>
+    </div>
   </fieldset>
 
   <fieldset>

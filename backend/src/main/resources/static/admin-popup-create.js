@@ -123,6 +123,56 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSns();
   });
 
+  // 이미지 업로드 기능
+  qs('#uploadImage').addEventListener('click', async () => {
+    const fileInput = qs('#imageFile');
+    const statusDiv = qs('#uploadStatus');
+    
+    if (!fileInput.files || !fileInput.files[0]) {
+      statusDiv.textContent = '파일을 선택해주세요.';
+      statusDiv.className = 'error';
+      return;
+    }
+    
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    statusDiv.textContent = '업로드 중...';
+    statusDiv.className = 'muted';
+    
+    try {
+      const response = await fetch('/api/images/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        statusDiv.textContent = `업로드 실패: ${result?.message || response.status}`;
+        statusDiv.className = 'error';
+        return;
+      }
+      
+      // 업로드된 이미지 URL을 상태에 추가
+      state.imageUrls.push(result.data.imageUrl);
+      renderImageUrls();
+      
+      // 파일 입력 초기화
+      fileInput.value = '';
+      
+      statusDiv.textContent = `업로드 성공! (${result.data.fileName})`;
+      statusDiv.className = 'success';
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      statusDiv.textContent = '업로드 중 오류가 발생했습니다.';
+      statusDiv.className = 'error';
+    }
+  });
+
   qs('#submit').addEventListener('click', async () => {
     const result = qs('#result');
     result.textContent = '';
