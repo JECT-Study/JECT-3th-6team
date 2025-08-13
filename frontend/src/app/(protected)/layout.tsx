@@ -1,25 +1,20 @@
 'use client';
 
-import { useUserStore } from '@/entities/user/lib/useUserStore';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useUserHydrated } from '@/entities/user/lib/useUserStore';
+import dynamic from 'next/dynamic';
+
+const AuthGuard = dynamic(() => import('@/features/auth/lib/AuthGuard'), {
+  ssr: false,
+  loading: () => <div className="p-6 animate-pulse">Loading…</div>,
+});
 
 export default function AuthRequiredLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const isLoggedIn = useUserStore(state => state.userState.isLoggedIn);
-  const router = useRouter();
-  const pathname = usePathname();
+  const hasHydrated = useUserHydrated();
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      router.replace(`/login?redirect_path=${pathname}`);
-    }
-  }, [isLoggedIn, pathname, router]);
-
-  if (!isLoggedIn) return null; // 라우팅 전까지 아무것도 렌더링하지 않음
-
-  return <>{children}</>;
+  if (!hasHydrated) return null;
+  return <AuthGuard>{children}</AuthGuard>;
 }

@@ -34,10 +34,12 @@ export default function NotificationBell() {
     retry: false,
     enabled: isLoggedIn,
     throwOnError: false,
+    refetchOnWindowFocus: 'always',
+    refetchOnMount: 'always',
   });
 
   if (isError) return <DefaultBell />;
-  if (isLoading) return;
+  if (isLoading) return null;
 
   return (
     <div className={'relative'}>

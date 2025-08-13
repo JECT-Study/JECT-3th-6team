@@ -19,6 +19,9 @@ export default function useReadNotification() {
       await queryClient.invalidateQueries({
         queryKey: ['notification', 'list'],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ['notification', 'unread-list'],
+      });
     },
   });
 

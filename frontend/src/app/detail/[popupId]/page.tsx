@@ -27,7 +27,7 @@ import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
 export default function ProductDetail() {
   const router = useRouter();
   const params = useParams();
-  const popupId = params.popupId as string;
+  const popupId = Number(params.popupId);
 
   const {
     data: popupDetailData,
@@ -119,12 +119,12 @@ export default function ProductDetail() {
           />
           <MediumText color="color-black">위치</MediumText>
           <MediumText color="text-gray60">|</MediumText>
-          <MediumText color="color-black">{location.address_name}</MediumText>
+          <MediumText color="color-black">{location.addressName}</MediumText>
         </div>
         {/* Map */}
         <div className="mt-6.5">
           <CircleMap
-            center={{ lat: location.y, lng: location.x }}
+            center={{ lat: location.latitude, lng: location.longitude }}
             maxLevel={6}
             minLevel={6}
             onClick={handleClickMap}

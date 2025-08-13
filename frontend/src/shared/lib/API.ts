@@ -21,6 +21,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export default class API {
   readonly method: HTTPMethod;
   readonly url: string;
+  static onUnauthorized: (() => void) | undefined;
   baseURL?: string;
   headers?: HTTPHeaders;
   params?: HTTPParams;
@@ -115,7 +116,6 @@ export default class API {
           };
         }
 
-        // TODO : API 명세서에 맞는 에러 코드 처리
         switch (response.status) {
           case 400:
             throw new ApiError(
@@ -125,7 +125,7 @@ export default class API {
               errorData.code
             );
           case 401:
-            // TODO : 토큰 만료시 재발급 로직 추가
+            API.onUnauthorized?.();
             throw new ApiError(
               errorData.message || '인증에 실패했습니다.',
               response.status,

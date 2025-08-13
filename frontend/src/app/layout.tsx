@@ -4,7 +4,7 @@ import './globals.css';
 import localFont from 'next/font/local';
 import { Toaster } from '@/shared/ui';
 import { ReactQueryClientProvider } from '@/shared/lib';
-import AuthInitializer from '@/entities/user/lib/AuthInitializer';
+import AuthProvider from '@/features/auth/lib/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'Popup App',
@@ -36,20 +36,19 @@ export default function RootLayout({
             src={KAKAO_SDK_URL}
             strategy="beforeInteractive"
           />
-          <AuthInitializer />
-          {/*<AuthInitializer>*/}
-          <div className="min-h-screen bg-gray40">
-            <div className="w-full min-w-[320px] max-w-[430px] mx-auto bg-white min-h-screen">
-              {/* <Header /> */}
+          <AuthProvider>
+            <div className="min-h-screen bg-gray40">
+              <div className="w-full min-w-[320px] max-w-[430px] mx-auto bg-white min-h-screen">
+                {/* <Header /> */}
 
-              {/* 메인 콘텐츠 영역 */}
-              <Toaster position="top-center" richColors />
-              <main className="flex-1">{children}</main>
+                {/* 메인 콘텐츠 영역 */}
+                <Toaster position="top-center" richColors />
+                <main className="flex-1">{children}</main>
 
-              {/* <BottomNav /> */}
+                {/* <BottomNav /> */}
+              </div>
             </div>
-          </div>
-          {/*</AuthInitializer>*/}
+          </AuthProvider>
         </ReactQueryClientProvider>
       </body>
     </html>

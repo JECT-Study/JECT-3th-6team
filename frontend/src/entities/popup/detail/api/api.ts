@@ -1,8 +1,13 @@
 import { APIBuilder } from '@/shared/lib';
 import { POPUP_DETAIL_ENDPOINTS } from '@/entities/popup/detail/api/endpoints';
-import { PopupDetailResponseDto } from '@/entities/popup/detail/types/type';
+import {
+  PopupDetailResponseDto,
+  PopupDetailRequestDto,
+} from '@/entities/popup/detail/types/type';
 
-export const getPopupDetailApi = async (popupId: string) => {
+export const getPopupDetailApi = async (
+  popupId: PopupDetailRequestDto['popupId']
+): Promise<PopupDetailResponseDto> => {
   const response = await APIBuilder.get(
     POPUP_DETAIL_ENDPOINTS.GET_POPUP_DETAIL(popupId)
   )
@@ -11,5 +16,5 @@ export const getPopupDetailApi = async (popupId: string) => {
     .build()
     .call<PopupDetailResponseDto>();
 
-  return response.data.popupDetail[0]; // 배열에서 첫 번째 아이템 반환
+  return response.data;
 };
