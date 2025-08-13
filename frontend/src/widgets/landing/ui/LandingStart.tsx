@@ -11,12 +11,38 @@ export default function LandingStart(props: Props) {
 
   return (
     <div className={'grid grid-cols-[1fr_1fr] gap-x-9'}>
-      <Image
-        src={'/images/landing/LANDING_START.svg'}
-        width={600}
-        height={720}
-        alt={'service-landing-image'}
-      />
+      {/*좌측 영역*/}
+
+      <div
+        className={
+          'w-[600px] h-[722px] relative ' +
+          'bg-[#F4F4F4] rounded-[30px] flex flex-col justify-center items-center gap-y-[10px]'
+        }
+      >
+        <p
+          className={
+            'w-[500px] text-[22px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[87px] left-1/2 -translate-x-1/2'
+          }
+        >
+          팝업스토어 정보를 모아보고, 현장예약과 실시간 <br />
+          웨이팅까지 가능한 통합 플랫폼
+          <em className={'text-main not-italic'}> ‘Spot it!’ </em>을 알아볼까요?
+        </p>
+
+        <Image
+          src={'/images/landing/LANDING_START_PHONE.png'}
+          width={416}
+          height={477}
+          alt={'service-landing-image'}
+          className={
+            'object-fill w-[450px] absolute top-[203px] left-1/2 -translate-x-1/2'
+          }
+          priority
+          fetchPriority="high"
+        />
+      </div>
+
+      {/*우측 영역*/}
       <div
         className={
           'relative flex flex-col gap-y-[62px] justify-center items-center'
