@@ -11,10 +11,10 @@ export default function Page() {
 
 function KakaoLoading() {
   return (
-    <div className="flex h-[60vh] items-center justify-center">
-      <div className="animate-pulse rounded-xl bg-gray-100 px-6 py-4 text-gray-600">
-        로그인 처리 중이에요…
-      </div>
+    <div className="flex flex-col items-center justify-center h-screen text-gray-600">
+      {/* 기본 spin 애니메이션 */}
+      <div className="w-8 h-8 mb-4 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" />
+      <p className="text-base animate-pulse">로그인 중이이에요</p>
     </div>
   );
 }
