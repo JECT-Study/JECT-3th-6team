@@ -17,7 +17,7 @@ export default function AppShellLayout({
       />
       <div
         className={
-          'fixed hidden [@media(min-width:1289px)]:flex flex-col gap-y-[25px] justify-center items-center top-1/2 left-[calc((100vw-320px)/4)] -translate-x-1/2  -translate-y-1/2 opacity-50 '
+          'fixed hidden [@media(min-width:1289px)]:flex flex-col gap-y-[25px] justify-center items-center top-1/2 left-[calc((100vw-430px)/4)] -translate-x-1/2  -translate-y-1/2 opacity-50 '
         }
       >
         <Image
