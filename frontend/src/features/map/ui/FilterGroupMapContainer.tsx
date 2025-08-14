@@ -1,10 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { MapMarker } from 'react-kakao-maps-sdk';
+import { useQuery } from '@tanstack/react-query';
+
 import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
-import { MapMarker } from 'react-kakao-maps-sdk';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import KeywordFilterPreview, {
@@ -13,14 +15,19 @@ import KeywordFilterPreview, {
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
 import useSearchMyLocation from '@/features/map/hook/useSearchMyLocation';
 import useMapSearch from '@/features/map/hook/useMapSearch';
+
 import { getMapPopupListApi } from '@/entities/map/api';
-import { useQuery } from '@tanstack/react-query';
+import getPopupListApi from '@/entities/popup/api/getPopupListApi';
+import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
+import { PopupItemType } from '@/entities/popup/types/PopupListItem';
 
 export default function FilterGroupMapContainer() {
   // 기본 위치 (서울숲 4번출구 앞)
   const defaultCenter = { lat: 37.544643, lng: 127.044368 };
   const [center, setCenter] = useState(defaultCenter);
   const [selectedPopupId, setSelectedPopupId] = useState<number | null>(null);
+  const [selectedPopupData, setSelectedPopupData] =
+    useState<PopupItemType | null>(null);
 
   const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
   const { popupType, category } = filter.keyword;
@@ -36,8 +43,29 @@ export default function FilterGroupMapContainer() {
     ...toKeywordChips(category, 'category'),
   ];
 
-  const handleMarkerClick = (popupId: number) => {
-    setSelectedPopupId(prevId => (prevId === popupId ? null : popupId));
+  const handleMarkerClick = async (popupId: number) => {
+    const isCurrentlySelected = selectedPopupId === popupId;
+
+    if (isCurrentlySelected) {
+      return;
+    }
+
+    // 새로운 마커 선택
+    setSelectedPopupId(popupId);
+    console.log('선택된 팝업 ID:', popupId);
+
+    try {
+      const popupData = await getPopupListApi({ popupId });
+      console.log('popupData:', popupData);
+
+      // API 응답에서 첫 번째 팝업 데이터를 selectedPopupData로 설정
+      if (popupData.content && popupData.content.length > 0) {
+        setSelectedPopupData(popupData.content[0]);
+      }
+    } catch (error) {
+      console.error('팝업 데이터 조회 실패:', error);
+      setSelectedPopupData(null);
+    }
   };
 
   // 위치 결정 로직:
@@ -126,6 +154,13 @@ export default function FilterGroupMapContainer() {
           handleMoveToCurrentLocation(mapRef, setCenter)
         }
       />
+      {selectedPopupData && (
+        <div className="absolute bottom-30 left-0 right-0 z-50">
+          <div className="w-full max-w-sm mx-auto transform scale-100">
+            <BadgedPopupCard {...selectedPopupData} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
