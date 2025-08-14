@@ -26,7 +26,6 @@ const mapPopupListItemToViewProps = (
 ): PopupCardViewProps => {
   const renderedBadge = <PopupBadge data={data} />;
 
-  //  "2025.06.01 ~ 2025.06.25" 을 '6월 1일 ~ 6월 25일' 로 변환
   const { startDate, endDate } = periodStringToDate(data.period);
   const renderedPeriod = dateToPeriodKRString(startDate, endDate);
 
