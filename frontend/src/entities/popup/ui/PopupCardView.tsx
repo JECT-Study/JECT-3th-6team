@@ -1,6 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import Image from 'next/image';
-import React from 'react';
+import Image, { StaticImageData } from 'next/image';
+import React, { useEffect, useState } from 'react';
 import {
   PopupCardViewProps,
   ratingType,
@@ -10,6 +12,7 @@ import IconStar from '@/assets/icons/Normal/Icon_Star.svg';
 import IconBracketRight from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
 import DefaultImage from '/public/images/default-popup-image.png';
 
+type ImgSrc = string | StaticImageData;
 const PopupCardLink = ({
   children,
   linkTo,
@@ -17,7 +20,7 @@ const PopupCardLink = ({
   children: React.ReactNode;
   linkTo: string;
 }) => (
-  <Link href={linkTo}>
+  <Link href={linkTo} className={'group'}>
     <div className="relative w-full flex rounded-2xl bg-white overflow-hidden shadow-card border border-gray40">
       {children}
     </div>
@@ -32,18 +35,47 @@ const PopupCardImage = ({
   image: string;
   popupName: string;
   badge?: React.ReactNode;
-}) => (
-  <div className="relative w-[140px] min-h-[144px] overflow-hidden">
-    <Image
-      src={image || DefaultImage}
-      alt={`${popupName}-popup-image`}
-      className="object-cover h-full"
-      width={140}
-      height={144}
-    />
-    {badge}
-  </div>
-);
+}) => {
+  // 초기값: 값이 없으면 폴백
+  const initial: ImgSrc = image || DefaultImage;
+  const [src, setSrc] = useState<ImgSrc>(initial);
+  const [errored, setErrored] = useState(false);
+
+  // props.image가 바뀌면 초기화
+  useEffect(() => {
+    setErrored(false);
+    setSrc(image || DefaultImage);
+  }, [image]);
+
+  // src가 바뀌면 강제 리마운트 (Next/Image 내부 캐시/재시도 케이스 방지)
+  const key = typeof src === 'string' ? src : src.src;
+
+  return (
+    <div className="relative w-[140px] min-h-[144px] overflow-hidden">
+      <Image
+        key={key}
+        src={src}
+        alt={`${popupName}-popup-image`}
+        className="object-cover h-full group-hover:scale-105 transition-transform group-duration-200"
+        width={140}
+        height={144}
+        onError={() => {
+          if (!errored) {
+            setErrored(true);
+            setSrc(DefaultImage);
+          }
+        }}
+        onLoadingComplete={img => {
+          if (img.naturalWidth === 0 && !errored) {
+            setErrored(true);
+            setSrc(DefaultImage);
+          }
+        }}
+      />
+      {badge}
+    </div>
+  );
+};
 
 const PopupCardContent = ({
   location,
