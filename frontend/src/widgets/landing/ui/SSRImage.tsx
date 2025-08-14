@@ -4,7 +4,7 @@ import { StepType } from '@/app/landing/page';
 export default function SSRImage({ step }: { step: StepType }) {
   return (
     <Image
-      src={`/images/landing/LANDING_${step}.svg`}
+      src={`/images/landing/LANDING_${step}.png`}
       alt="guide image"
       width={1000}
       height={750}

@@ -21,7 +21,7 @@ export default function LandingStart(props: Props) {
       >
         <p
           className={
-            'w-[500px] text-[22px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[87px] left-1/2 -translate-x-1/2'
+            'w-[500px] text-[22px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[87px] left-1/2 -translate-x-1/2 select-none'
           }
         >
           팝업스토어 정보를 모아보고, 현장예약과 실시간 <br />

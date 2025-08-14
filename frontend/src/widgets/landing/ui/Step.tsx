@@ -2,6 +2,7 @@ import { StepType } from '@/app/landing/page';
 import { StandardButton } from '@/shared/ui';
 import Image from 'next/image';
 import SSRImage from '@/widgets/landing/ui/SSRImage';
+import LandingTitle, { GuideStepType } from '@/widgets/landing/ui/LandingTitle';
 
 interface StepProps {
   currentStep: StepType;
@@ -15,8 +16,9 @@ export default function Step(props: StepProps) {
   const { currentStep, onNext, onStepChange } = props;
   return (
     <div className={'grid grid-cols-[1fr_170px] gap-x-9 '}>
-      <div className={'relative'}>
+      <div className={'relative '}>
         {/*가이드이미지*/}
+        <LandingTitle step={currentStep as GuideStepType} />
         <SSRImage step={currentStep} />
 
         {/* 인디케이터 */}
