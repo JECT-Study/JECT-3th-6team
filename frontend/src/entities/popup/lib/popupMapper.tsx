@@ -25,11 +25,8 @@ const mapPopupListItemToViewProps = (
   data: PopupListItemType
 ): PopupCardViewProps => {
   const renderedBadge = <PopupBadge data={data} />;
-  const [startDate, endDate] = data.period.split(' ~ ');
-  const periodStr = dateToPeriodKRString(
-    new Date(startDate),
-    new Date(endDate)
-  );
+  const { startDate, endDate } = periodStringToDate(data.period);
+  const renderedPeriod = dateToPeriodKRString(startDate, endDate);
 
   const { region1depthName, region2depthName } = data.location;
   const renderLocation = `${region1depthName}, ${region2depthName}`;
@@ -39,7 +36,7 @@ const mapPopupListItemToViewProps = (
     popupName: data.popupName,
     popupImageUrl: data.imageUrl,
     location: renderLocation,
-    period: periodStr,
+    period: renderedPeriod,
     linkTo: `/detail/${data.popupId}`,
     Badge: renderedBadge,
     searchTags: renderTag,
