@@ -95,7 +95,7 @@ public class WaitingNotificationService {
         schedules.add(createEnterNowSchedule(waiting, estimatedEnterTime));
 
         // 2. 입장 시간 초과 알림 (ENTER_TIME_OVER 정책) 
-        schedules.add(createEnterTimeOverSchedule(waiting, estimatedEnterTime));
+//        schedules.add(createEnterTimeOverSchedule(waiting, estimatedEnterTime));
 
         // 3. 3팀 전 알림 (ENTER_3TEAMS_BEFORE 정책) - 동적 트리거
         schedules.add(createEnter3TeamsBeforeSchedule(waiting));
