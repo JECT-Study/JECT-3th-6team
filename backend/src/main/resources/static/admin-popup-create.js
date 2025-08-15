@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const state = {
     openingHours: [],
-    imageUrls: [""],
+    mainImageUrls: [""],        // 메인 이미지들 (필수)
+    brandStoryImageUrls: [""],  // 브랜드 스토리 이미지들 (필수)
     sns: [{ iconUrl: "", linkUrl: "" }],
   };
 
@@ -45,15 +46,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function renderImageUrls() {
-    const container = qs('#imageUrlList');
+  function renderMainImageUrls() {
+    const container = qs('#mainImageUrlList');
     container.innerHTML = '';
-    state.imageUrls.forEach((url, idx) => {
+    state.mainImageUrls.forEach((url, idx) => {
       const row = document.createElement('div');
       row.innerHTML = `
         <div style="display:flex; gap:8px;">
           <input type="text" value="${url}" data-idx="${idx}" style="flex:1;" placeholder="https://..." />
-          <button class="btn" data-remove-image="${idx}">삭제</button>
+          <button class="btn" data-remove-main-image="${idx}">삭제</button>
         </div>
       `;
       container.appendChild(row);
@@ -62,14 +63,43 @@ document.addEventListener('DOMContentLoaded', () => {
     container.querySelectorAll('input[type="text"]').forEach(el => {
       el.addEventListener('input', (e) => {
         const idx = Number(e.target.getAttribute('data-idx'));
-        state.imageUrls[idx] = e.target.value;
+        state.mainImageUrls[idx] = e.target.value;
       });
     });
-    container.querySelectorAll('[data-remove-image]').forEach(btn => {
+    container.querySelectorAll('[data-remove-main-image]').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.getAttribute('data-remove-image'));
-        state.imageUrls.splice(idx, 1);
-        renderImageUrls();
+        const idx = Number(e.target.getAttribute('data-remove-main-image'));
+        state.mainImageUrls.splice(idx, 1);
+        renderMainImageUrls();
+      });
+    });
+  }
+
+  function renderBrandStoryImageUrls() {
+    const container = qs('#brandStoryImageUrlList');
+    container.innerHTML = '';
+    state.brandStoryImageUrls.forEach((url, idx) => {
+      const row = document.createElement('div');
+      row.innerHTML = `
+        <div style="display:flex; gap:8px;">
+          <input type="text" value="${url}" data-idx="${idx}" style="flex:1;" placeholder="https://..." />
+          <button class="btn" data-remove-brand-story-image="${idx}">삭제</button>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    container.querySelectorAll('input[type="text"]').forEach(el => {
+      el.addEventListener('input', (e) => {
+        const idx = Number(e.target.getAttribute('data-idx'));
+        state.brandStoryImageUrls[idx] = e.target.value;
+      });
+    });
+    container.querySelectorAll('[data-remove-brand-story-image]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = Number(e.target.getAttribute('data-remove-brand-story-image'));
+        state.brandStoryImageUrls.splice(idx, 1);
+        renderBrandStoryImageUrls();
       });
     });
   }
@@ -107,63 +137,126 @@ document.addEventListener('DOMContentLoaded', () => {
   // init default items
   state.openingHours.push({ dayOfWeek: 'MONDAY', openTime: '10:00', closeTime: '20:00' });
   renderOpeningHours();
-  renderImageUrls();
+  renderMainImageUrls();
+  renderBrandStoryImageUrls();
   renderSns();
 
   qs('#addOpeningHours').addEventListener('click', () => {
     state.openingHours.push({ dayOfWeek: 'TUESDAY', openTime: '10:00', closeTime: '20:00' });
     renderOpeningHours();
   });
-  qs('#addImage').addEventListener('click', () => {
-    state.imageUrls.push('');
-    renderImageUrls();
+  qs('#addMainImageUrl').addEventListener('click', () => {
+    state.mainImageUrls.push('');
+    renderMainImageUrls();
+  });
+  qs('#addBrandStoryImageUrl').addEventListener('click', () => {
+    state.brandStoryImageUrls.push('');
+    renderBrandStoryImageUrls();
   });
   qs('#addSns').addEventListener('click', () => {
     state.sns.push({ iconUrl: '', linkUrl: '' });
     renderSns();
   });
 
-  // 이미지 업로드 기능
-  qs('#uploadImage').addEventListener('click', async () => {
-    const fileInput = qs('#imageFile');
-    const statusDiv = qs('#uploadStatus');
+  // 메인 이미지 업로드 기능
+  qs('#uploadMainImages').addEventListener('click', async () => {
+    const fileInput = qs('#mainImageFile');
+    const statusDiv = qs('#mainImageUploadStatus');
     
-    if (!fileInput.files || !fileInput.files[0]) {
+    if (!fileInput.files || fileInput.files.length === 0) {
       statusDiv.textContent = '파일을 선택해주세요.';
       statusDiv.className = 'error';
       return;
     }
     
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
+    statusDiv.textContent = '업로드 중...';
+    statusDiv.className = 'muted';
+    
+    try {
+      // 여러 파일 업로드 처리
+      for (let i = 0; i < fileInput.files.length; i++) {
+        const file = fileInput.files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/images/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          statusDiv.textContent = `업로드 실패: ${result?.message || response.status}`;
+          statusDiv.className = 'error';
+          return;
+        }
+        
+        // 업로드된 이미지 URL을 메인 이미지 상태에 추가
+        state.mainImageUrls.push(result.data.imageUrl);
+      }
+      
+      renderMainImageUrls();
+      
+      // 파일 입력 초기화
+      fileInput.value = '';
+      
+      statusDiv.textContent = `메인 이미지 업로드 성공! (${fileInput.files.length}개 파일)`;
+      statusDiv.className = 'success';
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      statusDiv.textContent = '업로드 중 오류가 발생했습니다.';
+      statusDiv.className = 'error';
+    }
+  });
+
+  // 브랜드 스토리 이미지 업로드 기능
+  qs('#uploadBrandStoryImages').addEventListener('click', async () => {
+    const fileInput = qs('#brandStoryImageFile');
+    const statusDiv = qs('#brandStoryImageUploadStatus');
+    
+    if (!fileInput.files || fileInput.files.length === 0) {
+      statusDiv.textContent = '파일을 선택해주세요.';
+      statusDiv.className = 'error';
+      return;
+    }
     
     statusDiv.textContent = '업로드 중...';
     statusDiv.className = 'muted';
     
     try {
-      const response = await fetch('/api/images/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
-        statusDiv.textContent = `업로드 실패: ${result?.message || response.status}`;
-        statusDiv.className = 'error';
-        return;
+      // 여러 파일 업로드 처리
+      for (let i = 0; i < fileInput.files.length; i++) {
+        const file = fileInput.files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/images/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          statusDiv.textContent = `업로드 실패: ${result?.message || response.status}`;
+          statusDiv.className = 'error';
+          return;
+        }
+        
+        // 업로드된 이미지 URL을 브랜드 스토리 이미지 상태에 추가
+        state.brandStoryImageUrls.push(result.data.imageUrl);
       }
       
-      // 업로드된 이미지 URL을 상태에 추가
-      state.imageUrls.push(result.data.imageUrl);
-      renderImageUrls();
+      renderBrandStoryImageUrls();
       
       // 파일 입력 초기화
       fileInput.value = '';
       
-      statusDiv.textContent = `업로드 성공! (${result.data.fileName})`;
+      statusDiv.textContent = `브랜드 스토리 이미지 업로드 성공! (${fileInput.files.length}개 파일)`;
       statusDiv.className = 'success';
       
     } catch (error) {
@@ -192,7 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
         latitude: Number(qs('#latitude').value),
       },
       weeklyOpeningHours: state.openingHours,
-      imageUrls: state.imageUrls.filter(Boolean),
+      mainImageUrls: state.mainImageUrls.filter(Boolean),
+      brandStoryImageUrls: state.brandStoryImageUrls.filter(Boolean),
       content: {
         introduction: qs('#introduction').value,
         notice: qs('#notice').value,
@@ -211,8 +305,18 @@ document.addEventListener('DOMContentLoaded', () => {
       result.className = 'error';
       return;
     }
-    if (payload.imageUrls.length === 0) {
-      result.textContent = '이미지 URL을 1개 이상 입력하세요';
+    if (payload.location.region1DepthName === '') {
+      result.textContent = '시/도를 선택해주세요';
+      result.className = 'error';
+      return;
+    }
+    if (payload.mainImageUrls.length === 0) {
+      result.textContent = '메인 이미지 URL을 1개 이상 입력하세요';
+      result.className = 'error';
+      return;
+    }
+    if (payload.brandStoryImageUrls.length === 0) {
+      result.textContent = '브랜드 스토리 이미지 URL을 1개 이상 입력하세요';
       result.className = 'error';
       return;
     }

@@ -36,7 +36,7 @@ public class WaitingDtoMapper {
                 waiting.waitingNumber(),
                 waiting.registeredAt(),
                 popupDtoMapper.toLocationResponse(popup.getLocation()),
-                popup.getDisplay().imageUrls().getFirst()
+                popup.getDisplay().mainImageUrls().getFirst()
         );
     }
 
@@ -59,7 +59,7 @@ public class WaitingDtoMapper {
                 new PopupSummaryResponse(
                         popup.getId(),
                         popup.getName(),
-                        popup.getDisplay().imageUrls().isEmpty() ? null : popup.getDisplay().imageUrls().getFirst(),
+                        popup.getDisplay().mainImageUrls().isEmpty() ? null : popup.getDisplay().mainImageUrls().getFirst(),
                         popupDtoMapper.toLocationResponse(popup.getLocation()),
                         dDay,
                         formatPeriod(popup.getSchedule().dateRange()),

@@ -62,12 +62,22 @@ public class PopupEntityMapper {
     }
 
     private PopupDisplay toDisplayDomain(List<PopupImageEntity> imageEntities, List<PopupContentEntity> contentEntities, List<PopupSocialEntity> socialEntities) {
-        List<String> imageUrls = imageEntities.stream().map(PopupImageEntity::getUrl).collect(Collectors.toList());
+        // 메인 이미지와 브랜드 스토리 이미지 분리
+        List<String> mainImageUrls = imageEntities.stream()
+                .filter(e -> e.getType() == PopupImageType.MAIN)
+                .map(PopupImageEntity::getUrl)
+                .collect(Collectors.toList());
+        
+        List<String> brandStoryImageUrls = imageEntities.stream()
+                .filter(e -> e.getType() == PopupImageType.DESCRIPTION)
+                .map(PopupImageEntity::getUrl)
+                .collect(Collectors.toList());
+        
         String introduction = contentEntities.stream().filter(e -> e.getSortOrder() == 1).findFirst().map(PopupContentEntity::getContentText).orElse("");
         String notice = contentEntities.stream().filter(e -> e.getSortOrder() == 2).findFirst().map(PopupContentEntity::getContentText).orElse("");
         PopupContent content = new PopupContent(introduction, notice);
         List<Sns> sns = socialEntities.stream().map(e -> new Sns(e.getIconUrl(), e.getLinkUrl())).collect(Collectors.toList());
-        return new PopupDisplay(imageUrls, content, sns);
+        return new PopupDisplay(mainImageUrls, brandStoryImageUrls, content, sns);
     }
 
     private List<PopupCategory> toCategoriesDomain(List<PopupCategoryEntity> categoryEntities) {
