@@ -12,14 +12,11 @@ import com.example.demo.common.security.UserPrincipal;
 import com.example.demo.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +27,9 @@ import java.util.Optional;
 public class PopupController {
 
     private final PopupService popupService;
+    //TODO 임시 코드 삭제 필요
+    @Value("${custom.admin.password}")
+    private String adminPassword;
 
     @GetMapping("/map")
     public ApiResponse<List<PopupMapResponse>> getPopupsOnMap(@Valid PopupMapRequest request) {
@@ -52,8 +52,13 @@ public class PopupController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<PopupCreateResponse>> createPopup(
-            @Valid @RequestBody PopupCreateRequest request
+            @Valid @RequestBody PopupCreateRequest request,
+            @RequestHeader("Authorization") String password
     ) {
+        //TODO 임시 코드 삭제 필요
+        if (!password.equals(adminPassword)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("비밀번호가 잘못되었습니다.", null));
+        }
         PopupCreateResponse response = popupService.create(request);
         return ResponseEntity.ok(new ApiResponse<>("팝업이 성공적으로 등록되었습니다.", response));
     }

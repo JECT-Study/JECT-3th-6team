@@ -68,6 +68,8 @@ custom:
     accessToken:
       secret: ${JWT_ACCESS_TOKEN_SECRET}
       expirationSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
+  admin:
+    password ${ADMIN_PASSWORD}
 
 app:
   sse:
