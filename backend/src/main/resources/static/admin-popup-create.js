@@ -8,6 +8,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const qs = (sel) => document.querySelector(sel);
   const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+  
+  // Authorization 헤더 생성 함수
+  const getAuthHeaders = () => {
+    const password = qs('#adminPassword').value.trim();
+    const headers = {};
+    
+    if (password) {
+      headers['Authorization'] = password;
+    }
+    
+    return headers;
+  };
+  
+  // 비밀번호 입력 시 상태 업데이트
+  const updateAuthStatus = () => {
+    const password = qs('#adminPassword').value.trim();
+    const statusDiv = qs('#authStatus');
+    
+    if (password) {
+      statusDiv.textContent = '✅ 비밀번호가 설정되었습니다. API 호출이 가능합니다.';
+      statusDiv.className = 'success';
+    } else {
+      statusDiv.textContent = '⚠️ 비밀번호를 입력해야 API 호출이 가능합니다.';
+      statusDiv.className = 'muted';
+    }
+  };
 
   function renderOpeningHours() {
     const container = qs('#openingHoursList');
@@ -158,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSns();
   });
 
+  // 비밀번호 입력 이벤트 리스너
+  qs('#adminPassword').addEventListener('input', updateAuthStatus);
+
   // 메인 이미지 업로드 기능
   qs('#uploadMainImages').addEventListener('click', async () => {
     const fileInput = qs('#mainImageFile');
@@ -182,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/images/upload', {
           method: 'POST',
           body: formData,
+          headers: getAuthHeaders(),
           credentials: 'include',
         });
         
@@ -236,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/images/upload', {
           method: 'POST',
           body: formData,
+          headers: getAuthHeaders(),
           credentials: 'include',
         });
         
@@ -329,7 +360,10 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch('/api/popups', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
         body: JSON.stringify(payload),
         credentials: 'include',
       });

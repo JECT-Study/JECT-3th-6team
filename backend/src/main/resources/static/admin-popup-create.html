@@ -24,6 +24,17 @@
 <body>
   <h1>관리자 - 팝업 생성</h1>
 
+  <fieldset style="background-color: #fff3cd; border-color: #ffeaa7;">
+    <legend style="color: #856404; font-weight: bold;">🔒 관리자 인증</legend>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <label style="margin: 0; flex: 0 0 auto;">
+        비밀번호:
+        <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요" style="width: 200px; margin-left: 8px;" />
+      </label>
+      <div id="authStatus" class="muted">비밀번호를 입력하면 API 호출이 가능합니다.</div>
+    </div>
+  </fieldset>
+
   <fieldset>
     <legend>기본 정보</legend>
     <div class="row">
