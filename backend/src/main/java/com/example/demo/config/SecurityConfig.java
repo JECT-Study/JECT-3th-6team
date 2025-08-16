@@ -42,7 +42,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // application.yml에서 설정된 frontend-url 사용
-        configuration.setAllowedOrigins(Arrays.asList(appProperties.getFrontendUrl()));
+        configuration.setAllowedOrigins(Arrays.asList(appProperties.getFrontendUrl(), "https://api.spotit.co.kr"));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
