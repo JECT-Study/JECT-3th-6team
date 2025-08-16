@@ -24,9 +24,8 @@ export default function LandingStart(props: Props) {
             'w-[500px] text-[22px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[87px] left-1/2 -translate-x-1/2 select-none'
           }
         >
-          팝업스토어 정보를 모아보고, 현장예약과 실시간 <br />
-          웨이팅까지 가능한 통합 플랫폼
-          <em className={'text-main not-italic'}> ‘Spot it!’ </em>을 알아볼까요?
+          팝업스토어 정보 확인부터 실시간 웨이팅까지, <br />한 번에 해결하는
+          <em className={'text-main not-italic'}> ‘Spot it!’ </em>
         </p>
 
         <Image
