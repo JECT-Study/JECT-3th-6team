@@ -1,6 +1,5 @@
 package com.example.demo.infrastructure.persistence.repository;
 
-import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupEntity;
 import java.time.LocalDate;
 import java.util.List;
@@ -102,7 +101,7 @@ public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
     @Query("""
         SELECT p FROM PopupEntity p
         WHERE (:popupId IS NULL OR p.id = :popupId)
-        AND ((:startDate IS NULL OR :endDate IS NULL) OR (p.endDate >= :startDate AND p.startDate <= :endDate))
+        AND ((CAST(:startDate AS date) IS NULL OR CAST(:endDate  AS date) IS NULL) OR (p.endDate >= :startDate AND p.startDate <= :endDate))
         AND (:types IS NULL OR p.type IN :types)
         AND EXISTS (
             SELECT 1 FROM PopupCategoryEntity c
