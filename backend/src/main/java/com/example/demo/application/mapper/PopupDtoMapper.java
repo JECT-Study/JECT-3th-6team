@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+// TODO : 리팩토링 필요
 public class PopupDtoMapper {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -146,7 +147,7 @@ public class PopupDtoMapper {
     }
 
     public PopupMapQuery toPopupMapQuery(PopupMapRequest request) {
-        PopupType type = StringUtils.hasText(request.type()) ? PopupType.valueOf(request.type()) : null;
+        PopupType type = StringUtils.hasText(request.type()) ? PopupType.fromKorean(request.type()) : null;
         List<String> categories = StringUtils.hasText(request.category()) ? Arrays.asList(request.category().split(","))
                 : null;
         DateRange dateRange = (request.startDate() != null && request.endDate() != null)
