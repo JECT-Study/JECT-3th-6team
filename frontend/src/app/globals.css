@@ -49,6 +49,8 @@
   --shadow-calendar: 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
   --shadow-container: 0px -4px 20px 0px rgba(0, 0, 0, 0.05);
   --shadow-card :0px 4px 10px 0px rgba(0, 0, 0, 0.05);
+  --shadow-main: 0 0 10px 0 rgba(0, 0, 0, 0.10);
+
 
   /*text-colors*/
   --color-text-color: #545454;
