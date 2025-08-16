@@ -6,6 +6,7 @@ import com.example.demo.domain.model.popup.PopupQuery;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupEntity;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
+import com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupLocationEntity;
 import com.example.demo.infrastructure.persistence.mapper.PopupEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.*;
@@ -45,12 +46,18 @@ public class PopupPortAdapter implements PopupPort {
                 .orElseThrow(() -> new EntityNotFoundException("PopupLocation not found for popupId: " + popupId));
 
         var scheduleEntities = popupWeeklyScheduleRepository.findAllByPopupId(popupId); // 정렬 없는 메서드로 변경
-        var imageEntities = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(popupId, PopupImageType.MAIN);
+        var mainImageEntities = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(popupId, PopupImageType.MAIN);
+        var brandStoryImageEntities = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(popupId, PopupImageType.DESCRIPTION);
         var contentEntities = popupContentRepository.findAllByPopupIdOrderBySortOrderAsc(popupId);
         var socialEntities = popupSocialRepository.findAllByPopupIdOrderBySortOrderAsc(popupId);
         var categoryEntities = popupCategoryRepository.findAllByPopupId(popupId);
 
-        Popup domain = popupEntityMapper.toDomain(popupEntity, locationEntity, scheduleEntities, imageEntities, contentEntities, socialEntities, categoryEntities);
+        // 메인 이미지와 브랜드 스토리 이미지 합치기
+        var allImageEntities = new ArrayList<PopupImageEntity>();
+        allImageEntities.addAll(mainImageEntities);
+        allImageEntities.addAll(brandStoryImageEntities);
+
+        Popup domain = popupEntityMapper.toDomain(popupEntity, locationEntity, scheduleEntities, allImageEntities, contentEntities, socialEntities, categoryEntities);
         return Optional.of(domain);
     }
 
@@ -93,17 +100,30 @@ public class PopupPortAdapter implements PopupPort {
                 .toList();
         popupWeeklyScheduleRepository.saveAll(scheduleEntities);
 
-        // 4) 이미지 저장 (모두 MAIN으로 저장하고 정렬 순서 부여)
-        List<com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity> imageEntities =
-                popup.getDisplay().imageUrls().stream()
+        // 4) 이미지 저장 (메인 이미지와 브랜드 스토리 이미지 분리 저장)
+        // 메인 이미지들 저장 (MAIN 타입)
+        List<com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity> mainImageEntities =
+                popup.getDisplay().mainImageUrls().stream()
                         .map(url -> com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity.builder()
                                 .popupId(popupId)
                                 .type(PopupImageType.MAIN)
                                 .url(url)
-                                .sortOrder(popup.getDisplay().imageUrls().indexOf(url) + 1)
+                                .sortOrder(popup.getDisplay().mainImageUrls().indexOf(url) + 1)
                                 .build())
                         .toList();
-        popupImageRepository.saveAll(imageEntities);
+        popupImageRepository.saveAll(mainImageEntities);
+
+        // 브랜드 스토리 이미지들 저장 (DESCRIPTION 타입)
+        List<com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity> brandStoryImageEntities =
+                popup.getDisplay().brandStoryImageUrls().stream()
+                        .map(url -> com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity.builder()
+                                .popupId(popupId)
+                                .type(PopupImageType.DESCRIPTION)
+                                .url(url)
+                                .sortOrder(popup.getDisplay().brandStoryImageUrls().indexOf(url) + 1)
+                                .build())
+                        .toList();
+        popupImageRepository.saveAll(brandStoryImageEntities);
 
         // 5) 컨텐츠 저장 (introduction=1, notice=2)
         var intro = com.example.demo.infrastructure.persistence.entity.popup.PopupContentEntity.builder()
@@ -180,11 +200,18 @@ public class PopupPortAdapter implements PopupPort {
                 .map(entity -> {
                     var location = popupLocationRepository.findById(entity.getPopupLocationId()).orElse(null);
                     var schedules = popupWeeklyScheduleRepository.findAllByPopupId(entity.getId());
-                    var images = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(entity.getId(), PopupImageType.MAIN);
+                    var mainImages = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(entity.getId(), PopupImageType.MAIN);
+                    var brandStoryImages = popupImageRepository.findAllByPopupIdAndTypeOrderBySortOrderAsc(entity.getId(), PopupImageType.DESCRIPTION);
                     var contents = popupContentRepository.findAllByPopupIdOrderBySortOrderAsc(entity.getId());
                     var socials = popupSocialRepository.findAllByPopupIdOrderBySortOrderAsc(entity.getId());
                     var categories = popupCategoryRepository.findAllByPopupId(entity.getId());
-                    return popupEntityMapper.toDomain(entity, location, schedules, images, contents, socials, categories);
+                    
+                    // 메인 이미지와 브랜드 스토리 이미지 합치기
+                    var allImages = new ArrayList<PopupImageEntity>();
+                    allImages.addAll(mainImages);
+                    allImages.addAll(brandStoryImages);
+                    
+                    return popupEntityMapper.toDomain(entity, location, schedules, allImages, contents, socials, categories);
                 })
                 .toList();
     }

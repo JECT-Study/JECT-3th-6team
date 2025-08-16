@@ -98,9 +98,10 @@ class WaitingServiceTest {
                 )
                 .display(
                         new PopupDisplay(
-                                List.of("http://image.com"),
-                                new PopupContent("팝업 설명", "팝업 공지"),
-                                List.of(new Sns("http://image.com", "http://sns.com"))
+                                List.of("https://example.com/image1.jpg"),
+                                List.of("https://example.com/brand1.jpg"),
+                                new PopupContent("소개", "공지"),
+                                List.of(new Sns("https://example.com/icon1.jpg", "https://instagram.com/example"))
                         )
                 )
                 .type(PopupType.EXHIBITION)
@@ -138,7 +139,7 @@ class WaitingServiceTest {
             );
 
             WaitingCreateResponse expectedResponse = new WaitingCreateResponse(
-                    1L, "테스트 팝업", "홍길동", 2, "hong@example.com", nextWaitingNumber, registeredAt, locationResponse, validPopup.getDisplay().imageUrls().getFirst()
+                    1L, "테스트 팝업", "홍길동", 2, "hong@example.com", nextWaitingNumber, registeredAt, locationResponse, validPopup.getDisplay().mainImageUrls().getFirst()
             );
 
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
@@ -292,9 +293,10 @@ class WaitingServiceTest {
                 )
                 .display(
                         new PopupDisplay(
-                                List.of("http://image.com"),
-                                new PopupContent("팝업 설명", "팝업 공지"),
-                                List.of(new Sns("http://image.com", "http://sns.com"))
+                                List.of("https://example.com/image1.jpg"),
+                                List.of("https://example.com/brand1.jpg"),
+                                new PopupContent("소개", "공지"),
+                                List.of(new Sns("https://example.com/icon1.jpg", "https://instagram.com/example"))
                         )
                 )
                 .type(PopupType.EXHIBITION)
@@ -671,9 +673,10 @@ class WaitingServiceTest {
                 )
                 .display(
                         new PopupDisplay(
-                                List.of("http://image.com"),
-                                new PopupContent("팝업 설명", "팝업 공지"),
-                                List.of(new Sns("http://image.com", "http://sns.com"))
+                                List.of("https://example.com/image1.jpg"),
+                                List.of("https://example.com/brand1.jpg"),
+                                new PopupContent("소개", "공지"),
+                                List.of(new Sns("https://example.com/icon1.jpg", "https://instagram.com/example"))
                         )
                 )
                 .type(PopupType.EXHIBITION)

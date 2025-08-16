@@ -76,6 +76,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/uploads/**", // 업로드된 이미지 파일 접근 허용
                                 "/index.html",
                                 "/index.js",
                                 "/admin-popup-create.html",
@@ -84,6 +85,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
                         .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
+                        .requestMatchers(HttpMethod.POST, "/api/images/upload").permitAll() // 임시: 이미지 업로드 무인증 허용
                         .requestMatchers("/admin-popup-create.html").permitAll()
                         .requestMatchers("/admin-popup-create.js").permitAll()
                         .anyRequest().authenticated()
@@ -119,6 +121,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/uploads/**", // 업로드된 이미지 파일 접근 허용
                                 "/index.html",
                                 "/index.js",
                                 "/admin-popup-create.html",
@@ -126,6 +129,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
                         .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
+                        .requestMatchers(HttpMethod.POST, "/api/images/upload").permitAll() // 임시: 이미지 업로드 무인증 허용
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions

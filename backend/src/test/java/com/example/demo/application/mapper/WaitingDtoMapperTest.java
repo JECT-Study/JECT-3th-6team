@@ -59,9 +59,10 @@ class WaitingDtoMapperTest {
                 )
                 .display(
                         new PopupDisplay(
-                                List.of("http://image.com"),
-                                new PopupContent("팝업 설명", "팝업 공지"),
-                                List.of(new Sns("http://image.com", "http://sns.com"))
+                                List.of("https://example.com/image1.jpg"),
+                                List.of("https://example.com/brand1.jpg"),
+                                new PopupContent("소개", "공지"),
+                                List.of(new Sns("https://example.com/icon1.jpg", "https://instagram.com/example"))
                         )
                 )
                 .type(PopupType.EXHIBITION)
@@ -158,9 +159,10 @@ class WaitingDtoMapperTest {
                 )
                 .display(
                         new PopupDisplay(
-                                List.of("http://image.com"),
-                                new PopupContent("팝업 설명", "팝업 공지"),
-                                List.of(new Sns("http://image.com", "http://sns.com"))
+                                List.of("https://example.com/image1.jpg"),
+                                List.of("https://example.com/brand1.jpg"),
+                                new PopupContent("소개", "공지"),
+                                List.of(new Sns("https://example.com/icon1.jpg", "https://instagram.com/example"))
                         )
                 )
                 .type(PopupType.EXHIBITION)
@@ -190,7 +192,7 @@ class WaitingDtoMapperTest {
             assertEquals(1L, result.waitingId());
             assertEquals(1L, result.popup().popupId());
             assertEquals("테스트 팝업", result.popup().popupName());
-            assertEquals("http://image.com", result.popup().popupImageUrl()); // 첫 번째 썸네일
+            assertEquals("https://example.com/image1.jpg", result.popup().popupImageUrl()); // 첫 번째 썸네일
             assertEquals("서울시 강남구", result.popup().location().addressName());
             assertEquals("2025-07-12 ~ 2025-08-11", result.popup().period());
             assertEquals(1, result.waitingNumber());
@@ -234,8 +236,9 @@ class WaitingDtoMapperTest {
                     .display(
                             new PopupDisplay(
                                     Collections.emptyList(),
-                                    new PopupContent("팝업 설명", "팝업 공지"),
-                                    List.of(new Sns("http://image.com", "http://sns.com"))
+                                    Collections.emptyList(),
+                                    new PopupContent("소개", "공지"),
+                                    List.of(new Sns("https://example.com/icon.jpg", "https://instagram.com/example"))
                             )
                     )
                     .type(PopupType.EXHIBITION)

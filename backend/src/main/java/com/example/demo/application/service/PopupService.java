@@ -76,7 +76,7 @@ public class PopupService {
 
         return new PopupDetailResponse(
                 popup.getId(),
-                popup.getDisplay().imageUrls(),
+                popup.getDisplay().mainImageUrls(),
                 (int) dDay,
                 popup.getName(),
                 popupDtoMapper.toSearchTagsResponse(popup),

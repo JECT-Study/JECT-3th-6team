@@ -80,7 +80,7 @@ public class PopupDtoMapper {
         List<Sns> sns = request.sns().stream()
                 .map(it -> new Sns(it.iconUrl(), it.linkUrl()))
                 .toList();
-        PopupDisplay display = new PopupDisplay(request.imageUrls(), content, sns);
+        PopupDisplay display = new PopupDisplay(request.mainImageUrls(), request.brandStoryImageUrls(), content, sns);
 
         List<PopupCategory> categories = request.categoryIds().stream()
                 .map(id -> new PopupCategory(id, null)) // name은 저장 시 Category 조회로 채움
@@ -102,7 +102,7 @@ public class PopupDtoMapper {
                 popup.getId(),
                 popup.getName(),
                 popup.getType() != null ? popup.getType().name() : null,
-                popup.getDisplay() != null ? popup.getDisplay().imageUrls() : java.util.Collections.emptyList()
+                popup.getDisplay() != null ? popup.getDisplay().mainImageUrls() : java.util.Collections.emptyList()
         );
     }
 
@@ -225,7 +225,7 @@ public class PopupDtoMapper {
         return new PopupSummaryResponse(
                 popup.getId(),
                 popup.getName(),
-                popup.getDisplay().imageUrls().getFirst(),
+                popup.getDisplay().mainImageUrls().getFirst(),
                 toLocationResponse(popup.getLocation()),
                 calculateDDay(popup.getSchedule().dateRange().endDate()),
                 formatPeriod(popup.getSchedule().dateRange()),

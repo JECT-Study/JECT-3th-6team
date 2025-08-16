@@ -51,9 +51,10 @@ class WaitingTest {
             )
             .display(
                     new PopupDisplay(
-                            List.of("http://image.com"),
-                            new PopupContent("팝업 설명", "팝업 공지"),
-                            List.of(new Sns("http://image.com", "http://sns.com"))
+                            List.of("https://example.com/image1.jpg"),
+                            List.of("https://example.com/brand1.jpg"),
+                            new PopupContent("소개", "공지"),
+                            List.of(new Sns("https://example.com/icon1.jpg", "https://instagram.com/example"))
                     )
             )
             .type(PopupType.EXHIBITION)
