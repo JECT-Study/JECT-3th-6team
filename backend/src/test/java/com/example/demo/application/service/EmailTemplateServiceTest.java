@@ -22,12 +22,12 @@ class EmailTemplateServiceTest {
         // given
         LocalDateTime waitingDateTime = LocalDateTime.of(2025, 6, 26, 13, 0);
         WaitingEntryNotificationRequest request = new WaitingEntryNotificationRequest(
-            "스타벅스 강남점",
-            "이윤재",
-            3,
-            "lki3532@naver.com",
-            waitingDateTime,
-            "https://maps.google.com"
+                "스타벅스 강남점",
+                "이윤재",
+                3,
+                "lki3532@naver.com",
+                waitingDateTime,
+                "https://maps.google.com"
         );
 
         // when
@@ -35,18 +35,18 @@ class EmailTemplateServiceTest {
 
         // then
         assertThat(template)
-            .contains("[스타벅스 강남점] 입장 알림")
-            .contains("이윤재")
-            .contains("3")
-            .contains("lki3532@naver.com")
-            .contains("오후 1:00")
-            .contains("2025/6/26")
-            .contains("https://maps.google.com")
-            .contains("스팟잇")
-            .contains("spot it!")
-            .contains("10분 이내에 입장")
-            .contains("매장 위치 보기")
-            .contains("스팟잇에서 입장하라고 안내받았어요");
+                .contains("[스타벅스 강남점] 지금 입장해주세요!")
+                .contains("이윤재")
+                .contains("3")
+                .contains("lki3532@naver.com")
+                .contains("오후 1:00")
+                .contains("2025/6/26")
+                .contains("https://maps.google.com")
+                .contains("스팟잇")
+                .contains("spot it!")
+                .contains("<strong>10분 이내</strong>에 입장 부탁드립니다")
+                .contains("매장 위치 보기")
+                .contains("스팟잇에서 입장하라고 안내받았어요");
     }
 
     @Test
