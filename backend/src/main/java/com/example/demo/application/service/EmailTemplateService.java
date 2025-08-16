@@ -74,19 +74,17 @@ public class EmailTemplateService {
                 <!-- 문의사항 -->
                 <div style="font-size: 14px; color: #333;">
                     <p style="margin-bottom: 8px;">문의사항이 있으신가요?</p>
-                    <p>📧 메일 문의: 
+                    <p>📧 메일 문의가 있다면?\s
+                        0spotit0@gmail.com
+                    </p>
+                    <p>💬\s
                         <a href="mailto:0spotit0@gmail.com" style="color: #FF6B35; text-decoration: none;">
-                            0spotit0@gmail.com
+                            스팟잇에게 의견 보내기
                         </a>
                     </p>
-                    <p>💬 피드백 보내기: 
-                        <a href="mailto:0spotit0@gmail.com" style="color: #FF6B35; text-decoration: none;">
-                            이메일 작성하기
-                        </a>
-                    </p>
-                    <p>🌐 스팟잇 더 알아보기: 
+                    <p>🌐\s
                         <a href="https://www.spotit.co.kr" style="color: #FF6B35; text-decoration: none;">
-                            웹사이트 방문
+                            스팟잇 더 알아보기
                         </a>
                     </p>
                 </div>

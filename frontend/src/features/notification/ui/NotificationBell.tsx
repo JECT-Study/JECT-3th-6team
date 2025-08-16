@@ -11,7 +11,7 @@ import useNotificationListener from '@/features/notification/hook/useNotificatio
 
 const DefaultBell = () => {
   return (
-    <Link href={'/notify'} className={'absolute -top-1 right-0 z-3'}>
+    <Link href={'/notify'}>
       <BellIcon fill={'var(--color-main)'} width={28} height={28} />
     </Link>
   );
@@ -34,16 +34,18 @@ export default function NotificationBell() {
     retry: false,
     enabled: isLoggedIn,
     throwOnError: false,
+    refetchOnWindowFocus: 'always',
+    refetchOnMount: 'always',
   });
 
   if (isError) return <DefaultBell />;
-  if (isLoading) return;
+  if (isLoading) return null;
 
   return (
     <div className={'relative'}>
       <DefaultBell />
       {data?.content && data?.content?.length > 0 && (
-        <span className="relative flex size-2 z-10">
+        <span className="absolute top-0 right-0 flex size-2 z-10">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-200 opacity-85"></span>
           <span className="relative inline-flex size-2 rounded-full bg-red-500"></span>
         </span>

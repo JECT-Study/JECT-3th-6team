@@ -9,13 +9,13 @@ export default function PageHeader({ title }: { title: string }) {
   return (
     <div
       className={
-        "flex items-center justify-between px-5 after:content-[''] after:block after:h-[75px] after:invisible"
+        "relative flex items-center  px-5 after:content-[''] after:block after:h-[75px] after:invisible"
       }
     >
-      <button onClick={() => router.back()}>
+      <button onClick={() => router.back()} className={'cursor-pointer'}>
         <IconBack width={24} height={24} fill={'var(--color-gray60)'} />
       </button>
-      <span className={'font-medium text-base text-black select-none'}>
+      <span className="absolute left-1/2 -translate-x-1/2 font-medium text-base text-black select-none">
         {title}
       </span>
     </div>

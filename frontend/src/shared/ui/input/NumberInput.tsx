@@ -10,8 +10,6 @@ export default function NumberInput({
   onChange,
   errorMessage = '',
 }: NumberInputProps) {
-  const numberStyle = value === min ? 'text-gray60' : 'text-black';
-
   const onMinusClick = () => {
     if (value > min) {
       onChange(value - 1);
@@ -44,7 +42,7 @@ export default function NumberInput({
             <IconMinus width={29} height={29} fill={'var(--color-gray60)'} />
           </button>
 
-          <span className={`text-xl min-w-3.5 font-regular ${numberStyle}`}>
+          <span className={`text-xl min-w-3.5 font-regular text-black`}>
             {value}
           </span>
 

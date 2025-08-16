@@ -32,11 +32,13 @@ export default function ReservationWaitingFloating() {
       className={
         'w-full max-w-[430px] min-w-[320px] py-[34px] fixed bottom-16 z-50 flex justify-center px-[20px] '
       }
-      onClick={() => {
-        router.push(`/waiting/${data.waitingId}`);
-      }}
     >
-      <div className="w-full h-[72px] rounded-full  bg-white shadow-card flex items-center justify-between px-[16px] cursor-pointer hover:bg-sub2 transition-colors duration-300">
+      <div
+        onClick={() => {
+          router.push(`/waiting/${data.waitingId}`);
+        }}
+        className="w-full h-[72px] rounded-full  bg-white shadow-card flex items-center justify-between px-[16px] cursor-pointer hover:bg-sub2 transition-colors duration-300"
+      >
         {/*이미지와 사용자 이름*/}
         <div className={'flex items-center gap-x-[12px]'}>
           <div

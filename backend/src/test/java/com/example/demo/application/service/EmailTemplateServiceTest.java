@@ -35,7 +35,7 @@ class EmailTemplateServiceTest {
 
         // then
         assertThat(template)
-            .contains("[스타벅스 강남점] 지금 입장해주세요!")
+            .contains("[스타벅스 강남점] 입장 알림")
             .contains("이윤재")
             .contains("3")
             .contains("lki3532@naver.com")
@@ -44,7 +44,7 @@ class EmailTemplateServiceTest {
             .contains("https://maps.google.com")
             .contains("스팟잇")
             .contains("spot it!")
-            .contains("10분 이내")
+            .contains("10분 이내에 입장")
             .contains("매장 위치 보기")
             .contains("스팟잇에서 입장하라고 안내받았어요");
     }
@@ -54,12 +54,12 @@ class EmailTemplateServiceTest {
         // given
         LocalDateTime morningTime = LocalDateTime.of(2025, 6, 26, 9, 30);
         WaitingEntryNotificationRequest request = new WaitingEntryNotificationRequest(
-            "테스트 매장",
-            "테스트 사용자",
-            1,
-            "test@example.com",
-            morningTime,
-            "https://test.com"
+                "테스트 매장",
+                "테스트 사용자",
+                1,
+                "test@example.com",
+                morningTime,
+                "https://test.com"
         );
 
         // when
@@ -74,12 +74,12 @@ class EmailTemplateServiceTest {
         // given
         LocalDateTime afternoonTime = LocalDateTime.of(2025, 6, 26, 15, 45);
         WaitingEntryNotificationRequest request = new WaitingEntryNotificationRequest(
-            "테스트 매장",
-            "테스트 사용자",
-            1,
-            "test@example.com",
-            afternoonTime,
-            "https://test.com"
+                "테스트 매장",
+                "테스트 사용자",
+                1,
+                "test@example.com",
+                afternoonTime,
+                "https://test.com"
         );
 
         // when

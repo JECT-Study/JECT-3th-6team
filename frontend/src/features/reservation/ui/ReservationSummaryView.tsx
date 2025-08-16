@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import ExImage from '/public/images/popup-ex.png';
+import DefaultImage from '/public/images/default-popup-image.png';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { BottomButtonContainer, StandardButton } from '@/shared/ui';
 import { useRouter } from 'next/navigation';
@@ -35,7 +35,7 @@ export default function ReservationSummaryView({
 }: {
   data: OnsiteReservationResponse;
 }) {
-  const { name, email, peopleCount, registeredAt, waitingId } = data;
+  const { name, email, peopleCount, registeredAt } = data;
   const router = useRouter();
   const displayData = [
     { label: '대기자 명', value: name },
@@ -50,7 +50,7 @@ export default function ReservationSummaryView({
         {/*이미지와 팝업 이름*/}
         <div className={'flex items-center gap-x-[16px]'}>
           <Image
-            src={data.popupImageUrl || ExImage}
+            src={data.popupImageUrl || DefaultImage}
             alt="popup image"
             width={80}
             height={80}
@@ -78,7 +78,7 @@ export default function ReservationSummaryView({
       </div>
       <BottomButtonContainer hasShadow={false}>
         <StandardButton
-          onClick={() => router.push(`/waiting/${waitingId}`)}
+          onClick={() => router.push(`/`)}
           disabled={false}
           color={'primary'}
         >
