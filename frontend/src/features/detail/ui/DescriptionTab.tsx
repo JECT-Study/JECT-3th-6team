@@ -25,7 +25,7 @@ export function DescriptionTab({
       {/* 브랜드 정보 */}
       <MediumText className="mt-5 font-semibold">브랜드 정보</MediumText>
       <ImageCarousel
-        images={brandStory.imageUrls.map(image => `${process.env.NEXT_PUBLIC_API_IMAGE}${image}`)}
+        images={brandStory.imageUrls}
         className="rounded-2xl mt-5"
       />
       <div className="w-full h-13 bg-white rounded-[10px] flex items-center px-5 shadow-[0px_2px_10px_0px_rgba(0,0,0,0.05)] mt-5">
