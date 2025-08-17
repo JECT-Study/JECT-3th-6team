@@ -12,7 +12,6 @@ import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
 import { MediumText } from '@/shared/ui/text/MediumText';
 import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
-import type { _MapProps } from 'react-kakao-maps-sdk';
 
 import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
 import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
@@ -67,11 +66,9 @@ export default function ProductDetail() {
     popupDetail,
   } = popupDetailData;
 
-  type ClickMapFunction = _MapProps['onClick'];
-  const handleClickMap: ClickMapFunction = (_, mouseEvent) => {
-    const latlng = mouseEvent.latLng;
-    const lat = latlng.getLat();
-    const lng = latlng.getLng();
+  const handleClickMap = () => {
+    const lat = location.latitude;
+    const lng = location.longitude;
     router.push(`/detail/${popupId}/map?lat=${lat}&lng=${lng}`);
   };
 
