@@ -72,7 +72,7 @@ public class ScheduledNotificationBatchService {
 
         return switch (trigger) {
             case WAITING_ENTER_NOW -> checkEnterNowTrigger(scheduledNotification);
-            case WAITING_ENTER_TIME_OVER -> checkEnterTimeOverTrigger(scheduledNotification);
+            case WAITING_ENTER_TIME_OVER -> false;
             case WAITING_ENTER_3TEAMS_BEFORE -> checkEnter3TeamsBeforeTrigger(scheduledNotification);
         };
     }
