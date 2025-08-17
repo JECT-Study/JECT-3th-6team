@@ -20,7 +20,6 @@ import { getMapPopupListApi } from '@/entities/map/api';
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
 import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 import { PopupItemType } from '@/entities/popup/types/PopupListItem';
-import { tagPopupItem } from '@/entities/popup/lib/tagPopupItem';
 
 export default function FilterGroupMapContainer() {
   // 기본 위치 (서울숲 4번출구 앞)
@@ -135,17 +134,9 @@ export default function FilterGroupMapContainer() {
             {searchResponse?.content && searchResponse.content.length > 0 && (
               <div className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2  bg-white  p-3">
                 {searchResponse.content.map(popup => {
-                  // API 응답을 올바른 형태로 변환 (any로 타입 캐스팅하여 타입 오류 해결)
-                  const apiResponse = popup as any;
-                  const convertedPopup = {
-                    ...apiResponse,
-                    imageUrl: apiResponse.popupImageUrl, // popupImageUrl을 imageUrl로 변경
-                  };
-                  const taggedPopup = tagPopupItem(convertedPopup, 'DEFAULT');
-
                   return (
                     <div key={popup.popupId}>
-                      <BadgedPopupCard {...taggedPopup} />
+                      <BadgedPopupCard {...popup} />
                     </div>
                   );
                 })}
