@@ -37,6 +37,7 @@ const PopupCardImage = ({
   badge?: React.ReactNode;
 }) => {
   // 초기값: 값이 없으면 폴백
+  console.log('iamge', image);
   const initial: ImgSrc = image
     ? `${process.env.NEXT_PUBLIC_API_IMAGE}${image}`
     : DefaultImage;
@@ -54,7 +55,7 @@ const PopupCardImage = ({
 
   // src가 바뀌면 강제 리마운트 (Next/Image 내부 캐시/재시도 케이스 방지)
   const key = typeof src === 'string' ? src : src.src;
-
+  console.log('src', src);
   return (
     <div className="relative w-[140px] min-h-[144px] overflow-hidden">
       <Image
