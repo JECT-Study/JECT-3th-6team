@@ -110,6 +110,7 @@ export default function FilterGroupMapContainer() {
         category: category.length > 0 ? category.join(',') : undefined,
       }),
   });
+  console.log('popupList:', popupList);
 
   return (
     <div className="w-full h-screen pb-[100px] relative">
