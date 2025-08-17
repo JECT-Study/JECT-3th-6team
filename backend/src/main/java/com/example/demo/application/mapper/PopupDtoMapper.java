@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+// TODO : 리팩토링 필요
 public class PopupDtoMapper {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -146,7 +148,10 @@ public class PopupDtoMapper {
     }
 
     public PopupMapQuery toPopupMapQuery(PopupMapRequest request) {
-        PopupType type = StringUtils.hasText(request.type()) ? PopupType.valueOf(request.type()) : null;
+        List<PopupType> types = StringUtils.hasText(request.type()) ?
+                Arrays.stream(request.type().split(","))
+                        .map(PopupType::fromKorean)
+                        .toList() : null;
         List<String> categories = StringUtils.hasText(request.category()) ? Arrays.asList(request.category().split(","))
                 : null;
         DateRange dateRange = (request.startDate() != null && request.endDate() != null)
@@ -158,7 +163,7 @@ public class PopupDtoMapper {
                 request.maxLatitude(),
                 request.minLongitude(),
                 request.maxLongitude(),
-                type,
+                types,
                 categories,
                 dateRange
         );
@@ -235,7 +240,7 @@ public class PopupDtoMapper {
 
     private long calculateDDay(LocalDate endDate) {
         if (endDate == null) return -1;
-        return endDate.toEpochDay() - LocalDate.now().toEpochDay();
+        return ChronoUnit.DAYS.between(LocalDate.now(), endDate);
     }
 
     private String formatPeriod(DateRange period) {

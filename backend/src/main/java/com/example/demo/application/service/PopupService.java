@@ -71,7 +71,7 @@ public class PopupService {
 
         var brandStory = brandStoryPort.findByPopupId(popupId)
                 .orElse(new BrandStory(Collections.emptyList(), Collections.emptyList()));
-        long dDay = ChronoUnit.DAYS.between(LocalDate.now(), popup.getSchedule().dateRange().startDate());
+        long dDay = ChronoUnit.DAYS.between(LocalDate.now(), popup.getSchedule().dateRange().endDate());
         WaitingStatus status = calculateReservationStatus(popupId, memberId);
 
         return new PopupDetailResponse(
