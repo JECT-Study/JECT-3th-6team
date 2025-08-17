@@ -41,7 +41,9 @@ const PopupCardImage = ({
   const initial: ImgSrc = image
     ? `${process.env.NEXT_PUBLIC_API_IMAGE}${image}`
     : DefaultImage;
+
   console.log('팝업 이미지', initial);
+
   const [src, setSrc] = useState<ImgSrc>(initial);
   const [errored, setErrored] = useState(false);
 
