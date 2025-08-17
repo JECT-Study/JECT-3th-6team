@@ -148,7 +148,7 @@ export default function FilterGroupMapContainer() {
     ],
   };
 
-  const { data: popupList } = useQuery({
+  const { data: popupList, isLoading: isPopupListLoading } = useQuery({
     queryKey: ['mapPopupList', popupType, category],
     queryFn: async () => {
       console.log('🔄 API 요청 시도...');
@@ -242,21 +242,23 @@ export default function FilterGroupMapContainer() {
             center={center}
             level={3}
             className="w-full h-full"
+            isLoading={isPopupListLoading}
           >
-            {popupList?.popupList?.map(popup => (
-              <MapMarker
-                key={popup.id}
-                position={{ lat: popup.latitude, lng: popup.longitude }}
-                image={{
-                  src:
-                    selectedPopupId === popup.id
-                      ? selectedPopupIconSrc
-                      : popupListIconSrc,
-                  size: { width: 32, height: 32 },
-                }}
-                onClick={() => handleMarkerClick(popup.id)}
-              />
-            ))}
+            {!isPopupListLoading &&
+              (popupList?.popupList || mockPopupList.popupList)?.map(popup => (
+                <MapMarker
+                  key={popup.id}
+                  position={{ lat: popup.latitude, lng: popup.longitude }}
+                  image={{
+                    src:
+                      selectedPopupId === popup.id
+                        ? selectedPopupIconSrc
+                        : popupListIconSrc,
+                    size: { width: 32, height: 32 },
+                  }}
+                  onClick={() => handleMarkerClick(popup.id)}
+                />
+              ))}
           </KakaoMap>
         </>
       )}
