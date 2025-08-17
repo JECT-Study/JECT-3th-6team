@@ -40,13 +40,14 @@ const PopupCardImage = ({
   const initial: ImgSrc = image
     ? `${process.env.NEXT_PUBLIC_API_IMAGE}${image}`
     : DefaultImage;
+  console.log('팝업 이미지', initial);
   const [src, setSrc] = useState<ImgSrc>(initial);
   const [errored, setErrored] = useState(false);
 
   // props.image가 바뀌면 초기화
   useEffect(() => {
     setErrored(false);
-    setSrc(image || DefaultImage);
+    setSrc(`${process.env.NEXT_PUBLIC_API_IMAGE}${image}` || DefaultImage);
   }, [image]);
 
   // src가 바뀌면 강제 리마운트 (Next/Image 내부 캐시/재시도 케이스 방지)
