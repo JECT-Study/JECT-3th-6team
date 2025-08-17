@@ -18,8 +18,8 @@ export default function LandingPage() {
   const router = useRouter();
 
   const handleServiceStart = () => {
-    // 쿠키로 "봤다" 표시 (1년)
-    document.cookie = `seenLanding=1; Max-Age=${60 * 60 * 24 * 365}; Path=/; SameSite=Lax`;
+    const SIX_MONTHS = 60 * 60 * 24 * 182;
+    document.cookie = `seenLanding=1; Max-Age=${SIX_MONTHS}; Path=/; SameSite=Lax`;
     try {
       localStorage.setItem('spotit_seen_landing', '1');
     } catch {}
