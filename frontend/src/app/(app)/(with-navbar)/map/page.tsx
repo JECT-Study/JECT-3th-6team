@@ -4,14 +4,32 @@ import { FilterProvider } from '@/features/filtering/lib/FilterContext';
 import FilterBottomSheet from '@/features/filtering/ui/FilterBottomSheet';
 import FilterGroupMapContainer from '@/features/map/ui/FilterGroupMapContainer';
 import { Suspense } from 'react';
+import { QueryErrorResetBoundary } from '@tanstack/react-query';
+import { ErrorBoundary } from 'react-error-boundary';
+import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
+import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
 
 export default function MapPage() {
   return (
-    // NOTE : 내부에 useSearchParams를 사용하는 훅이 있을 경우, 상위를 Suspense로 감싸야 합니다.
-    // TODO :  build에러 막기위해 임시로 Suspense 추가, 이후 Fallback UI를 수정하십시오 @hyunjee
-    <Suspense fallback={<div>로딩중</div>}>
+    <Suspense fallback={<LoadingFallback />}>
       <FilterProvider>
-        <FilterGroupMapContainer />
+        <QueryErrorResetBoundary>
+          {({ reset }) => (
+            <ErrorBoundary
+              onReset={reset}
+              fallbackRender={({ error, resetErrorBoundary }) => (
+                <QueryErrorFallback
+                  onRetry={resetErrorBoundary}
+                  error={error}
+                />
+              )}
+            >
+              <Suspense fallback={<LoadingFallback />}>
+                <FilterGroupMapContainer />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+        </QueryErrorResetBoundary>
         <FilterBottomSheet />
       </FilterProvider>
     </Suspense>

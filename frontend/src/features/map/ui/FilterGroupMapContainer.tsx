@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import { useQuery } from '@tanstack/react-query';
 
@@ -20,6 +20,7 @@ import { getMapPopupListApi } from '@/entities/map/api';
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
 import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 import { PopupItemType } from '@/entities/popup/types/PopupListItem';
+import { tagPopupItem } from '@/entities/popup/lib/tagPopupItem';
 
 export default function FilterGroupMapContainer() {
   // 기본 위치 (서울숲 4번출구 앞)
@@ -28,13 +29,38 @@ export default function FilterGroupMapContainer() {
   const [selectedPopupId, setSelectedPopupId] = useState<number | null>(null);
   const [selectedPopupData, setSelectedPopupData] =
     useState<PopupItemType | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
   const { popupType, category } = filter.keyword;
   const mapRef = useRef<kakao.maps.Map>(null);
   const { handleMoveToCurrentLocation } = useSearchMyLocation();
-  const { searchValue, isSearchFocused, handleSearchBlur, handleChange } =
-    useMapSearch();
+  const {
+    searchValue,
+    isSearchFocused,
+    handleSearchFocus,
+    handleSearchBlur,
+    handleChange,
+  } = useMapSearch();
+
+  const { data: searchResponse } = useQuery({
+    queryKey: ['popup', 'list', { keyword: searchKeyword }],
+    queryFn: async () => {
+      const result = await getPopupListApi({ keyword: searchKeyword });
+      console.log('검색 결과:', result);
+      return result;
+    },
+    enabled: !!searchKeyword,
+  });
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter' && searchValue.trim()) {
+        setSearchKeyword(searchValue.trim());
+      }
+    },
+    [searchValue]
+  );
   const popupListIconSrc = '/icons/Color/Icon_NormalMinus.svg';
   const selectedPopupIconSrc = '/icons/Color/Icon_Map.svg';
 
@@ -91,14 +117,49 @@ export default function FilterGroupMapContainer() {
       {/* 검색 포커스 시 지도 영역만 오버레이 */}
       {isSearchFocused && (
         <div className="absolute top-0 left-0 right-0 bottom-[100px] z-30 bg-white">
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] h-[75px] rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3">
-            <SearchInput
-              id={'search-input'}
-              value={searchValue}
-              onChange={handleChange}
-              // onFocus={handleSearchFocus}
-              onBlur={handleSearchBlur}
-            />
+          {/* 검색 입력창과 결과를 포함하는 컨테이너 */}
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px]">
+            {/* 검색 입력창 */}
+            <div className="rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 mb-3">
+              <SearchInput
+                id={'search-input'}
+                value={searchValue}
+                onChange={handleChange}
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+
+            {/* 검색 결과 표시 */}
+            {searchResponse?.content && searchResponse.content.length > 0 && (
+              <div className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2  bg-white  p-3">
+                {searchResponse.content.map(popup => {
+                  // API 응답을 올바른 형태로 변환 (any로 타입 캐스팅하여 타입 오류 해결)
+                  const apiResponse = popup as any;
+                  const convertedPopup = {
+                    ...apiResponse,
+                    imageUrl: apiResponse.popupImageUrl, // popupImageUrl을 imageUrl로 변경
+                  };
+                  const taggedPopup = tagPopupItem(convertedPopup, 'DEFAULT');
+
+                  return (
+                    <div key={popup.popupId}>
+                      <BadgedPopupCard {...taggedPopup} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* 검색 결과가 없을 때 */}
+            {searchKeyword &&
+              searchResponse?.content &&
+              searchResponse.content.length === 0 && (
+                <div className="p-4 text-center text-gray-500 rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)]">
+                  검색 결과가 없습니다.
+                </div>
+              )}
           </div>
         </div>
       )}
@@ -111,8 +172,9 @@ export default function FilterGroupMapContainer() {
               id={'search-input'}
               value={searchValue}
               onChange={handleChange}
-              // onFocus={handleSearchFocus}
+              onFocus={handleSearchFocus}
               onBlur={handleSearchBlur}
+              onKeyDown={handleKeyDown}
             />
 
             <KeywordFilterPreview
