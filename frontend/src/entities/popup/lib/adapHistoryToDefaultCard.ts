@@ -11,7 +11,7 @@ function adaptHistoryToDefaultData(
     tag: 'DEFAULT',
     popupId: data.popup.popupId,
     popupName: data.popup.popupName,
-    imageUrl: data.popup.popupImageUrl,
+    popupImageUrl: data.popup.popupImageUrl,
     location: {
       region1depthName: data.popup.location.region1depthName,
       region2depthName: data.popup.location.region2depthName,
