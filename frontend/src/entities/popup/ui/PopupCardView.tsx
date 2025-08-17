@@ -37,8 +37,9 @@ const PopupCardImage = ({
   badge?: React.ReactNode;
 }) => {
   // 초기값: 값이 없으면 폴백
-  const initial: ImgSrc =
-    `${process.env.NEXT_PUBLIC_API_URL}${image}` || DefaultImage;
+  const initial: ImgSrc = image
+    ? `${process.env.NEXT_PUBLIC_API_IMAGE}${image}`
+    : DefaultImage;
   const [src, setSrc] = useState<ImgSrc>(initial);
   const [errored, setErrored] = useState(false);
 
