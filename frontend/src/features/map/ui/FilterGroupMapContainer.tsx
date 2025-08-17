@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import { useQuery } from '@tanstack/react-query';
 
@@ -28,6 +28,7 @@ export default function FilterGroupMapContainer() {
   const [selectedPopupId, setSelectedPopupId] = useState<number | null>(null);
   const [selectedPopupData, setSelectedPopupData] =
     useState<PopupItemType | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
 
   const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
@@ -170,6 +171,18 @@ export default function FilterGroupMapContainer() {
     },
   });
 
+  // API 요청이 완료되면 1초 후에 지도를 표시
+  useEffect(() => {
+    if (!isPopupListLoading && popupList) {
+      const timer = setTimeout(() => {
+        console.log('🗺️ 지도 표시 준비 완료');
+        setIsMapReady(true);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isPopupListLoading, popupList]);
+
   return (
     <div className="w-full h-screen pb-[100px] relative">
       {/* 검색 포커스 시 지도 영역만 오버레이 */}
@@ -237,51 +250,66 @@ export default function FilterGroupMapContainer() {
             />
           </div>
 
-          <KakaoMap
-            ref={mapRef}
-            center={center}
-            level={3}
-            className="w-full h-full"
-          >
-            {(() => {
-              const markerData =
-                popupList?.popupList || mockPopupList.popupList;
-              console.log(
-                '🐛 Debug - Rendering markers, isLoading:',
-                isPopupListLoading
-              );
-              console.log('🐛 Debug - markerData:', markerData);
-
-              if (isPopupListLoading) {
-                console.log('🐛 Debug - Still loading, not rendering markers');
-                return null;
-              }
-
-              if (!markerData || markerData.length === 0) {
-                console.log('🐛 Debug - No marker data available');
-                return null;
-              }
-
-              console.log('🐛 Debug - Rendering', markerData.length, 'markers');
-              return markerData.map(popup => {
-                console.log('🐛 Debug - Rendering marker:', popup);
-                return (
-                  <MapMarker
-                    key={popup.id}
-                    position={{ lat: popup.latitude, lng: popup.longitude }}
-                    image={{
-                      src:
-                        selectedPopupId === popup.id
-                          ? selectedPopupIconSrc
-                          : popupListIconSrc,
-                      size: { width: 32, height: 32 },
-                    }}
-                    onClick={() => handleMarkerClick(popup.id)}
-                  />
+          {!isMapReady ? (
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">지도 로딩 중...</p>
+              </div>
+            </div>
+          ) : (
+            <KakaoMap
+              ref={mapRef}
+              center={center}
+              level={3}
+              className="w-full h-full"
+            >
+              {(() => {
+                const markerData =
+                  popupList?.popupList || mockPopupList.popupList;
+                console.log(
+                  '🐛 Debug - Rendering markers, isLoading:',
+                  isPopupListLoading
                 );
-              });
-            })()}
-          </KakaoMap>
+                console.log('🐛 Debug - markerData:', markerData);
+
+                if (isPopupListLoading) {
+                  console.log(
+                    '🐛 Debug - Still loading, not rendering markers'
+                  );
+                  return null;
+                }
+
+                if (!markerData || markerData.length === 0) {
+                  console.log('🐛 Debug - No marker data available');
+                  return null;
+                }
+
+                console.log(
+                  '🐛 Debug - Rendering',
+                  markerData.length,
+                  'markers'
+                );
+                return markerData.map(popup => {
+                  console.log('🐛 Debug - Rendering marker:', popup);
+                  return (
+                    <MapMarker
+                      key={popup.id}
+                      position={{ lat: popup.latitude, lng: popup.longitude }}
+                      image={{
+                        src:
+                          selectedPopupId === popup.id
+                            ? selectedPopupIconSrc
+                            : popupListIconSrc,
+                        size: { width: 32, height: 32 },
+                      }}
+                      onClick={() => handleMarkerClick(popup.id)}
+                    />
+                  );
+                });
+              })()}
+            </KakaoMap>
+          )}
         </>
       )}
 
