@@ -101,21 +101,21 @@ public interface PopupJpaRepository extends JpaRepository<PopupEntity, Long> {
     Optional<PopupEntity> findById(Long id);
 
     @Query("""
-                SELECT p FROM PopupEntity p
-                WHERE (:popupId IS NULL OR p.id = :popupId)
-                AND ((:startDate IS NULL OR :endDate IS NULL) OR (p.endDate >= :startDate AND p.startDate <= :endDate))
-                AND (:types IS NULL OR p.type IN :types)
-                AND EXISTS (
-                    SELECT 1 FROM PopupCategoryEntity c
-                    WHERE c.popupId = p.id AND (:categories IS NULL OR c.name IN :categories)
-                )
-                AND EXISTS (
-                    SELECT 1 FROM PopupLocationEntity l
-                    WHERE l.id = p.popupLocationId AND (:region1DepthName IS NULL OR l.region1DepthName = :region1DepthName)
-                )
-                AND (:lastPopupId IS NULL OR p.id > :lastPopupId)
-                ORDER BY p.startDate ASC, p.id ASC
-            """)
+        SELECT p FROM PopupEntity p
+        WHERE (:popupId IS NULL OR p.id = :popupId)
+        AND ((CAST(:startDate AS date) IS NULL OR CAST(:endDate  AS date) IS NULL) OR (p.endDate >= :startDate AND p.startDate <= :endDate))
+        AND (:types IS NULL OR p.type IN :types)
+        AND EXISTS (
+            SELECT 1 FROM PopupCategoryEntity c
+            WHERE c.popupId = p.id AND (:categories IS NULL OR c.name IN :categories)
+        )
+        AND EXISTS (
+            SELECT 1 FROM PopupLocationEntity l
+            WHERE l.id = p.popupLocationId AND (:region1DepthName IS NULL OR l.region1DepthName = :region1DepthName)
+        )
+        AND (:lastPopupId IS NULL OR p.id > :lastPopupId)
+        ORDER BY p.startDate ASC, p.id ASC
+    """)
     List<PopupEntity> findFilteredPopups(
             @Param("popupId") Long popupId,
             @Param("startDate") LocalDate startDate,
