@@ -1,63 +1,8 @@
 import {
   isCameraSupported,
   getCameraErrorMessage,
-  isMobileDevice,
 } from '@/shared/lib/cameraUtils';
 import QrScanner from 'qr-scanner';
-
-/**
- * 모바일에서 기본 카메라 앱을 열기 위한 파일 input 요소를 생성합니다.
- */
-const openMobileCamera = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    try {
-      // 숨겨진 file input 요소 생성
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.capture = 'environment'; // 후면 카메라 사용
-      input.style.display = 'none';
-
-      input.addEventListener('change', event => {
-        const target = event.target as HTMLInputElement;
-        if (target.files && target.files.length > 0) {
-          console.log('모바일 카메라에서 이미지가 촬영되었습니다.');
-          resolve();
-        }
-
-        document.body.removeChild(input);
-      });
-
-      const handleCancel = () => {
-        console.log('카메라 촬영이 취소되었습니다.');
-        if (document.body.contains(input)) {
-          document.body.removeChild(input);
-        }
-        resolve();
-      };
-
-      // focus가 돌아왔을 때 취소로 간주 (fallback)
-      const handleFocus = () => {
-        setTimeout(() => {
-          if (document.body.contains(input)) {
-            handleCancel();
-            window.removeEventListener('focus', handleFocus);
-          }
-        }, 1000);
-      };
-
-      input.addEventListener('cancel', handleCancel);
-      window.addEventListener('focus', handleFocus);
-
-      // DOM에 추가하고 클릭 트리거
-      document.body.appendChild(input);
-      input.click();
-    } catch (error) {
-      console.log('모바일 카메라를 열 수 없습니다.', error);
-      reject(new Error('모바일 카메라를 열 수 없습니다.'));
-    }
-  });
-};
 
 /**
  * 웹에서 브라우저 카메라를 시작하고 QR 코드를 감지합니다.
