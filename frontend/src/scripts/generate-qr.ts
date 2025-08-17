@@ -3,9 +3,7 @@ import { join } from 'path';
 import QRCode from 'qrcode';
 
 async function main() {
-  const base = (
-    process.env.NEXT_PUBLIC_BASE_URL || 'https://spotit.co.kr'
-  ).replace(/\/$/, '');
+  const base = 'https://www.spotit.co.kr'.replace(/\/$/, '');
   const fixed = `${base}/qr/feedback`;
 
   const svg = await QRCode.toString(fixed, {
