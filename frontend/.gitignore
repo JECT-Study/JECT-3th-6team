@@ -40,5 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-## 빌드 아웃풋
-public/qr/feedback.svg
+
