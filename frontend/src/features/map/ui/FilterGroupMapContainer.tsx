@@ -62,37 +62,11 @@ export default function FilterGroupMapContainer() {
   );
   const popupListIconSrc = '/icons/Color/Icon_NormalMinus.svg';
   const selectedPopupIconSrc = '/icons/Color/Icon_Map.svg';
-  const selectedPopupIconSrc = '/icons/Color/Icon_Map.svg';
 
   const keywords: KeywordChip[] = [
     ...toKeywordChips(popupType, 'category'),
     ...toKeywordChips(category, 'category'),
   ];
-
-  const handleMarkerClick = async (popupId: number) => {
-    const isCurrentlySelected = selectedPopupId === popupId;
-
-    if (isCurrentlySelected) {
-      return;
-    }
-
-    // 새로운 마커 선택
-    setSelectedPopupId(popupId);
-    console.log('선택된 팝업 ID:', popupId);
-
-    try {
-      const popupData = await getPopupListApi({ popupId });
-      console.log('popupData:', popupData);
-
-      // API 응답에서 첫 번째 팝업 데이터를 selectedPopupData로 설정
-      if (popupData.content && popupData.content.length > 0) {
-        setSelectedPopupData(popupData.content[0]);
-      }
-    } catch (error) {
-      console.error('팝업 데이터 조회 실패:', error);
-      setSelectedPopupData(null);
-    }
-  };
 
   const handleMarkerClick = async (popupId: number) => {
     const isCurrentlySelected = selectedPopupId === popupId;
