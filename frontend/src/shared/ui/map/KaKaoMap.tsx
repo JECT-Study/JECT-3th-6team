@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, forwardRef } from 'react';
-import { Map, MapMarker } from 'react-kakao-maps-sdk';
+import { Map } from 'react-kakao-maps-sdk';
 import { _MapProps } from 'react-kakao-maps-sdk';
 import { ReactNode } from 'react';
 
@@ -53,7 +53,7 @@ const KakaoMap = forwardRef<
 >(({ center, level = 6, children, isLoading = false, ...props }, ref) => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
-  const imageUrl = '/icons/Color/Icon_MyLocation.svg';
+  // const imageUrl = '/icons/Color/Icon_MyLocation.svg';
 
   useEffect(() => {
     // 카카오맵 SDK 로딩 확인

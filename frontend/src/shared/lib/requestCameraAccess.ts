@@ -52,6 +52,7 @@ const openMobileCamera = (): Promise<void> => {
       document.body.appendChild(input);
       input.click();
     } catch (error) {
+      console.log('모바일 카메라를 열 수 없습니다.', error);
       reject(new Error('모바일 카메라를 열 수 없습니다.'));
     }
   });
