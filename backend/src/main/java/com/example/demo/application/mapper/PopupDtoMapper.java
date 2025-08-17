@@ -148,7 +148,10 @@ public class PopupDtoMapper {
     }
 
     public PopupMapQuery toPopupMapQuery(PopupMapRequest request) {
-        PopupType type = StringUtils.hasText(request.type()) ? PopupType.fromKorean(request.type()) : null;
+        List<PopupType> types = StringUtils.hasText(request.type()) ?
+                Arrays.stream(request.type().split(","))
+                        .map(PopupType::fromKorean)
+                        .toList() : null;
         List<String> categories = StringUtils.hasText(request.category()) ? Arrays.asList(request.category().split(","))
                 : null;
         DateRange dateRange = (request.startDate() != null && request.endDate() != null)
@@ -160,7 +163,7 @@ public class PopupDtoMapper {
                 request.maxLatitude(),
                 request.minLongitude(),
                 request.maxLongitude(),
-                type,
+                types,
                 categories,
                 dateRange
         );

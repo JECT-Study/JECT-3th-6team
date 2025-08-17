@@ -5,8 +5,8 @@ import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.domain.model.popup.PopupQuery;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupEntity;
-import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity;
+import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
 import com.example.demo.infrastructure.persistence.entity.popup.PopupLocationEntity;
 import com.example.demo.infrastructure.persistence.mapper.PopupEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.*;
@@ -205,12 +205,12 @@ public class PopupPortAdapter implements PopupPort {
                     var contents = popupContentRepository.findAllByPopupIdOrderBySortOrderAsc(entity.getId());
                     var socials = popupSocialRepository.findAllByPopupIdOrderBySortOrderAsc(entity.getId());
                     var categories = popupCategoryRepository.findAllByPopupId(entity.getId());
-                    
+
                     // 메인 이미지와 브랜드 스토리 이미지 합치기
                     var allImages = new ArrayList<PopupImageEntity>();
                     allImages.addAll(mainImages);
                     allImages.addAll(brandStoryImages);
-                    
+
                     return popupEntityMapper.toDomain(entity, location, schedules, allImages, contents, socials, categories);
                 })
                 .toList();
@@ -245,21 +245,21 @@ public class PopupPortAdapter implements PopupPort {
      * 조건에 따라 적절한 JPA 메서드를 호출한다
      */
     private List<PopupEntity> findPopupsByConditions(PopupMapQuery query) {
-        boolean hasType = query.type() != null;
+        boolean hasType = query.types() != null && !query.types().isEmpty();
         boolean hasDateRange = hasValidDateRange(query);
 
         if (hasType && hasDateRange) {
             return popupJpaRepository.findByCoordinateRangeAndTypeAndDateRange(
                     query.minLatitude(), query.maxLatitude(),
                     query.minLongitude(), query.maxLongitude(),
-                    query.type(),
+                    query.types(),
                     query.dateRange().startDate(), query.dateRange().endDate()
             );
         } else if (hasType) {
             return popupJpaRepository.findByCoordinateRangeAndType(
                     query.minLatitude(), query.maxLatitude(),
                     query.minLongitude(), query.maxLongitude(),
-                    query.type()
+                    query.types()
             );
         } else if (hasDateRange) {
             return popupJpaRepository.findByCoordinateRangeAndDateRange(
@@ -318,7 +318,7 @@ public class PopupPortAdapter implements PopupPort {
         // 키워드를 띄어쓰기 기준으로 토큰화하고 공백문자 및 의미 없는 문자 제거
         List<String> tokens = Arrays.stream(keyword.split("\\s+"))
                 .map(String::trim)
-                .filter(token -> !token.isEmpty() && token.length() > 0)
+                .filter(token -> !token.isEmpty())
                 .distinct()
                 .toList();
 
