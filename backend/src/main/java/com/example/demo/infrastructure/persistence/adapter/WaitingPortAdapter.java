@@ -68,6 +68,11 @@ public class WaitingPortAdapter implements WaitingPort {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean checkDuplicate(WaitingQuery query) {
+        return waitingJpaRepository.existsByMemberIdAndPopupId(query.memberId(), query.popupId());
+    }
+
     private Waiting mapEntityToDomain(WaitingEntity entity) {
         var popup = popupPortAdapter.findById(entity.getPopupId()).orElse(null);
         var member = memberPortAdapter.findById(entity.getMemberId()).orElse(null);
@@ -84,7 +89,7 @@ public class WaitingPortAdapter implements WaitingPort {
         if (allWaitng.isEmpty()) {
             return 0; // 아무도 대기하지 않는 경우 0 반환
         }
-        
+
         return allWaitng.stream()
                 .mapToInt(WaitingEntity::getWaitingNumber)
                 .max()

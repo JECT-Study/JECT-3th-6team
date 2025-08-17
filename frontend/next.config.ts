@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'example.com', pathname: '/images/**' },
+      {
+        protocol: 'https',
+        hostname: 'api.spotit.co.kr',
+        port: '',
+        pathname: '/uploads/**',
+      },
     ],
   },
 

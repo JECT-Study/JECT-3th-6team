@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+// TODO : 리팩토링 필요
 public class PopupDtoMapper {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -80,7 +82,7 @@ public class PopupDtoMapper {
         List<Sns> sns = request.sns().stream()
                 .map(it -> new Sns(it.iconUrl(), it.linkUrl()))
                 .toList();
-        PopupDisplay display = new PopupDisplay(request.imageUrls(), content, sns);
+        PopupDisplay display = new PopupDisplay(request.mainImageUrls(), request.brandStoryImageUrls(), content, sns);
 
         List<PopupCategory> categories = request.categoryIds().stream()
                 .map(id -> new PopupCategory(id, null)) // name은 저장 시 Category 조회로 채움
@@ -102,7 +104,7 @@ public class PopupDtoMapper {
                 popup.getId(),
                 popup.getName(),
                 popup.getType() != null ? popup.getType().name() : null,
-                popup.getDisplay() != null ? popup.getDisplay().imageUrls() : java.util.Collections.emptyList()
+                popup.getDisplay() != null ? popup.getDisplay().mainImageUrls() : java.util.Collections.emptyList()
         );
     }
 
@@ -146,7 +148,10 @@ public class PopupDtoMapper {
     }
 
     public PopupMapQuery toPopupMapQuery(PopupMapRequest request) {
-        PopupType type = StringUtils.hasText(request.type()) ? PopupType.valueOf(request.type()) : null;
+        List<PopupType> types = StringUtils.hasText(request.type()) ?
+                Arrays.stream(request.type().split(","))
+                        .map(PopupType::fromKorean)
+                        .toList() : null;
         List<String> categories = StringUtils.hasText(request.category()) ? Arrays.asList(request.category().split(","))
                 : null;
         DateRange dateRange = (request.startDate() != null && request.endDate() != null)
@@ -158,7 +163,7 @@ public class PopupDtoMapper {
                 request.maxLatitude(),
                 request.minLongitude(),
                 request.maxLongitude(),
-                type,
+                types,
                 categories,
                 dateRange
         );
@@ -225,7 +230,7 @@ public class PopupDtoMapper {
         return new PopupSummaryResponse(
                 popup.getId(),
                 popup.getName(),
-                popup.getDisplay().imageUrls().getFirst(),
+                popup.getDisplay().mainImageUrls().getFirst(),
                 toLocationResponse(popup.getLocation()),
                 calculateDDay(popup.getSchedule().dateRange().endDate()),
                 formatPeriod(popup.getSchedule().dateRange()),
@@ -235,7 +240,7 @@ public class PopupDtoMapper {
 
     private long calculateDDay(LocalDate endDate) {
         if (endDate == null) return -1;
-        return endDate.toEpochDay() - LocalDate.now().toEpochDay();
+        return ChronoUnit.DAYS.between(LocalDate.now(), endDate);
     }
 
     private String formatPeriod(DateRange period) {

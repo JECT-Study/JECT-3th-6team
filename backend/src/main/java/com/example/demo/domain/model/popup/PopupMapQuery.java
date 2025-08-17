@@ -12,7 +12,7 @@ import java.util.List;
  * @param maxLatitude  최대 위도
  * @param minLongitude 최소 경도
  * @param maxLongitude 최대 경도
- * @param type         팝업 유형
+ * @param types        팝업 유형
  * @param categories   카테고리 목록
  * @param dateRange    검색 기간
  */
@@ -21,7 +21,7 @@ public record PopupMapQuery(
         BigDecimal maxLatitude,
         BigDecimal minLongitude,
         BigDecimal maxLongitude,
-        PopupType type,
+        List<PopupType> types,
         List<String> categories,
         DateRange dateRange
 ) {

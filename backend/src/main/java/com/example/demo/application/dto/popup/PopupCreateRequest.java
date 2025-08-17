@@ -20,7 +20,9 @@ public record PopupCreateRequest(
 
         @NotNull @Size(min = 1) List<@Valid OpeningHoursCreate> weeklyOpeningHours,
 
-        @NotNull @Size(min = 1) List<@NotBlank String> imageUrls,
+        // 기존 imageUrls를 두 개로 분리
+        @NotNull @Size(min = 1) List<@NotBlank String> mainImageUrls,        // 메인 이미지들 (필수)
+        @NotNull @Size(min = 1) List<@NotBlank String> brandStoryImageUrls,  // 브랜드 스토리 이미지들 (필수)
 
         @NotNull @Valid ContentCreate content,
 

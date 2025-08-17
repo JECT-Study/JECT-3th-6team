@@ -29,6 +29,7 @@ public class CookieUtils {
                 .httpOnly(true)
                 .path("/")
                 .maxAge(0)
+                .domain(".spotit.co.kr")
                 .secure(true)
                 .sameSite("None")
                 .build();

@@ -47,7 +47,7 @@ export function ImageCarousel({
                 className={`relative w-full h-[300px] overflow-hidden ${className || ''}`}
               >
                 <Image
-                  src={image}
+                  src={`${process.env.NEXT_PUBLIC_API_IMAGE}${image}`}
                   alt={`${defaultAltText} ${index + 1}`}
                   fill
                   className="object-cover"
