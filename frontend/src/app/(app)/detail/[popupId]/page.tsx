@@ -78,7 +78,7 @@ export default function ProductDetail() {
   const handleWaitingClick = async () => {
     if (status === 'NONE') {
       try {
-        await requestCameraAccess();
+        await requestCameraAccess(qrData => {});
       } catch (error) {
         console.error('카메라 접근 실패:', error);
         alert(
