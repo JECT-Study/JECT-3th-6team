@@ -46,7 +46,7 @@ export interface RawPopupListItemType {
   rating?: ratingType;
   period: string;
   dDay: number;
-  imageUrl: string;
+  popupImageUrl: string;
   searchTags: searchTagType;
 }
 

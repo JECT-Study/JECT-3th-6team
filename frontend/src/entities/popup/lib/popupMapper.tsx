@@ -35,7 +35,7 @@ const mapPopupListItemToViewProps = (
   return {
     popupId: data.popupId,
     popupName: data.popupName,
-    popupImageUrl: data.imageUrl,
+    popupImageUrl: data.popupImageUrl,
     location: renderLocation,
     period: renderedPeriod,
     linkTo: `/detail/${data.popupId}`,
