@@ -73,4 +73,8 @@ public record WaitingQuery(
     public WaitingQuery(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder) {
         this(waitingId, memberId, size, lastWaitingId, status, sortOrder, null);
     }
+
+    public static WaitingQuery forDuplicateCheck(Long memberId, Long popupId) {
+        return new WaitingQuery(null, memberId, null, null, null, null, popupId);
+    }
 } 
