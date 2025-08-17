@@ -22,6 +22,7 @@ import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
 import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
 import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
+import { requestCameraAccess } from '@/shared/lib/requestCameraAccess';
 
 export default function ProductDetail() {
   const router = useRouter();
@@ -72,6 +73,21 @@ export default function ProductDetail() {
     const lat = latlng.getLat();
     const lng = latlng.getLng();
     router.push(`/detail/${popupId}/map?lat=${lat}&lng=${lng}`);
+  };
+
+  const handleWaitingClick = async () => {
+    if (status === 'NONE') {
+      try {
+        await requestCameraAccess();
+      } catch (error) {
+        console.error('카메라 접근 실패:', error);
+        alert(
+          error instanceof Error
+            ? error.message
+            : '카메라에 접근할 수 없습니다.'
+        );
+      }
+    }
   };
 
   return (
@@ -142,9 +158,7 @@ export default function ProductDetail() {
 
       <BottomButtonContainer hasShadow={true}>
         <StandardButton
-          onClick={() => {
-            console.log('웨이팅');
-          }}
+          onClick={handleWaitingClick}
           disabled={status === 'WAITING' || status === 'VISITED'}
           color="primary"
         >

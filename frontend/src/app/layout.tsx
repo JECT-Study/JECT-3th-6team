@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: '지금, 이 순간의 핫플을 스팟잇!',
     images: [
       {
-        url: '/images/open_graph.svg',
+        url: '/images/og.svg',
         width: 1200,
         height: 630,
         alt: '스팟잇 Spot It!',
