@@ -44,6 +44,11 @@ public class WaitingService {
         var popup = popupPort.findById(request.popupId())
                 .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 
+        // 해당 팝업에 예약한 적 있는지 확인
+        if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId()))) {
+            throw new BusinessException(ErrorType.DUPLICATE_WAITING, String.valueOf(request.popupId()));
+        }
+
         // 2. 다음 대기 번호 조회
         Integer nextWaitingNumber = waitingPort.getNextWaitingNumber(request.popupId());
 

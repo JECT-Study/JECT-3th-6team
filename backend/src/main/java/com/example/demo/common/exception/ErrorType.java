@@ -35,6 +35,7 @@ public enum ErrorType {
     INVALID_POPUP_TYPE(HttpStatus.BAD_REQUEST, "INVALID_POPUP_TYPE", "지원하지 않는 팝업 타입입니다"), // PopupType.java:37
     WAITING_NOT_READY(HttpStatus.BAD_REQUEST, "WAITING_NOT_READY", "아직 입장할 수 없습니다."),
     INVALID_WAITING_NUMBER(HttpStatus.INTERNAL_SERVER_ERROR, "INVALID_WAITING_NUMBER", "대기 번호가 유효하지 않습니다"),
+    DUPLICATE_WAITING(HttpStatus.BAD_REQUEST, "DUPLICATE_WAITING", "이미 대기 했던 팝업입니다"), // WaitingService.java:66
 
     // 데이터 무결성 관련
     NULL_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "NULL_NOTIFICATION_ID", "알림 ID가 null입니다"), // NotificationPortAdapter.java:50

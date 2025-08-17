@@ -52,4 +52,6 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
      * @return 대기 엔티티 목록 (대기번호 순으로 정렬)
      */
     List<WaitingEntity> findByPopupIdAndStatusOrderByWaitingNumberAsc(Long popupId, WaitingStatus status);
+
+    Boolean existsByMemberIdAndPopupId(Long memberId, Long popupId);
 } 
