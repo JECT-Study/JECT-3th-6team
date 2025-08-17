@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -236,7 +237,7 @@ public class PopupDtoMapper {
 
     private long calculateDDay(LocalDate endDate) {
         if (endDate == null) return -1;
-        return endDate.toEpochDay() - LocalDate.now().toEpochDay();
+        return ChronoUnit.DAYS.between(LocalDate.now(), endDate);
     }
 
     private String formatPeriod(DateRange period) {
