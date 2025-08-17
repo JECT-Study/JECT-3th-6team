@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, KeyboardEvent } from 'react';
 import SearchIcon from '@/assets/icons/Normal/Icon_Search.svg';
 
 interface SearchInputProps {
@@ -9,6 +9,7 @@ interface SearchInputProps {
   id?: string;
   onFocus?: () => void;
   onBlur?: () => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export default function SearchInput({
@@ -19,6 +20,7 @@ export default function SearchInput({
   id = '',
   onFocus,
   onBlur,
+  onKeyDown,
 }: SearchInputProps) {
   return (
     <div className="relative w-full">
@@ -33,6 +35,7 @@ export default function SearchInput({
         }
         onFocus={onFocus}
         onBlur={onBlur}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         disabled={disabled}
         className="w-full px-3 py-3 pl-12 rounded-xl border border-main bg-white text-base font-regular/normal tracking-wide placeholder:text-gray60 text-gray80 focus:outline-none caret-main "

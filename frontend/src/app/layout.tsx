@@ -6,8 +6,27 @@ import { ReactQueryClientProvider } from '@/shared/lib';
 import AuthProvider from '@/features/auth/lib/AuthProvider';
 
 export const metadata: Metadata = {
-  title: 'Popup App',
-  description: 'Popup store reservation app',
+  title: '스팟잇 Spot It!',
+  description: '지금, 이 순간의 핫플을 스팟잇!',
+  openGraph: {
+    title: '스팟잇 Spot It!',
+    description: '지금, 이 순간의 핫플을 스팟잇!',
+    images: [
+      {
+        url: '/images/open_graph.svg',
+        width: 1200,
+        height: 630,
+        alt: '스팟잇 Spot It!',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '스팟잇 Spot It!',
+    description: '지금, 이 순간의 핫플을 스팟잇!',
+    images: ['/images/open_graph.svg'],
+  },
 };
 
 const pretendard = localFont({

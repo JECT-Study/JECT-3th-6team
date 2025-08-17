@@ -7,6 +7,7 @@ import { tagPopupItem } from '@/entities/popup/lib/tagPopupItem';
 import { ApiError } from 'next/dist/server/api-utils';
 
 export interface PopupListRequest {
+  keyword?: string;
   popupId?: number;
   type?: string[]; // type=체험형&type=전시형
   category?: string[]; // category=패션&category=예술
