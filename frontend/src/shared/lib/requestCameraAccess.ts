@@ -4,6 +4,7 @@ import {
   isMobileDevice,
 } from '@/shared/lib/cameraUtils';
 import QrScanner from 'qr-scanner';
+import { startSimpleQRScan } from '@/shared/lib/simpleCameraQR';
 
 /**
  * 모바일에서 기본 카메라 앱을 열어 QR 코드를 스캔합니다.
@@ -158,17 +159,36 @@ const startCameraWithQRDetection = async (
 
 /**
  * 카메라를 시작하고 QR 코드를 감지합니다.
- * - 모바일: 기본 카메라 앱을 열어 사진 촬영 후 QR 인식
+ * - 모바일: 간단한 기본 카메라 앱 실행 (QR 자동 인식)
  * - 웹: 브라우저 내 카메라로 실시간 QR 스캔
  */
 export const requestCameraAccess = async (
   onQRDetected: (qrData: string) => void
 ): Promise<void> => {
   if (isMobileDevice()) {
-    console.log('모바일 디바이스: 기본 카메라 앱을 엽니다.');
-    await openMobileCameraForQR(onQRDetected);
+    console.log('모바일 디바이스: 기본 카메라 앱으로 QR 스캔을 시작합니다.');
+    try {
+      await startSimpleQRScan();
+      // 사용자가 카메라에서 QR을 스캔한 후 웹으로 돌아와야 하므로
+      // 실제 QR 데이터는 사용자가 링크를 통해 직접 접근하게 됩니다.
+      console.log('카메라 앱이 실행되었습니다. QR 코드를 비춰주세요.');
+    } catch (error) {
+      console.warn('간단한 카메라 실행 실패, 복잡한 방식으로 전환:', error);
+      // fallback으로 기존 복잡한 방식 사용
+      await openMobileCameraForQR(onQRDetected);
+    }
   } else {
     console.log('웹 브라우저: 브라우저 내 카메라로 QR 스캔을 시작합니다.');
     await startCameraWithQRDetection(onQRDetected);
   }
+};
+
+/**
+ * 간단한 QR 스캔 함수 (별칭)
+ * 기본 카메라 우선, 실패 시 웹 스캐너 사용
+ */
+export const requestCameraAccessWithDeepLink = async (
+  onQRDetected: (qrData: string) => void
+): Promise<void> => {
+  await requestCameraAccess(onQRDetected);
 };
