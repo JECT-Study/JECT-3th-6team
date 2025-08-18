@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/shared/ui/badge/Badge';
@@ -12,6 +13,7 @@ import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
 
 import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
 import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
+import QrScanGuideModal from '@/features/detail/ui/QrScanGuideModal';
 
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
@@ -29,6 +31,7 @@ export default function PopupDetailContent({
   popupId,
 }: PopupDetailContentProps) {
   const router = useRouter();
+  const [isQrGuideModalOpen, setIsQrGuideModalOpen] = useState(false);
 
   const {
     thumbnails,
@@ -50,18 +53,23 @@ export default function PopupDetailContent({
 
   const handleWaitingClick = async () => {
     if (status === 'NONE') {
-      try {
-        await requestCameraAccess(() => {});
-      } catch (error) {
-        console.error('카메라 접근 실패:', error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : '카메라에 접근할 수 없습니다.'
-        );
-      }
+      setIsQrGuideModalOpen(true);
+      // try {
+      //   await requestCameraAccess(() => {});
+      // } catch (error) {
+      //   console.error('카메라 접근 실패:', error);
+      //   alert(
+      //     error instanceof Error
+      //       ? error.message
+      //       : '카메라에 접근할 수 없습니다.'
+      //   );
+      // }
     }
   };
+
+  const handleQrGuideClose = useCallback(() => {
+    setIsQrGuideModalOpen(false);
+  }, []);
 
   return (
     <div className="pb-36">
@@ -142,6 +150,12 @@ export default function PopupDetailContent({
               : '방문 완료'}
         </StandardButton>
       </BottomButtonContainer>
+
+      {/* QR 스캔 안내 모달 */}
+      <QrScanGuideModal
+        isOpen={isQrGuideModalOpen}
+        onClose={handleQrGuideClose}
+      />
     </div>
   );
 }
