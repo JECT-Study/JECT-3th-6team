@@ -22,7 +22,7 @@ import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
 import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
 import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
-import { requestCameraAccess } from '@/shared/lib/requestCameraAccess';
+import { requestCameraAccessWithDeepLink } from '@/shared/lib/requestCameraAccess';
 
 export default function ProductDetail() {
   const router = useRouter();
@@ -78,14 +78,32 @@ export default function ProductDetail() {
   const handleWaitingClick = async () => {
     if (status === 'NONE') {
       try {
-        await requestCameraAccess(() => {});
+        await requestCameraAccessWithDeepLink((qrData: string) => {
+          console.log('QR 코드 스캔 성공:', qrData);
+
+          // QR 코드 데이터 처리 로직
+          if (qrData.includes('spotit.co.kr') || qrData.includes('waiting')) {
+            // 웨이팅 관련 QR 코드인 경우
+            alert('웨이팅이 등록되었습니다!');
+            // 여기에 실제 웨이팅 API 호출 로직 추가
+            router.push('/waiting/123'); // 예시 - 실제 웨이팅 ID로 교체 필요
+          } else {
+            alert('올바른 웨이팅 QR 코드가 아닙니다.');
+          }
+        });
+
+        // 모바일에서는 카메라 앱이 실행되고, 사용자가 QR을 스캔하면
+        // QR 코드에 포함된 링크를 통해 자동으로 웨이팅 페이지로 이동됩니다.
+        console.log('기본 카메라로 QR 코드를 스캔해주세요.');
       } catch (error) {
-        console.error('카메라 접근 실패:', error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : '카메라에 접근할 수 없습니다.'
-        );
+        console.error('QR 스캔 실패:', error);
+
+        // 에러 메시지가 단순히 사용자 취소인 경우 알림을 표시하지 않음
+        if (error instanceof Error && !error.message.includes('취소')) {
+          alert(
+            'QR 코드 스캔 중 문제가 발생했습니다. 기본 카메라 앱을 직접 열어서 QR 코드를 스캔해보세요.'
+          );
+        }
       }
     }
   };
