@@ -37,6 +37,8 @@ const pretendard = localFont({
   fallback: ['Arial', 'sans-serif'],
 });
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? '';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,14 +48,36 @@ export default function RootLayout({
   const KAKAO_SDK_URL = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_APP_JS_KEY}&libraries=services,clusterer,drawing&autoload=false`;
 
   return (
-    <html lang="kr" className={`${pretendard.variable}`}>
+    <html lang="ko" className={`${pretendard.variable}`}>
+      <head>
+        {/* Google Tag Manager */}
+        <Script id="gtm-loader" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','${GA_ID}');
+          `}
+        </Script>
+      </head>
       <body className={`${pretendard.className} `}>
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GA_ID}`}
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
         <ReactQueryClientProvider>
           <Script
             type="text/javascript"
             src={KAKAO_SDK_URL}
             strategy="beforeInteractive"
           />
+
           <AuthProvider>{children}</AuthProvider>
         </ReactQueryClientProvider>
       </body>
