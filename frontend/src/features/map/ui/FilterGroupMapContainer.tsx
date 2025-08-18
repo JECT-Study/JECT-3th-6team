@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { KakaoMap, ModalContainer } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
+import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import KeywordFilterPreview, {
@@ -31,6 +32,10 @@ export default function FilterGroupMapContainer() {
   const [isMapReady, setIsMapReady] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(true);
+  const [myLocationMarker, setMyLocationMarker] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const { filter, tempState, isOpen, handleOpen, handleDeleteKeyword } =
     useFilterContext();
@@ -255,18 +260,14 @@ export default function FilterGroupMapContainer() {
           </div>
 
           {!isMapReady ? (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                <p className="text-gray-600">지도 로딩 중...</p>
-              </div>
-            </div>
+            <LoadingFallback />
           ) : (
             <KakaoMap
               ref={mapRef}
               center={center}
               level={3}
               className="w-full h-full"
+              myLocationMarker={myLocationMarker}
             >
               {(() => {
                 const markerData =
@@ -304,7 +305,7 @@ export default function FilterGroupMapContainer() {
 
       <MyLocationButton
         onMoveToCurrentLocation={() =>
-          handleMoveToCurrentLocation(mapRef, setCenter)
+          handleMoveToCurrentLocation(mapRef, setCenter, setMyLocationMarker)
         }
       />
       {selectedPopupData && (
