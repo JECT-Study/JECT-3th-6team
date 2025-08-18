@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import { useQuery } from '@tanstack/react-query';
 
-import { KakaoMap, ModalContainer } from '@/shared/ui';
+import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
 import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
@@ -31,7 +31,7 @@ export default function FilterGroupMapContainer() {
     useState<PopupItemType | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(true);
+
   const [myLocationMarker, setMyLocationMarker] = useState<{
     lat: number;
     lng: number;

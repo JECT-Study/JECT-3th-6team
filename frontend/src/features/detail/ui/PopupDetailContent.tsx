@@ -18,7 +18,6 @@ import QrScanGuideModal from '@/features/detail/ui/QrScanGuideModal';
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
-import { requestCameraAccess } from '@/shared/lib/requestCameraAccess';
 import { PopupDetailResponseDto } from '@/entities/popup/detail/types/type';
 
 interface PopupDetailContentProps {
