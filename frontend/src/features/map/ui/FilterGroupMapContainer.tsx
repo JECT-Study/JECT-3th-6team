@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import { useQuery } from '@tanstack/react-query';
 
-import { KakaoMap } from '@/shared/ui';
+import { KakaoMap, ModalContainer } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
 
@@ -30,8 +30,10 @@ export default function FilterGroupMapContainer() {
     useState<PopupItemType | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(true);
 
-  const { filter, handleOpen, handleDeleteKeyword } = useFilterContext();
+  const { filter, tempState, isOpen, handleOpen, handleDeleteKeyword } =
+    useFilterContext();
   const { popupType, category } = filter.keyword;
   const mapRef = useRef<kakao.maps.Map>(null);
   const { handleMoveToCurrentLocation } = useSearchMyLocation();
@@ -47,7 +49,7 @@ export default function FilterGroupMapContainer() {
     queryKey: ['popup', 'list', { keyword: searchKeyword }],
     queryFn: async () => {
       const result = await getPopupListApi({ keyword: searchKeyword });
-      console.log('검색 결과:', result);
+
       return result;
     },
     enabled: !!searchKeyword,
@@ -64,12 +66,22 @@ export default function FilterGroupMapContainer() {
   const popupListIconSrc = '/icons/Color/Icon_NormalMinus.svg';
   const selectedPopupIconSrc = '/icons/Color/Icon_Map.svg';
 
-  const keywords: KeywordChip[] = [
-    ...toKeywordChips(popupType, 'category'),
+  // 적용된 필터 키워드 (지도에 실제 반영된 상태)
+  const appliedKeywords: KeywordChip[] = [
+    ...toKeywordChips(popupType, 'popupType'),
     ...toKeywordChips(category, 'category'),
   ];
 
-  const handleMarkerClick = async (popupId: number) => {
+  // 임시 키워드 (바텀시트에서 선택중인 상태)
+  const tempKeywords: KeywordChip[] = [
+    ...toKeywordChips(tempState.keyword.popupType, 'popupType'),
+    ...toKeywordChips(tempState.keyword.category, 'category'),
+  ];
+
+  // KeywordFilterPreview에 표시할 키워드: 바텀시트가 열렸으면 tempKeywords, 닫혀있으면 appliedKeywords
+  const displayKeywords = isOpen ? tempKeywords : appliedKeywords;
+
+  const handleClickMarker = async (popupId: number) => {
     const isCurrentlySelected = selectedPopupId === popupId;
 
     if (isCurrentlySelected) {
@@ -78,12 +90,9 @@ export default function FilterGroupMapContainer() {
 
     // 새로운 마커 선택
     setSelectedPopupId(popupId);
-    console.log('선택된 팝업 ID:', popupId);
 
     try {
-      console.log('🔄 팝업 상세 데이터 요청 시도...');
       const popupData = await getPopupListApi({ popupId });
-      console.log('✅ 팝업 데이터 성공:', popupData);
 
       // API 응답에서 첫 번째 팝업 데이터를 selectedPopupData로 설정
       if (popupData.content && popupData.content.length > 0) {
@@ -92,7 +101,6 @@ export default function FilterGroupMapContainer() {
     } catch (error) {
       console.error('❌ 팝업 데이터 조회 실패, 목 데이터 사용:', error);
 
-      // 목 데이터 생성
       const mockPopupData = {
         popupId: popupId,
         popupName: `팝업 스토어 ${popupId}`,
@@ -119,7 +127,6 @@ export default function FilterGroupMapContainer() {
       };
 
       setSelectedPopupData(mockPopupData);
-      console.log('📤 목 팝업 데이터 사용:', mockPopupData);
     }
   };
 
@@ -152,7 +159,6 @@ export default function FilterGroupMapContainer() {
   const { data: popupList, isLoading: isPopupListLoading } = useQuery({
     queryKey: ['mapPopupList', popupType, category],
     queryFn: async () => {
-      console.log('🔄 API 요청 시도...');
       try {
         const result = await getMapPopupListApi({
           minLatitude: 37.541673,
@@ -162,7 +168,6 @@ export default function FilterGroupMapContainer() {
           type: popupType.length > 0 ? popupType.join(',') : undefined,
           category: category.length > 0 ? category.join(',') : undefined,
         });
-        console.log('✅ API 성공:', result);
         return result;
       } catch (error) {
         console.error('❌ API 실패, 목 데이터 사용:', error);
@@ -175,7 +180,6 @@ export default function FilterGroupMapContainer() {
   useEffect(() => {
     if (!isPopupListLoading && popupList) {
       const timer = setTimeout(() => {
-        console.log('🗺️ 지도 표시 준비 완료');
         setIsMapReady(true);
       }, 1000);
 
@@ -243,10 +247,10 @@ export default function FilterGroupMapContainer() {
             <KeywordFilterPreview
               initialStatus="unselect"
               onClick={() => handleOpen('keyword')}
-              keywords={keywords}
-              onDelete={({ label, type }) =>
-                handleDeleteKeyword(label, type, 'filter')
-              }
+              keywords={displayKeywords}
+              onDelete={({ label, type }) => {
+                handleDeleteKeyword(label, type, isOpen ? 'temp' : 'filter');
+              }}
             />
           </div>
 
@@ -267,31 +271,16 @@ export default function FilterGroupMapContainer() {
               {(() => {
                 const markerData =
                   popupList?.popupList || mockPopupList.popupList;
-                console.log(
-                  '🐛 Debug - Rendering markers, isLoading:',
-                  isPopupListLoading
-                );
-                console.log('🐛 Debug - markerData:', markerData);
 
                 if (isPopupListLoading) {
-                  console.log(
-                    '🐛 Debug - Still loading, not rendering markers'
-                  );
                   return null;
                 }
 
                 if (!markerData || markerData.length === 0) {
-                  console.log('🐛 Debug - No marker data available');
                   return null;
                 }
 
-                console.log(
-                  '🐛 Debug - Rendering',
-                  markerData.length,
-                  'markers'
-                );
                 return markerData.map(popup => {
-                  console.log('🐛 Debug - Rendering marker:', popup);
                   return (
                     <MapMarker
                       key={popup.id}
@@ -303,7 +292,7 @@ export default function FilterGroupMapContainer() {
                             : popupListIconSrc,
                         size: { width: 32, height: 32 },
                       }}
-                      onClick={() => handleMarkerClick(popup.id)}
+                      onClick={() => handleClickMarker(popup.id)}
                     />
                   );
                 });
