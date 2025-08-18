@@ -24,7 +24,7 @@ export default function SearchInput({
 }: SearchInputProps) {
   return (
     <div className="relative w-full">
-      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center mt-1">
         <SearchIcon width={28} height={28} />
       </div>
       <input
@@ -38,7 +38,7 @@ export default function SearchInput({
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-3 py-3 pl-12 rounded-xl border border-main bg-white text-base font-regular/normal tracking-wide placeholder:text-gray60 text-gray80 focus:outline-none caret-main "
+        className="w-full h-[48px] px-3 pl-11 rounded-xl border border-main bg-white text-base font-regular tracking-wide placeholder:text-gray60 text-gray80 focus:outline-none caret-main"
       />
     </div>
   );
