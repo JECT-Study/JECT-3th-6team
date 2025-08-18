@@ -56,7 +56,7 @@ function Chip({
         alt="Close"
         width={12}
         height={12}
-        className="size-3 cursor-pointer"
+        className="size-3"
         onClick={onClickRightIcon}
       />
     ) : (

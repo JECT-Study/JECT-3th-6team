@@ -3,10 +3,7 @@ import { useCallback } from 'react';
 interface UseSearchMyLocationReturn {
   handleMoveToCurrentLocation: (
     mapRef: React.RefObject<kakao.maps.Map | null>,
-    setCenter?: (center: { lat: number; lng: number }) => void,
-    setMyLocationMarker?: (
-      position: { lat: number; lng: number } | null
-    ) => void
+    setCenter?: (center: { lat: number; lng: number }) => void
   ) => void;
 }
 
@@ -14,10 +11,7 @@ export default function useSearchMyLocation(): UseSearchMyLocationReturn {
   const handleMoveToCurrentLocation = useCallback(
     (
       mapRef: React.RefObject<kakao.maps.Map | null>,
-      setCenter?: (center: { lat: number; lng: number }) => void,
-      setMyLocationMarker?: (
-        position: { lat: number; lng: number } | null
-      ) => void
+      setCenter?: (center: { lat: number; lng: number }) => void
     ) => {
       if (mapRef.current) {
         const map = mapRef.current;
@@ -30,19 +24,12 @@ export default function useSearchMyLocation(): UseSearchMyLocationReturn {
                 position.coords.longitude
               );
 
-              const locationData = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              };
-
               // setCenter가 제공되면 center 상태도 업데이트
               if (setCenter) {
-                setCenter(locationData);
-              }
-
-              // 현재 위치 마커 표시
-              if (setMyLocationMarker) {
-                setMyLocationMarker(locationData);
+                setCenter({
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                });
               }
 
               map.panTo(currentPos);

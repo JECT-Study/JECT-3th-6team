@@ -6,114 +6,74 @@ import {
 import QrScanner from 'qr-scanner';
 
 /**
- * 모바일에서도 브라우저 카메라를 사용하되 더 안정적으로 QR 스캔합니다.
+ * 모바일에서 기본 카메라 앱을 열어 QR 코드를 스캔합니다.
  */
-const startMobileCameraWithQR = async (
+const openMobileCameraForQR = (
   onQRDetected: (qrData: string) => void
 ): Promise<void> => {
-  try {
-    console.log('모바일 카메라를 시작합니다...');
+  return new Promise((resolve, reject) => {
+    try {
+      // 숨겨진 file input 요소 생성
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.capture = 'environment'; // 후면 카메라 사용
+      input.style.display = 'none';
 
-    // 모바일에 최적화된 카메라 설정
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { exact: 'environment' }, // 후면 카메라 강제
-        width: { ideal: 1920, max: 1920 },
-        height: { ideal: 1080, max: 1080 },
-      },
-      audio: false,
-    });
+      input.addEventListener('change', async event => {
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) {
+          const file = target.files[0];
+          console.log('모바일 카메라에서 이미지가 촬영되었습니다.');
 
-    console.log('모바일 카메라 권한이 허용되었습니다.');
-
-    // 전체화면 비디오 요소 생성
-    const video = document.createElement('video');
-    video.style.position = 'fixed';
-    video.style.top = '0';
-    video.style.left = '0';
-    video.style.width = '100vw';
-    video.style.height = '100vh';
-    video.style.objectFit = 'cover';
-    video.style.zIndex = '9999';
-    video.style.backgroundColor = 'black';
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
-
-    // 비디오에 스트림 연결
-    video.srcObject = stream;
-
-    // 닫기 버튼 추가 (모바일용)
-    const closeButton = document.createElement('button');
-    closeButton.innerHTML = '✕';
-    closeButton.style.position = 'fixed';
-    closeButton.style.top = '20px';
-    closeButton.style.right = '20px';
-    closeButton.style.zIndex = '10000';
-    closeButton.style.backgroundColor = 'rgba(0,0,0,0.7)';
-    closeButton.style.color = 'white';
-    closeButton.style.border = 'none';
-    closeButton.style.borderRadius = '50%';
-    closeButton.style.width = '50px';
-    closeButton.style.height = '50px';
-    closeButton.style.fontSize = '20px';
-    closeButton.style.cursor = 'pointer';
-
-    // QR 스캐너 설정
-    const qrScanner = new QrScanner(
-      video,
-      result => {
-        console.log('QR 코드 감지:', result.data);
-
-        // 정리 작업
-        qrScanner.stop();
-        qrScanner.destroy();
-        stream.getTracks().forEach(track => track.stop());
-
-        if (document.body.contains(video)) {
-          document.body.removeChild(video);
-        }
-        if (document.body.contains(closeButton)) {
-          document.body.removeChild(closeButton);
+          try {
+            // QR 코드 스캔 시도
+            const qrData = await QrScanner.scanImage(file);
+            console.log('QR 코드 감지:', qrData);
+            onQRDetected(qrData);
+            resolve();
+          } catch (error) {
+            console.log('QR 코드를 찾을 수 없습니다:', error);
+            alert('QR 코드를 인식할 수 없습니다. 다시 촬영해주세요.');
+            resolve(); // 에러여도 resolve (사용자가 다시 시도할 수 있도록)
+          }
         }
 
-        // 콜백 호출
-        onQRDetected(result.data);
-      },
-      {
-        highlightScanRegion: true,
-        highlightCodeOutline: true,
-        maxScansPerSecond: 5, // 스캔 빈도 증가
-      }
-    );
+        // input 요소 제거
+        if (document.body.contains(input)) {
+          document.body.removeChild(input);
+        }
+      });
 
-    // 닫기 버튼 이벤트
-    closeButton.onclick = () => {
-      qrScanner.stop();
-      qrScanner.destroy();
-      stream.getTracks().forEach(track => track.stop());
+      const handleCancel = () => {
+        console.log('카메라 촬영이 취소되었습니다.');
+        if (document.body.contains(input)) {
+          document.body.removeChild(input);
+        }
+        resolve();
+      };
 
-      if (document.body.contains(video)) {
-        document.body.removeChild(video);
-      }
-      if (document.body.contains(closeButton)) {
-        document.body.removeChild(closeButton);
-      }
-    };
+      // focus가 돌아왔을 때 취소로 간주 (fallback)
+      const handleFocus = () => {
+        setTimeout(() => {
+          if (document.body.contains(input)) {
+            handleCancel();
+            window.removeEventListener('focus', handleFocus);
+          }
+        }, 1000);
+      };
 
-    // DOM에 추가
-    document.body.appendChild(video);
-    document.body.appendChild(closeButton);
+      input.addEventListener('cancel', handleCancel);
+      window.addEventListener('focus', handleFocus);
 
-    // 비디오 재생 및 스캐너 시작
-    await video.play();
-    await qrScanner.start();
-    console.log('모바일 QR 스캐너가 시작되었습니다.');
-  } catch (err) {
-    console.error('모바일 카메라 시작 실패:', err);
-    const errorMessage = getCameraErrorMessage(err as Error);
-    throw new Error(errorMessage);
-  }
+      // DOM에 추가하고 클릭 트리거
+      document.body.appendChild(input);
+      input.click();
+    } catch (error) {
+      console.log('모바일 카메라를 열 수 없습니다:', error);
+      reject(new Error('모바일 카메라를 열 수 없습니다.'));
+    }
+  });
 };
 
 /**
@@ -198,15 +158,15 @@ const startCameraWithQRDetection = async (
 
 /**
  * 카메라를 시작하고 QR 코드를 감지합니다.
- * - 모바일: 후면 카메라 우선, 고해상도 설정으로 QR 스캔 개선
+ * - 모바일: 기본 카메라 앱을 열어 사진 촬영 후 QR 인식
  * - 웹: 브라우저 내 카메라로 실시간 QR 스캔
  */
 export const requestCameraAccess = async (
   onQRDetected: (qrData: string) => void
 ): Promise<void> => {
   if (isMobileDevice()) {
-    console.log('모바일 디바이스: 최적화된 카메라로 QR 스캔을 시작합니다.');
-    await startMobileCameraWithQR(onQRDetected);
+    console.log('모바일 디바이스: 기본 카메라 앱을 엽니다.');
+    await openMobileCameraForQR(onQRDetected);
   } else {
     console.log('웹 브라우저: 브라우저 내 카메라로 QR 스캔을 시작합니다.');
     await startCameraWithQRDetection(onQRDetected);
