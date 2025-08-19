@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/shared/ui/badge/Badge';
@@ -71,9 +71,9 @@ export default function PopupDetailContent({
     }
   };
 
-  const handleQrGuideClose = useCallback(() => {
+  const handleQrGuideClose = () => {
     setIsQrGuideModalOpen(false);
-  }, []);
+  };
 
   return (
     <div className="pb-36">

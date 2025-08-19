@@ -50,6 +50,7 @@ export const openNativeCamera = (): Promise<void> => {
         reject(new Error('지원되지 않는 플랫폼입니다.'));
       }
     } catch (error) {
+      console.log(error);
       reject(
         new Error(
           '카메라 앱을 실행할 수 없습니다. 기기의 카메라 앱을 직접 열어보세요.'
