@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, forwardRef } from 'react';
-import { Map } from 'react-kakao-maps-sdk';
+import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { _MapProps } from 'react-kakao-maps-sdk';
 import { ReactNode } from 'react';
 
@@ -49,74 +49,94 @@ const KakaoMap = forwardRef<
     React.HTMLAttributes<HTMLDivElement> & {
       children?: ReactNode;
       isLoading?: boolean;
+      myLocationMarker?: { lat: number; lng: number } | null;
     }
->(({ center, level = 6, children, isLoading = false, ...props }, ref) => {
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
-  // const imageUrl = '/icons/Color/Icon_MyLocation.svg';
+>(
+  (
+    {
+      center,
+      level = 6,
+      children,
+      isLoading = false,
+      myLocationMarker,
+      ...props
+    },
+    ref
+  ) => {
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
+    const [mapError, setMapError] = useState<string | null>(null);
+    const myLocationImageUrl = '/icons/Color/Icon_MyLocation.svg';
 
-  useEffect(() => {
-    // 카카오맵 SDK 로딩 확인
-    const checkKakaoMapSDK = () => {
-      if (typeof window !== 'undefined' && window.kakao && window.kakao.maps) {
-        setIsMapLoaded(true);
-        setMapError(null);
-      } else {
-        setMapError('지도를 불러올 수 없습니다.');
-      }
-    };
+    useEffect(() => {
+      // 카카오맵 SDK 로딩 확인
+      const checkKakaoMapSDK = () => {
+        if (
+          typeof window !== 'undefined' &&
+          window.kakao &&
+          window.kakao.maps
+        ) {
+          setIsMapLoaded(true);
+          setMapError(null);
+        } else {
+          setMapError('지도를 불러올 수 없습니다.');
+        }
+      };
 
-    // 초기 체크
-    checkKakaoMapSDK();
+      // 초기 체크
+      checkKakaoMapSDK();
 
-    // SDK 로딩 대기
-    const timer = setTimeout(checkKakaoMapSDK, 1000);
+      // SDK 로딩 대기
+      const timer = setTimeout(checkKakaoMapSDK, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }, []);
 
-  // 에러 상태 처리
-  if (mapError) {
+    // 에러 상태 처리
+    if (mapError) {
+      return (
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <p className="text-gray-500 text-sm">{mapError}</p>
+        </div>
+      );
+    }
+
+    // 로딩 상태 처리
+    if (!isMapLoaded || isLoading) {
+      return (
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <p className="text-gray-500 text-sm">지도를 불러오는 중...</p>
+        </div>
+      );
+    }
+
     return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-500 text-sm">{mapError}</p>
-      </div>
-    );
-  }
-
-  // 로딩 상태 처리
-  if (!isMapLoaded || isLoading) {
-    return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-500 text-sm">지도를 불러오는 중...</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <Map
-        ref={ref}
-        center={center}
-        level={level}
-        onError={error => {
-          console.error('카카오맵 에러:', error);
-          setMapError('지도를 표시할 수 없습니다.');
-        }}
-        {...props}
-      >
-        {/* <MapMarker
-          position={center}
-          image={{
-            src: imageUrl,
-            size: { width: 40, height: 40 },
+      <>
+        <Map
+          ref={ref}
+          center={center}
+          level={level}
+          onError={error => {
+            console.error('카카오맵 에러:', error);
+            setMapError('지도를 표시할 수 없습니다.');
           }}
-        /> */}
-        {children}
-      </Map>
-    </>
-  );
-});
+          {...props}
+        >
+          {/* 현재 위치 마커 표시 (MyLocationButton을 누른 경우에만) */}
+          {myLocationMarker && (
+            <MapMarker
+              position={myLocationMarker}
+              image={{
+                src: myLocationImageUrl,
+                size: { width: 40, height: 40 },
+              }}
+            />
+          )}
+          {children}
+        </Map>
+      </>
+    );
+  }
+);
 
 KakaoMap.displayName = 'KakaoMap';
 
