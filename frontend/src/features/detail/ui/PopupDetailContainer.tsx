@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getPopupDetailApi } from '@/entities/popup/detail/api/api';
-import PopupDetailContent from './PopupDetailContent';
+import PopupDetailContent from '@/features/detail/ui/PopupDetailContent';
 
 interface PopupDetailContainerProps {
   popupId: number;
@@ -16,9 +16,7 @@ export default function PopupDetailContainer({
     queryFn: () => getPopupDetailApi(popupId),
   });
 
-  if (!popupDetailData) {
-    return <div>팝업 데이터를 찾을 수 없습니다.</div>;
-  }
+  console.log('PopupDetailData:', popupDetailData);
 
   return (
     <PopupDetailContent popupDetailData={popupDetailData} popupId={popupId} />

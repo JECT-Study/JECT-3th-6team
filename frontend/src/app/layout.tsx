@@ -6,8 +6,14 @@ import { ReactQueryClientProvider } from '@/shared/lib';
 import AuthProvider from '@/features/auth/lib/AuthProvider';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000'
+  ),
   title: '스팟잇 Spot It!',
   description: '지금, 이 순간의 핫플을 스팟잇!',
+  icons: {
+    icon: '/images/favicon.svg',
+  },
   openGraph: {
     title: '스팟잇 Spot It!',
     description: '지금, 이 순간의 핫플을 스팟잇!',

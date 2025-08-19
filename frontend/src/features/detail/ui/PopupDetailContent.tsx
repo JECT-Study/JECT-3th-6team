@@ -21,7 +21,7 @@ import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import { PopupDetailResponseDto } from '@/entities/popup/detail/types/type';
 
 interface PopupDetailContentProps {
-  popupDetailData: PopupDetailResponseDto;
+  popupDetailData?: PopupDetailResponseDto;
   popupId: number;
 }
 
@@ -31,6 +31,11 @@ export default function PopupDetailContent({
 }: PopupDetailContentProps) {
   const router = useRouter();
   const [isQrGuideModalOpen, setIsQrGuideModalOpen] = useState(false);
+
+  // 데이터가 없을 때 early return (Suspense에서 처리됨)
+  if (!popupDetailData) {
+    return null;
+  }
 
   const {
     thumbnails,
