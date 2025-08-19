@@ -16,8 +16,6 @@ export default function PopupDetailContainer({
     queryFn: () => getPopupDetailApi(popupId),
   });
 
-  console.log('PopupDetailData:', popupDetailData);
-
   return (
     <PopupDetailContent popupDetailData={popupDetailData} popupId={popupId} />
   );

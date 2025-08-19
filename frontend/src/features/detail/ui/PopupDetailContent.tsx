@@ -110,16 +110,25 @@ export default function PopupDetailContent({
             {period.startDate} ~ {period.endDate}
           </MediumText>
         </div>
-        <div className="flex items-center gap-2 mt-2.5">
+        <div className="flex items-start gap-2 mt-2.5">
           <IconMap
             width={22}
             height={22}
             fill={'var(--gray-80)'}
             stroke={'var(--gray-80)'}
+            className="flex-shrink-0 mt-0.5"
           />
-          <MediumText color="color-black">위치</MediumText>
-          <MediumText color="text-gray60">|</MediumText>
-          <MediumText color="color-black">{location.addressName}</MediumText>
+          <div className="flex items-start gap-2 min-w-0 flex-1">
+            <MediumText color="color-black" className="flex-shrink-0">
+              위치
+            </MediumText>
+            <MediumText color="text-gray60" className="flex-shrink-0">
+              |
+            </MediumText>
+            <MediumText color="color-black" className="break-words">
+              {location.addressName}
+            </MediumText>
+          </div>
         </div>
         {/* Map */}
         <div className="mt-6.5">

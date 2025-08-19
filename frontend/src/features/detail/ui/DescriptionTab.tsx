@@ -77,12 +77,16 @@ export function DescriptionTab({
           );
         })}
       </div>
-      <div className="mt-4.5">
+      <div className="mt-4.5 flex flex-col gap-2">
         <RegularText className="text-[15px] text-black">콘텐츠</RegularText>
         {popupDetail.descriptions.map((description, index) => (
-          <p key={index} className="text-sm text-black">
+          <pre
+            key={index}
+            className="text-sm text-black whitespace-pre-wrap"
+            style={{ lineHeight: '0.7' }}
+          >
             {description}
-          </p>
+          </pre>
         ))}
       </div>
       <div className="border-t border-gray40 mt-5 -mx-5"></div>
