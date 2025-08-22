@@ -8,6 +8,9 @@ spring:
   datasource:
     hikari:
       maximum-pool-size: 2
+      idle-timeout: 60000
+      max-lifetime: 300000
+      connection-test-query: "SELECT 1"
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${SUPABASE_HOST}:${SUPABASE_PORT}/${SUPABASE_DB}?sslmode=require&prepareThreshold=0
     username: ${SUPABASE_USER}
