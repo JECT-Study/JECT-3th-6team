@@ -27,6 +27,10 @@ export default function Navbar() {
       className={
         'bg-white w-full max-w-[430px] min-w-[320px] py-[34px] fixed bottom-0 flex justify-around pt-1 '
       }
+      style={{
+        // 모바일에서 안전 영역 고려
+        paddingBottom: 'calc(34px + env(safe-area-inset-bottom, 0px))',
+      }}
     >
       {navItems.map((item, index) => {
         const Icon = item.icon;
