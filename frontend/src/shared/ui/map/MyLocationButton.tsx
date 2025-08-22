@@ -14,7 +14,7 @@ export default function MyLocationButton({
   return (
     <button
       onClick={handleClickMyLocation}
-      className="absolute bottom-35 right-5  z-10 flex justify-center items-center w-14 h-14"
+      className="absolute bottom-15 right-5  z-10 flex justify-center items-center w-14 h-14"
     >
       <IconSearchCurrentLocation
         fill={'var(--color-main)'}

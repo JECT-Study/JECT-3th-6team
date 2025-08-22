@@ -83,7 +83,7 @@ export function DescriptionTab({
           <pre
             key={index}
             className="text-sm text-black whitespace-pre-wrap"
-            style={{ lineHeight: '0.7' }}
+            style={{ lineHeight: '1' }}
           >
             {description}
           </pre>

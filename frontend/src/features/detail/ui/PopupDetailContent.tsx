@@ -57,7 +57,7 @@ export default function PopupDetailContent({
 
   const handleWaitingClick = async () => {
     if (status === 'NONE') {
-      setIsQrGuideModalOpen(true);
+      // setIsQrGuideModalOpen(true);
       // try {
       //   await requestCameraAccess(() => {});
       // } catch (error) {
@@ -68,6 +68,8 @@ export default function PopupDetailContent({
       //       : '카메라에 접근할 수 없습니다.'
       //   );
       // }
+
+      router.push(`/reservation/onsite/${popupId}`);
     }
   };
 
@@ -165,10 +167,12 @@ export default function PopupDetailContent({
       </BottomButtonContainer>
 
       {/* QR 스캔 안내 모달 */}
-      <QrScanGuideModal
-        isOpen={isQrGuideModalOpen}
-        onClose={handleQrGuideClose}
-      />
+      <div>
+        <QrScanGuideModal
+          isOpen={isQrGuideModalOpen}
+          onClose={handleQrGuideClose}
+        />
+      </div>
     </div>
   );
 }

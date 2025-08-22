@@ -144,17 +144,12 @@ export default function FilterGroupMapContainer() {
   const mockPopupList = {
     popupList: [
       {
-        id: 1,
-        latitude: 37.544,
-        longitude: 127.0436,
+        id: 7,
+        latitude: 37.545681758279,
+        longitude: 127.04442401847,
       },
       {
         id: 2,
-        latitude: 37.545470791421,
-        longitude: 127.04324359055,
-      },
-      {
-        id: 3,
         latitude: 37.545470791421,
         longitude: 127.04324359055,
       },
@@ -193,12 +188,12 @@ export default function FilterGroupMapContainer() {
   }, [isPopupListLoading, popupList]);
 
   return (
-    <div className="w-full h-screen pb-[100px] relative">
+    <div className="w-full h-[calc(100vh-120px)] relative overflow-hidden">
       {/* 검색 포커스 시 지도 영역만 오버레이 */}
       {isSearchFocused && (
-        <div className="absolute top-0 left-0 right-0 bottom-[100px] z-30 bg-white">
+        <div className="absolute top-0 left-0 right-0 bottom-[120px] z-30 bg-white">
           {/* 검색 입력창과 결과를 포함하는 컨테이너 */}
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px]">
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] max-w-[90vw]">
             {/* 검색 입력창 */}
             <div className="rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 mb-3">
               <SearchInput
@@ -239,7 +234,7 @@ export default function FilterGroupMapContainer() {
       {/* 일반 상태 */}
       {!isSearchFocused && (
         <>
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] h-[122px] rounded-2xl bg-white/60 shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 space-y-2.5">
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] max-w-[90vw] h-[122px] rounded-2xl bg-white/60 shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 space-y-2.5">
             <SearchInput
               id={'search-input'}
               value={searchValue}
@@ -310,7 +305,9 @@ export default function FilterGroupMapContainer() {
         }
       />
       {selectedPopupData && (
-        <div className="absolute bottom-30 left-0 right-0 z-50">
+        <div className="absolute bottom-10 left-0 right-0 z-50">
+          {/* <div className="absolute bottom-[140px] md:bottom-[140px] left-0 right-0 z-50"> */}
+          {/* <div className="absolute bottom-[140px] left-0 right-0 z-50"> */}
           <div className="w-full max-w-sm mx-auto transform scale-100">
             <BadgedPopupCard {...selectedPopupData} />
           </div>
