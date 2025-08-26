@@ -11,4 +11,10 @@ public record Location(
     String region3depthName,
     double longitude,
     double latitude
-) {}
+) {
+    public Location {
+        if (region3depthName == null) {
+            region3depthName = "";
+        }
+    }
+}

@@ -1,7 +1,7 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.css');
-@import "tw-animate-css";
-/*---break---*/
+@import 'tw-animate-css';
+
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
@@ -9,26 +9,28 @@
   font-weight: normal;
   font-style: normal;
   font-display: swap;
-  src: url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.woff2') format('woff2'),
-  url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.woff') format('woff'),
-  url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.otf') format('opentype'),
-  url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.ttf') format('truetype');
+  src:
+    url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.woff2')
+      format('woff2'),
+    url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.woff')
+      format('woff'),
+    url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.otf')
+      format('opentype'),
+    url('https://cdn.jsdelivr.net/gh/fonts-archive/GangwonEduPower/GangwonEduPower.ttf')
+      format('truetype');
 }
 
-@font-face {
-  font-family: 'Pretendard';
-  font-weight: 400;
-  font-style: normal;
-  font-display: fallback;
-  src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @theme {
   /*gray-scale*/
-  --color-black:rgba(9, 10, 10, 1);
+  --color-black: rgba(9, 10, 10, 1);
   --color-gray80: rgba(98, 98, 98, 1);
   --color-gray60: rgba(148, 148, 148, 1);
-  --color-gray40 : rgba(234, 234, 234, 1);
+  --color-gray40: rgba(234, 234, 234, 1);
   --color-gray20: rgba(218, 222, 232, 1);
   --color-white: rgba(255, 255, 255, 1);
   /*임의 네이밍*/
@@ -36,28 +38,28 @@
 
   /*primary*/
   --color-main: rgba(254, 163, 31, 1);
+  --color-main-pale: #fff2e6;
   --color-sub: rgba(255, 232, 199, 1);
+  --color-sub2: #fff8ec;
   --color-sub-pale: rgba(255, 232, 199, 0.3);
   --color-main-active: rgba(217, 105, 0, 1);
   /*other-color*/
   --color-red: rgba(255, 89, 89, 1);
-
-  /*text-colors*/
-  --color-text-color: #545454;
-  --color-text-gray-color: #8B95A1;
-
+  --color-modal-overlay: rgba(40, 40, 40, 0.4);
   /*ganwon-font*/
   --font-gangwon: 'GangwonEdu Power', sans-serif;
-
-  /*pretendard-font*/
-  --font-pretendard: 'Pretendard', sans-serif;
 
   /*shadow*/
   --shadow-button: 0px 2px 10px 0px rgba(152, 74, 0, 0.15);
   --shadow-calendar: 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
-}
+  --shadow-container: 0px -4px 20px 0px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
+  --shadow-main: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 
-/*---break---*/
+  /*text-colors*/
+  --color-text-color: #545454;
+  --color-text-gray-color: #8b95a1;
+}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -133,7 +135,6 @@
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
 }
-
 /*---break---*/
 
 .dark {
@@ -172,11 +173,93 @@
 
 /*---break---*/
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+/* 모바일 최적화를 위한 CSS */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari 최적화 */
+  .sticky {
+    position: -webkit-sticky;
   }
-  body {
-    @apply bg-background text-foreground;
+}
+
+/* 모바일 뷰포트 최적화 */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 모바일 터치 최적화 */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 텍스트 선택 허용 */
+p,
+span,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* 모바일 스크롤 최적화 */
+body {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* 하드웨어 가속 활성화 */
+.transform-gpu {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+}
+
+/* 모바일에서 navbar 고정 위치 보정 */
+@media (max-width: 768px) {
+  .sticky {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    z-index: 50;
+  }
+
+  /* iOS Safari 주소창 대응 */
+  @supports (-webkit-touch-callout: none) {
+    .sticky {
+      position: fixed;
+      bottom: env(safe-area-inset-bottom, 0);
+    }
+  }
+}
+
+/* 웹 환경에서는 navbar를 상대 위치로 설정하여 빈 공간 방지 */
+@media (min-width: 769px) {
+  .sticky {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: 430px;
+    z-index: 50;
   }
 }

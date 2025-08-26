@@ -1,28 +1,86 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password:
-  
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+    hikari:
+      maximum-pool-size: 2
+      idle-timeout: 60000
+      max-lifetime: 300000
+      connection-test-query: "SELECT 1"
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${SUPABASE_HOST}:${SUPABASE_PORT}/${SUPABASE_DB}?sslmode=require&prepareThreshold=0
+    username: ${SUPABASE_USER}
+    password: ${SUPABASE_PASSWORD}
   
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         default_batch_fetch_size: 1000
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${OAUTH2_KAKAO_CLIENT_ID}
+            client-secret: ${OAUTH2_KAKAO_CLIENT_SECRET}
+            redirect-uri: "${BACKEND_URL}/oauth/kakao/callback"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: Kakao
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: ${OAUTH2_KAKAO_PROVIDER_AUTHORIZATION_URI}
+            token-uri: ${OAUTH2_KAKAO_PROVIDER_TOKEN_URI}
+            user-info-uri: ${OAUTH2_KAKAO_PROVIDER_USER_INFO_URI}
+            user-name-attribute: id
+    # Gmail SMTP 설정
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    from-email: ${GMAIL_FROM_EMAIL:notify@spotit.co.kr}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+custom:
+  app:
+    frontend-url: ${FRONTEND_URL}
+  jwt:
+    accessToken:
+      secret: ${JWT_ACCESS_TOKEN_SECRET}
+      expirationSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
+  admin:
+    password: ${ADMIN_PASSWORD}
+
+app:
+  sse:
+    heartbeat:
+      enabled: true          # SSE 하트비트 기능 활성화
+      ping-interval: 30000   # 30초마다 ping 전송
+  upload:
+    dir: uploads             # 파일 업로드 디렉토리
+    max-file-size: 10485760  # 10MB (바이트)
+
+
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE 
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    org.springframework.jdbc.datasource.init.ScriptUtils: DEBUG

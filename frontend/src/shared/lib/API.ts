@@ -1,0 +1,190 @@
+import {
+  ApiError,
+  ApiErrorResponse,
+  ApiResponse,
+  HTTPHeaders,
+  HTTPMethod,
+  HTTPParams,
+} from '@/shared/type/api';
+
+// RequestInit 타입 확장
+interface ExtendedRequestInit extends RequestInit {
+  allowCredentials?: boolean;
+  cache?: RequestCache;
+  next?: NextFetchRequestConfig;
+}
+
+// 기본 API URL 설정
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// API 클래스 정의
+export default class API {
+  readonly method: HTTPMethod;
+  readonly url: string;
+  static onUnauthorized: (() => void) | undefined;
+  baseURL?: string;
+  headers?: HTTPHeaders;
+  params?: HTTPParams;
+  data?: unknown;
+  timeout?: number;
+  withCredentials?: boolean;
+  cache?: RequestCache;
+  next?: NextFetchRequestConfig;
+
+  constructor(method: HTTPMethod, url: string) {
+    this.method = method;
+    this.url = url;
+  }
+
+  async call<T>(): Promise<ApiResponse<T>> {
+    // URL 파라미터 처리
+    let finalUrl = this.url;
+    if (this.params) {
+      const queryParams = new URLSearchParams();
+      Object.entries(this.params).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+
+        if (Array.isArray(value)) {
+          value.forEach(item => queryParams.append(key, String(item)));
+        } else {
+          queryParams.append(key, String(value));
+        }
+      });
+
+      const queryString = queryParams.toString();
+      if (queryString) {
+        finalUrl += `?${queryString}`;
+      }
+    }
+
+    // 기본 URL 설정
+    const baseURL = this.baseURL || BASE_URL;
+    const fullUrl = `${baseURL}${finalUrl}`;
+
+    // 헤더 설정
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...this.headers,
+    };
+
+    // 요청 설정
+    const requestConfig: ExtendedRequestInit = {
+      method: this.method,
+      headers,
+      credentials: this.withCredentials ? 'include' : 'same-origin',
+      allowCredentials: true,
+      cache: this.cache,
+      next: this.next,
+    };
+
+    if (
+      this.data &&
+      (this.method === 'POST' ||
+        this.method === 'PUT' ||
+        this.method === 'PATCH')
+    ) {
+      // 요청 본문 설정
+      requestConfig.body = JSON.stringify(this.data);
+    }
+
+    try {
+      // 타임아웃 처리
+      let controller: AbortController | undefined;
+      if (this.timeout) {
+        controller = new AbortController();
+        const timeoutId = setTimeout(() => controller?.abort(), this.timeout);
+        requestConfig.signal = controller.signal;
+
+        // 타임아웃 후 타이머 정리
+        setTimeout(() => clearTimeout(timeoutId), this.timeout);
+      }
+
+      // 요청 실행
+      const response = await fetch(fullUrl, requestConfig);
+
+      // 응답 처리
+      if (!response.ok) {
+        // 에러 응답 파싱
+        let errorData: ApiErrorResponse;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = {
+            status: response.status,
+            error: response.statusText,
+            message: '알 수 없는 오류가 발생했습니다.',
+          };
+        }
+
+        switch (response.status) {
+          case 400:
+            throw new ApiError(
+              errorData.message || '잘못된 요청입니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+          case 401:
+            API.onUnauthorized?.();
+            throw new ApiError(
+              errorData.message || '인증에 실패했습니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+          case 403:
+            throw new ApiError(
+              errorData.message || '접근이 거부되었습니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+          case 404:
+            throw new ApiError(
+              errorData.message || '요청한 리소스를 찾을 수 없습니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+          case 409:
+            throw new ApiError(
+              errorData.message || '리소스 충돌이 발생했습니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+          case 500:
+            throw new ApiError(
+              errorData.message || '서버 오류가 발생했습니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+          default:
+            throw new ApiError(
+              errorData.message || '알 수 없는 오류가 발생했습니다.',
+              response.status,
+              response.statusText,
+              errorData.code
+            );
+        }
+      }
+
+      const data = await response.json();
+
+      return {
+        data: data.data || data,
+        status: response.status,
+        statusText: data.message,
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new ApiError(error.message);
+      }
+      throw new ApiError('요청 중 오류가 발생했습니다.');
+    }
+  }
+}

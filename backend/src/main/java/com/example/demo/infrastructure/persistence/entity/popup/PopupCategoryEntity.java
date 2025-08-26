@@ -1,12 +1,7 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
 
 /**
  * 팝업 카테고리 매핑 엔티티.
@@ -15,6 +10,9 @@ import lombok.Getter;
 @Entity
 @Table(name = "popup_categories")
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PopupCategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

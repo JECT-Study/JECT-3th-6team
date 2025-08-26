@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>관리자 - 팝업 생성</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; padding: 24px; }
+    h1 { font-size: 20px; margin: 0 0 16px; }
+    h2 { font-size: 16px; margin: 24px 0 8px; }
+    fieldset { border: 1px solid #ddd; padding: 16px; margin-bottom: 16px; }
+    label { display: block; margin: 8px 0; }
+    input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea { padding: 8px; width: 100%; box-sizing: border-box; }
+    .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .items { display: flex; flex-direction: column; gap: 8px; }
+    .btn { padding: 8px 12px; border: 1px solid #999; background: #fafafa; cursor: pointer; }
+    .btn:active { transform: translateY(1px); }
+    .muted { color: #666; font-size: 12px; }
+    .success { color: #0a7e07; }
+    .error { color: #b70000; }
+  </style>
+</head>
+<body>
+  <h1>관리자 - 팝업 생성</h1>
+
+  <fieldset style="background-color: #fff3cd; border-color: #ffeaa7;">
+    <legend style="color: #856404; font-weight: bold;">🔒 관리자 인증</legend>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <label style="margin: 0; flex: 0 0 auto;">
+        비밀번호:
+        <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요" style="width: 200px; margin-left: 8px;" />
+      </label>
+      <div id="authStatus" class="muted">비밀번호를 입력하면 API 호출이 가능합니다.</div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>기본 정보</legend>
+    <div class="row">
+      <label>
+        이름
+        <input id="name" type="text" placeholder="팝업 이름" />
+      </label>
+      <label>
+        타입
+        <select id="type">
+          <option value="EXPERIENTIAL">EXPERIENTIAL</option>
+          <option value="EXHIBITION">EXHIBITION</option>
+          <option value="RETAIL">RETAIL</option>
+        </select>
+      </label>
+      <label>
+        시작일
+        <input id="startDate" type="date" />
+      </label>
+      <label>
+        종료일
+        <input id="endDate" type="date" />
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>위치</legend>
+    <div class="row">
+      <label>
+        주소
+        <input id="addressName" type="text" placeholder="주소" />
+      </label>
+      <label>
+        시/도
+        <select id="region1DepthName">
+          <option value="">시/도를 선택하세요</option>
+          <option value="서울">서울</option>
+          <option value="경기">경기</option>
+          <option value="인천">인천</option>
+          <option value="부산">부산</option>
+          <option value="경남">경남</option>
+          <option value="경북">경북</option>
+          <option value="대구">대구</option>
+          <option value="울산">울산</option>
+          <option value="대전">대전</option>
+          <option value="충남">충남</option>
+          <option value="충북">충북</option>
+          <option value="광주">광주</option>
+          <option value="전남">전남</option>
+          <option value="전북">전북</option>
+          <option value="강원">강원</option>
+          <option value="제주">제주</option>
+          <option value="세종">세종</option>
+        </select>
+      </label>
+      <label>
+        시/군/구
+        <input id="region2DepthName" type="text" placeholder="강남구" />
+      </label>
+      <label>
+        읍/면/동
+        <input id="region3DepthName" type="text" placeholder="역삼동" />
+      </label>
+      <label>
+        경도 (longitude)
+        <input id="longitude" type="number" step="0.000001" placeholder="127.000000" />
+      </label>
+      <label>
+        위도 (latitude)
+        <input id="latitude" type="number" step="0.000001" placeholder="37.000000" />
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>운영시간</legend>
+    <div id="openingHoursList" class="items"></div>
+    <button class="btn" id="addOpeningHours" type="button">+ 추가</button>
+    <div class="muted">예: MONDAY, 10:00 ~ 20:00</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>메인 이미지 *</legend>
+    <div class="row">
+      <div style="flex: 1;">
+        <h3 style="font-size: 14px; margin: 0 0 8px;">메인 이미지 업로드</h3>
+        <input type="file" id="mainImageFile" accept="image/*" multiple style="margin-bottom: 8px;" />
+        <button class="btn" id="uploadMainImages" type="button">업로드</button>
+        <div id="mainImageUploadStatus" class="muted" style="margin-top: 4px;"></div>
+      </div>
+      <div style="flex: 1;">
+        <h3 style="font-size: 14px; margin: 0 0 8px;">메인 이미지 URL 목록 *</h3>
+        <div id="mainImageUrlList"></div>
+        <button class="btn" id="addMainImageUrl" type="button">+ URL 추가</button>
+        <div class="muted">최소 1개 이상의 메인 이미지가 필요합니다.</div>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>브랜드 스토리 이미지 *</legend>
+    <div class="row">
+      <div style="flex: 1;">
+        <h3 style="font-size: 14px; margin: 0 0 8px;">브랜드 스토리 이미지 업로드</h3>
+        <input type="file" id="brandStoryImageFile" accept="image/*" multiple style="margin-bottom: 8px;" />
+        <button class="btn" id="uploadBrandStoryImages" type="button">업로드</button>
+        <div id="brandStoryImageUploadStatus" class="muted" style="margin-top: 4px;"></div>
+      </div>
+      <div style="flex: 1;">
+        <h3 style="font-size: 14px; margin: 0 0 8px;">브랜드 스토리 이미지 URL 목록 *</h3>
+        <div id="brandStoryImageUrlList"></div>
+        <button class="btn" id="addBrandStoryImageUrl" type="button">+ URL 추가</button>
+        <div class="muted">최소 1개 이상의 브랜드 스토리 이미지가 필요합니다.</div>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>컨텐츠</legend>
+    <label>
+      소개
+      <textarea id="introduction" rows="3" placeholder="소개"></textarea>
+    </label>
+    <label>
+      공지
+      <textarea id="notice" rows="3" placeholder="공지"></textarea>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>SNS</legend>
+    <div id="snsList" class="items"></div>
+    <button class="btn" id="addSns" type="button">+ 추가</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>카테고리</legend>
+    <div class="items" id="categoryList">
+      <label><input type="checkbox" value="1" /> 리빙/인테리어 (1)</label>
+      <label><input type="checkbox" value="2" /> 패션 (2)</label>
+      <label><input type="checkbox" value="3" /> F&B (3)</label>
+      <label><input type="checkbox" value="4" /> 뷰티 (4)</label>
+      <label><input type="checkbox" value="5" /> 캐릭터 (5)</label>
+      <label><input type="checkbox" value="6" /> 애니메이션 (6)</label>
+      <label><input type="checkbox" value="7" /> 크리에이터/유튜버 (7)</label>
+      <label><input type="checkbox" value="8" /> 패밀리/키즈 (8)</label>
+      <label><input type="checkbox" value="9" /> 예술 (9)</label>
+      <label><input type="checkbox" value="10" /> 스포츠/건강 (10)</label>
+      <label><input type="checkbox" value="11" /> 게임 (11)</label>
+      <label><input type="checkbox" value="12" /> 일러스트/디자인 (12)</label>
+      <label><input type="checkbox" value="13" /> 영화/드라마 (13)</label>
+      <label><input type="checkbox" value="14" /> 연예인 (14)</label>
+      <label><input type="checkbox" value="15" /> 전자기기 (15)</label>
+      <label><input type="checkbox" value="16" /> 도서/음반 (16)</label>
+      <label><input type="checkbox" value="17" /> 플리마켓 (17)</label>
+      <label><input type="checkbox" value="18" /> 기타 (18)</label>
+    </div>
+    <div class="muted">시드 데이터에 존재하는 카테고리 IDs 예시를 제공합니다.</div>
+  </fieldset>
+
+  <div>
+    <button class="btn" id="submit" type="button">생성하기</button>
+    <span id="result" class="muted"></span>
+  </div>
+  <script defer src="admin-popup-create.js"></script>
+</body>
+</html>
+
+

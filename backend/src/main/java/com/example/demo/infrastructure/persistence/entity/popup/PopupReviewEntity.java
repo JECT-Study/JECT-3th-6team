@@ -1,13 +1,8 @@
 package com.example.demo.infrastructure.persistence.entity.popup;
 
 import com.example.demo.common.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
 
 /**
  * 팝업 리뷰 엔티티.
@@ -16,6 +11,9 @@ import lombok.Getter;
 @Entity
 @Table(name = "popup_reviews")
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PopupReviewEntity extends BaseEntity {
 
     @Id
