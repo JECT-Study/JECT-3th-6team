@@ -1,0 +1,61 @@
+name: Mirror to Fork (main & develop)
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history, no credentials)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Debug info
+        env:
+          BRANCH: ${{ github.ref_name }}
+          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}
+        run: |
+          echo "==== DEBUG INFO ===="
+          echo "Current branch: $BRANCH"
+          if [ -z "$TOKEN" ]; then
+            echo "❌ Token is EMPTY (check Actions Secrets!)"
+            exit 1
+          else
+            echo "✅ Token is present (masked in logs)"
+          fi
+
+      - name: Set git identity
+        run: |
+          git config user.name "spotit-ci"
+          git config user.email "spotit-ci@users.noreply.github.com"
+
+      - name: Add fork remote (Classic PAT with username in URL)
+        env:
+          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # Classic PAT (repo + workflow)
+        run: |
+          # 혹시 남아있을 기본 extraheader 제거
+          git config --global http.https://github.com/.extraheader ""
+          # ✅ Classic PAT: 'username:token' 형식으로 인증
+          git remote add fork https://spotit-developer:${TOKEN}@github.com/spotit-developer/JECT-3th-6team.git
+          echo "==== REMOTE INFO ===="
+          git remote -v
+          echo "====================="
+          # 권한/접근 확인
+          git ls-remote fork
+
+      - name: Push current branch to fork
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          echo "==== PUSHING $BRANCH ===="
+          git push fork ${BRANCH}:${BRANCH}
+          # 포크 브랜치 히스토리 불일치/보호규칙이면 필요 시:
+          # git push fork ${BRANCH}:${BRANCH} --force-with-lease
