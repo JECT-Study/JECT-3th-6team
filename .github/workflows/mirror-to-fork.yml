@@ -1,0 +1,44 @@
+name: Mirror to Fork (main & develop)
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch: {}  # 필요할 때 수동 실행
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set git identity
+        run: |
+          git config user.name "team-ci"
+          git config user.email "team-ci@users.noreply.github.com"
+
+      - name: Add fork remote
+        env:
+          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # 팀 계정 Fine-grained PAT
+          FORK_OWNER: ${{ vars.FORK_OWNER }}      # 예: team-account
+          FORK_REPO:  ${{ vars.FORK_REPO }}       # 예: spotit
+        run: |
+          git remote add fork https://x-access-token:${TOKEN}@github.com/${FORK_OWNER}/${FORK_REPO}.git
+          git remote -v
+
+      - name: Push current branch to fork
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          # 히스토리가 어긋난 상태가 아니라면 일반 푸시로 충분
+          git push fork ${BRANCH}:${BRANCH}
+
+      # --- 옵션: 태그/모든 레퍼런스까지 미러링하고 싶다면 아래를 켜세요(주의: 강함)
+      # - name: Mirror all refs (optional, destructive)
+      #   run: |
+      #     git push --mirror fork
