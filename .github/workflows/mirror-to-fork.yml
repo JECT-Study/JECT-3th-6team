@@ -10,6 +10,8 @@ permissions:
 
 jobs:
   mirror:
+    # ✅ 원본 레포에서만 실행. 포크 레포에선 'skipped' 처리
+    if: github.repository == 'spotit-org/JECT-3th-6team'  # <- 여기에 원본 repo 경로 넣기
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (full history, no credentials)
@@ -41,14 +43,11 @@ jobs:
         env:
           TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # Classic PAT (repo + workflow)
         run: |
-          # 혹시 남아있을 기본 extraheader 제거
           git config --global http.https://github.com/.extraheader ""
-          # ✅ Classic PAT: 'username:token' 형식으로 인증
           git remote add fork https://spotit-developer:${TOKEN}@github.com/spotit-developer/JECT-3th-6team.git
           echo "==== REMOTE INFO ===="
           git remote -v
           echo "====================="
-          # 권한/접근 확인
           git ls-remote fork
 
       - name: Push current branch to fork
@@ -57,5 +56,5 @@ jobs:
         run: |
           echo "==== PUSHING $BRANCH ===="
           git push fork ${BRANCH}:${BRANCH}
-          # 포크 브랜치 히스토리 불일치/보호규칙이면 필요 시:
+          # 히스토리 불일치/보호규칙이면 필요 시:
           # git push fork ${BRANCH}:${BRANCH} --force-with-lease
