@@ -90,6 +90,12 @@ npm install
 npm run dev
 ```
 
+#### 빌드 후 실행
+```
+npm run build
+npm run start
+```
+
 ## 아키텍처 원칙
 
 - **클린 아키텍처**: 의존성 역전 원칙을 통한 관심사 분리
