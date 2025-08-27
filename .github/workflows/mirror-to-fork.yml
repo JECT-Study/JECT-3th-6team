@@ -8,15 +8,15 @@ on:
 permissions:
   contents: read
 
+# ✅ 최상단에서 env 지정 → job if에서 env.HAS_TOKEN 사용 가능
+env:
+  HAS_TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}
+
 jobs:
   mirror:
-    # ✅ 포크 레포가 아니고 + 토큰이 env로 주입되어 있을 때만 실행
+    # ✅ 포크가 아니고 + 토큰이 있을 때만 실행
     if: ${{ !github.event.repository.fork && env.HAS_TOKEN != '' }}
     runs-on: ubuntu-latest
-
-    # secrets를 env로 매핑 → if에서 env로 체크
-    env:
-      HAS_TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}
 
     steps:
       - name: Checkout (full history, no credentials)
@@ -49,14 +49,11 @@ jobs:
         env:
           TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # Classic PAT (scopes: repo + workflow)
         run: |
-          # 기존 extraheader 제거
           git config --global http.https://github.com/.extraheader ""
-          # 포크 레포 풀 URL + PAT 인증
           git remote add fork https://spotit-developer:${TOKEN}@github.com/spotit-developer/JECT-3th-6team.git
           echo "==== REMOTE INFO ===="
           git remote -v
           echo "====================="
-          # 접근 권한 확인
           git ls-remote fork
 
       - name: Push current branch to fork
@@ -65,5 +62,5 @@ jobs:
         run: |
           echo "==== PUSHING $BRANCH ===="
           git push fork ${BRANCH}:${BRANCH}
-          # 히스토리 불일치/브랜치 보호 규칙 시 필요하면:
+          # 필요 시:
           # git push fork ${BRANCH}:${BRANCH} --force-with-lease
