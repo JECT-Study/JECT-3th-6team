@@ -1,0 +1,71 @@
+name: Deploy Backend to Development
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'backend/**'
+
+env:
+  IMAGE_NAME: spotit-backend
+  PROJECT_NAME: spotit
+
+jobs:
+  deploy:
+    name: Deploy to Development EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+        working-directory: ./backend
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3.4.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy on Development EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST_DEV }}
+          username: ${{ secrets.EC2_USERNAME_DEV }}
+          key: ${{ secrets.EC2_PRIVATE_KEY_DEV }}
+          port: 22
+          script: |
+            cd /home/${{ secrets.EC2_USERNAME_DEV }}/${{ env.PROJECT_NAME }}
+
+            # Login to Docker Hub to pull private packages
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+            # Create .env file for docker-compose
+            echo "IMAGE_TAG=${{ github.sha }}" > .env
+            echo "IMAGE_REGISTRY=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}" >> .env
+
+            # Pull the latest image and restart the service
+            docker compose pull backend
+            docker compose up -d --remove-orphans
+
+            # Clean up
+            docker image prune -af
