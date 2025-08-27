@@ -23,21 +23,16 @@ jobs:
           git config user.name "spotit-ci"
           git config user.email "spotit-ci@users.noreply.github.com"
 
-      - name: Auth with PAT via header & add fork remote (full URL)
+      - name: Add fork remote (full URL with token)
         env:
-          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # spotit-developer 계정의 Fine-grained PAT
+          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # spotit-developer 계정 PAT
         run: |
-          # 혹시 남아있을 수 있는 기본 인증 헤더 제거
+          # 혹시 기본 extraheader 남아있을 경우 제거
           git config --global http.https://github.com/.extraheader ""
-          # PAT을 Authorization 헤더로 주입 (basic: x-access-token:<PAT>)
-          AUTH=$(printf "x-access-token:%s" "$TOKEN" | base64)
-          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic $AUTH"
-
-          # 포크 레포 풀 URL 고정
-          git remote add fork https://github.com/spotit-developer/JECT-3th-6team.git
+          # 포크 레포 주소 + PAT으로 remote 추가
+          git remote add fork https://x-access-token:${TOKEN}@github.com/spotit-developer/JECT-3th-6team.git
           git remote -v
-
-          # 접근 권한 확인 (실패 시 토큰/권한 문제)
+          # 권한/접근 테스트
           git ls-remote fork
 
       - name: Push current branch to fork
@@ -45,5 +40,5 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           git push fork ${BRANCH}:${BRANCH}
-          # 히스토리 불일치로 막히면 아래 줄로 강제 동기화(주의)
+          # 필요시 강제 동기화 (히스토리 불일치일 때만)
           # git push fork ${BRANCH}:${BRANCH} --force
