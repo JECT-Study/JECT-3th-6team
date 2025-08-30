@@ -1,16 +1,11 @@
 package com.example.demo.presentation.controller;
 
-import com.example.demo.application.dto.notification.NotificationListRequest;
-import com.example.demo.application.dto.notification.NotificationListResponse;
-import com.example.demo.application.dto.notification.NotificationReadRequest;
-import com.example.demo.application.dto.notification.NotificationResponse;
-import com.example.demo.application.dto.notification.NotificationDeleteRequest;
+import com.example.demo.application.dto.notification.*;
 import com.example.demo.application.service.NotificationService;
 import com.example.demo.application.service.NotificationSseService;
 import com.example.demo.common.security.UserPrincipal;
 import com.example.demo.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -49,13 +44,6 @@ public class NotificationController {
     @GetMapping(value = "/stream", produces = "text/event-stream")
     public SseEmitter streamNotifications(@AuthenticationPrincipal UserPrincipal principal) {
         return notificationSseService.createSseConnection(principal.getId());
-    }
-
-    @Profile("sse-test")
-    @GetMapping(value = "/stream-test", produces = "text/event-stream")
-    public SseEmitter testStreamNotifications() {
-        Long memberId = 1000L; // 테스트용으로 고정된 회원 ID
-        return notificationSseService.createSseConnection(memberId);
     }
 
     @GetMapping("/connection-status")

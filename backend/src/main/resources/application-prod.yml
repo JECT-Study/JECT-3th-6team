@@ -19,3 +19,17 @@ spring:
       hibernate:
         format_sql: false
         default_batch_fetch_size: 1000
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+  endpoint:
+    prometheus:
+      access: read_only
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+custom:
+  metrics:
+    userName: ${METRICS_USER}
+    password: ${METRICS_PASSWORD}
