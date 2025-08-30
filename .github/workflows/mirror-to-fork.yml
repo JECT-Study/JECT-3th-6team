@@ -8,14 +8,10 @@ on:
 permissions:
   contents: read
 
-# ✅ 최상단에서 env 지정 → job if에서 env.HAS_TOKEN 사용 가능
-env:
-  HAS_TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}
-
 jobs:
   mirror:
-    # ✅ 포크가 아니고 + 토큰이 있을 때만 실행
-    if: ${{ !github.event.repository.fork && env.HAS_TOKEN != '' }}
+    # ✅ 포크 레포에서는 아예 실행 안 함 (원본에서만 실행)
+    if: ${{ !github.event.repository.fork }}
     runs-on: ubuntu-latest
 
     steps:
@@ -25,15 +21,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Debug info
-        env:
-          BRANCH: ${{ github.ref_name }}
-          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}
+      # ✅ 토큰 존재 확인(원본 레포에 반드시 있어야 함)
+      - name: Debug / Check token
         run: |
           echo "==== DEBUG INFO ===="
-          echo "Current branch: $BRANCH"
-          if [ -z "$TOKEN" ]; then
-            echo "❌ Token is EMPTY (check Actions Secrets!)"
+          echo "Current branch: ${{ github.ref_name }}"
+          if [ -z "${{ secrets.FORK_PUSH_TOKEN }}" ]; then
+            echo "❌ Token is EMPTY (add FORK_PUSH_TOKEN in Actions Secrets: Classic PAT with repo + workflow)"
             exit 1
           else
             echo "✅ Token is present (masked in logs)"
@@ -45,9 +39,10 @@ jobs:
           git config user.name "spotit-ci"
           git config user.email "spotit-ci@users.noreply.github.com"
 
+      # ✅ Classic PAT (repo + workflow) 사용: username:token 형식
       - name: Add fork remote (Classic PAT with username in URL)
         env:
-          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}   # Classic PAT (scopes: repo + workflow)
+          TOKEN: ${{ secrets.FORK_PUSH_TOKEN }}
         run: |
           git config --global http.https://github.com/.extraheader ""
           git remote add fork https://spotit-developer:${TOKEN}@github.com/spotit-developer/JECT-3th-6team.git
@@ -62,5 +57,5 @@ jobs:
         run: |
           echo "==== PUSHING $BRANCH ===="
           git push fork ${BRANCH}:${BRANCH}
-          # 필요 시:
+          # 필요 시(히스토리 불일치/브랜치 보호 규칙) ↓ 주석 해제
           # git push fork ${BRANCH}:${BRANCH} --force-with-lease
