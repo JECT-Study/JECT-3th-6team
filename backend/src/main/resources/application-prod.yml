@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 2
+      idle-timeout: 60000
+      max-lifetime: 300000
+      connection-test-query: "SELECT 1"
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${SUPABASE_HOST}:${SUPABASE_PORT}/${SUPABASE_DB}?sslmode=require&prepareThreshold=0
+    username: ${SUPABASE_USER}
+    password: ${SUPABASE_PASSWORD}
+  
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_batch_fetch_size: 1000
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+  endpoint:
+    prometheus:
+      access: read_only
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+custom:
+  metrics:
+    userName: ${METRICS_USER}
+    password: ${METRICS_PASSWORD}

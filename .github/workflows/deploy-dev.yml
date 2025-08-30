@@ -1,10 +1,9 @@
-name: Deploy Backend to EC2
+name: Deploy Backend to Development
 
 on:
   push:
     branches:
       - develop
-      - 'feat/#80'
     paths:
       - 'backend/**'
 
@@ -14,12 +13,14 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to EC2
+    name: Deploy to Development EC2
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: develop
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -31,7 +32,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
-        run: ./gradlew build -x test
+        run: ./gradlew build test
         working-directory: ./backend
 
       - name: Log in to Docker Hub
@@ -47,15 +48,15 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Deploy on EC2
+      - name: Deploy on Development EC2
         uses: appleboy/ssh-action@v1.2.2
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          port: 22
+          host: ${{ secrets.EC2_HOST_DEV }}
+          username: ${{ secrets.EC2_USERNAME_DEV }}
+          key: ${{ secrets.EC2_PRIVATE_KEY_DEV }}
+          port: ${{ secrets.EC2_PORT_DEV }}
           script: |
-            cd /home/${{ secrets.EC2_USERNAME }}/${{ env.PROJECT_NAME }}
+            cd /home/${{ secrets.EC2_USERNAME_DEV }}/${{ secrets.PROJECT_NAME_DEV }}
 
             # Login to Docker Hub to pull private packages
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
@@ -69,4 +70,4 @@ jobs:
             docker compose up -d --remove-orphans
 
             # Clean up
-            docker image prune -af 
+            docker image prune -af

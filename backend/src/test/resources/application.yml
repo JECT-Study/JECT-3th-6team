@@ -1,8 +1,6 @@
 spring:
   profiles:
     default: local
-  config:
-    import: optional:file:.env[.properties]
   servlet:
     multipart:
       max-file-size: 10MB
@@ -12,9 +10,9 @@ spring:
       client:
         registration:
           kakao:
-            client-id: ${OAUTH2_KAKAO_CLIENT_ID}
-            client-secret: ${OAUTH2_KAKAO_CLIENT_SECRET}
-            redirect-uri: "${BACKEND_URL}/oauth/kakao/callback"
+            client-id: "mock-client-id"
+            client-secret: "mock-client-secret"
+            redirect-uri: "mock/oauth/kakao/callback"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             client-name: Kakao
@@ -23,17 +21,17 @@ spring:
               - account_email
         provider:
           kakao:
-            authorization-uri: ${OAUTH2_KAKAO_PROVIDER_AUTHORIZATION_URI}
-            token-uri: ${OAUTH2_KAKAO_PROVIDER_TOKEN_URI}
-            user-info-uri: ${OAUTH2_KAKAO_PROVIDER_USER_INFO_URI}
+            authorization-uri: mock-authorization-uri
+            token-uri: mock-token-uri
+            user-info-uri: mock-user-info-uri
             user-name-attribute: id
     # Gmail SMTP 설정
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${GMAIL_USERNAME}
-    password: ${GMAIL_APP_PASSWORD}
-    from-email: ${GMAIL_FROM_EMAIL:notify@spotit.co.kr}
+    username: mock-username
+    password: mock-app-password
+    from-email: test@spotit.kr
     properties:
       mail:
         smtp:
@@ -42,13 +40,13 @@ spring:
             enable: true
 custom:
   app:
-    frontend-url: ${FRONTEND_URL}
+    frontend-url: http://mock-frontend-url
   jwt:
     accessToken:
-      secret: ${JWT_ACCESS_TOKEN_SECRET}
-      expirationSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
+      secret: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+      expirationSeconds: 3600
   admin:
-    password: ${ADMIN_PASSWORD}
+    password: mock-admin-password
 
 app:
   sse:
