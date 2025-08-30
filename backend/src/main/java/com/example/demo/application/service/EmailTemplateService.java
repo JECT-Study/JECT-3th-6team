@@ -4,6 +4,7 @@ import com.example.demo.application.dto.notification.WaitingEntryNotificationReq
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * 이메일 템플릿 생성 서비스
@@ -18,7 +19,7 @@ public class EmailTemplateService {
      * @return HTML 이메일 템플릿
      */
     public String buildWaitingEntryTemplate(WaitingEntryNotificationRequest request) {
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("a h:mm");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("a h:mm", Locale.KOREA);
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/M/d");
     
         String timeStr = request.waitingDateTime().format(timeFormatter);
