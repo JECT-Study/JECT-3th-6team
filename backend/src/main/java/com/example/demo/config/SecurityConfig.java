@@ -6,6 +6,7 @@ import com.example.demo.common.jwt.JwtTokenProvider;
 import com.example.demo.common.security.CustomAccessDeniedHandler;
 import com.example.demo.common.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,8 +40,28 @@ public class SecurityConfig {
     private final AppProperties appProperties;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    @Value("${custom.metrics.userName:username}")
+    private String metricUsername;
+    @Value("${custom.metrics.password:password}")
+    private String metricPassword;
 
     // TODO: 아키텍처 리팩토링 https://github.com/JECT-Study/JECT-3th-6team/pull/99
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        UserDetails admin = User.builder()
+                .username(metricUsername)
+                .password(passwordEncoder().encode(metricPassword))
+                .roles("ACTUATOR")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin);
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -59,7 +86,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
+                .httpBasic(httpBasic -> httpBasic
+                        .realmName("Actuator")
+                )
                 //h2 확인을 위한 설정 TODO: MySQL 연결시 삭제
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -83,6 +112,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
                         .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
                         .requestMatchers(HttpMethod.POST, "/api/images/upload").permitAll() // 임시: 이미지 업로드 무인증 허용
+                        .requestMatchers("/actuator/**").hasRole("ACTUATOR")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions
