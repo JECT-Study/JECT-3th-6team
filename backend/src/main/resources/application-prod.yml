@@ -19,3 +19,14 @@ spring:
       hibernate:
         format_sql: false
         default_batch_fetch_size: 1000
+management:
+  server:
+    port: 8081
+    base-path: "/metrics"
+  endpoint:
+    prometheus:
+      access: read_only
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
