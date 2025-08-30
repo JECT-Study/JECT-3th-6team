@@ -11,5 +11,4 @@ class Demo2ApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }
