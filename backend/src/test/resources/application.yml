@@ -1,0 +1,64 @@
+spring:
+  profiles:
+    default: local
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: "mock-client-id"
+            client-secret: "mock-client-secret"
+            redirect-uri: "mock/oauth/kakao/callback"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: Kakao
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: mock-authorization-uri
+            token-uri: mock-token-uri
+            user-info-uri: mock-user-info-uri
+            user-name-attribute: id
+    # Gmail SMTP 설정
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mock-username
+    password: mock-app-password
+    from-email: test@spotit.kr
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+custom:
+  app:
+    frontend-url: http://mock-frontend-url
+  jwt:
+    accessToken:
+      secret: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+      expirationSeconds: 3600
+  admin:
+    password: mock-admin-password
+
+app:
+  sse:
+    heartbeat:
+      enabled: true          # SSE 하트비트 기능 활성화
+      ping-interval: 30000   # 30초마다 ping 전송
+  upload:
+    dir: uploads             # 파일 업로드 디렉토리
+    max-file-size: 10485760  # 10MB (바이트)
+
+logging:
+  level:
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    org.springframework.jdbc.datasource.init.ScriptUtils: DEBUG
