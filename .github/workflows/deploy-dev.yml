@@ -52,6 +52,7 @@ jobs:
           host: ${{ secrets.EC2_HOST_DEV }}
           username: ${{ secrets.EC2_USERNAME_DEV }}
           key: ${{ secrets.EC2_PRIVATE_KEY_DEV }}
+          port: ${{ secrets.EC2_PORT_DEV }}
           script: |
             cd /home/${{ secrets.EC2_USERNAME_DEV }}/${{ env.PROJECT_NAME_DEV }}
 
