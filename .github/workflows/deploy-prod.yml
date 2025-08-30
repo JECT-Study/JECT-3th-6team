@@ -46,7 +46,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Deploy on Production EC2
+      - name: Deploy on Production EC2 with Blue-Green
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -63,9 +63,17 @@ jobs:
             echo "IMAGE_TAG=${{ github.sha }}" > .env
             echo "IMAGE_REGISTRY=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}" >> .env
 
-            # Pull the latest image and restart the service
-            docker compose pull backend
-            docker compose up -d --remove-orphans
+            # 새 이미지 pull
+            docker compose pull backend-blue backend-green
 
-            # Clean up
-            docker image prune -af
+            # Blue-Green 배포 스크립트 실행
+            chmod +x deploy.sh
+            ./deploy.sh
+
+            # 배포 결과 확인
+            if [ $? -eq 0 ]; then
+              echo "✅ Blue-Green 배포 성공"
+            else
+              echo "❌ Blue-Green 배포 실패"
+              exit 1
+            fi
