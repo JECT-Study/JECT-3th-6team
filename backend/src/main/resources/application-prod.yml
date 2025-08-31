@@ -35,4 +35,4 @@ custom:
     password: ${METRICS_PASSWORD}
   app:
     cors-allowed-origins:
-      - https://spotit.co.kr
+      - https://www.spotit.co.kr
