@@ -23,4 +23,5 @@ spring:
 custom:
   app:
     cors-allowed-origins:
-      - https://dev.api.spotit.co.kr
+      - https://dev.spotit.co.kr
+      - http://localhost:3000
