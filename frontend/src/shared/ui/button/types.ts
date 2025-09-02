@@ -6,7 +6,7 @@ export type SizeType = 'fit' | 'full';
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled: boolean;
   color?: ColorType;
   size?: SizeType;
