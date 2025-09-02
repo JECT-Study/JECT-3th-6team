@@ -19,6 +19,8 @@ import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 
 import { PopupDetailResponseDto } from '@/entities/popup/detail/types/type';
+import TagManager from 'react-gtm-module';
+import { extractLinkMetaFromButton } from '@/shared/lib';
 
 interface PopupDetailContentProps {
   popupDetailData?: PopupDetailResponseDto;
@@ -55,7 +57,7 @@ export default function PopupDetailContent({
     router.push(`/detail/${popupId}/map?lat=${lat}&lng=${lng}`);
   };
 
-  const handleWaitingClick = async () => {
+  const handleWaitingClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (status === 'NONE') {
       // setIsQrGuideModalOpen(true);
       // try {
@@ -68,6 +70,17 @@ export default function PopupDetailContent({
       //       : '카메라에 접근할 수 없습니다.'
       //   );
       // }
+
+      const { text, url } = extractLinkMetaFromButton(e);
+      // GTM
+      TagManager.dataLayer({
+        dataLayer: {
+          event: 'popup_click',
+          popup_id: String(popupId),
+          link_text: text,
+          link_url: url,
+        },
+      });
 
       router.push(`/reservation/onsite/${popupId}`);
     }
@@ -157,6 +170,7 @@ export default function PopupDetailContent({
           onClick={handleWaitingClick}
           disabled={status === 'WAITING' || status === 'VISITED'}
           color="primary"
+          className={'waiting-btn'}
         >
           {status === 'WAITING'
             ? '예약중'

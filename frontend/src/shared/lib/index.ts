@@ -5,3 +5,5 @@ export { default as APIBuilder } from './APIBuilder';
 export { default as logError } from './logError';
 export { default as ReactQueryClientProvider } from './ReactQueryClientProvider';
 export { useGetMapBounds } from './useGetMapBounds';
+export { default as GTMInit } from './GTMInit';
+export { default as extractLinkMetaFromButton } from './extractLinkMetaFromButton';
