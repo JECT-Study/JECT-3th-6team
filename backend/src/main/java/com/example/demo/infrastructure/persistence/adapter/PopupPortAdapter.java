@@ -3,13 +3,14 @@ package com.example.demo.infrastructure.persistence.adapter;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.domain.model.popup.PopupQuery;
+import com.example.demo.domain.model.popup.PopupType;
 import com.example.demo.domain.port.PopupPort;
-import com.example.demo.infrastructure.persistence.entity.popup.PopupEntity;
-import com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity;
-import com.example.demo.infrastructure.persistence.entity.popup.PopupImageType;
-import com.example.demo.infrastructure.persistence.entity.popup.PopupLocationEntity;
+import com.example.demo.infrastructure.persistence.entity.CategoryEntity;
+import com.example.demo.infrastructure.persistence.entity.popup.*;
 import com.example.demo.infrastructure.persistence.mapper.PopupEntityMapper;
 import com.example.demo.infrastructure.persistence.repository.*;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.example.demo.infrastructure.persistence.entity.popup.QPopupCategoryEntity.popupCategoryEntity;
+import static com.example.demo.infrastructure.persistence.entity.popup.QPopupEntity.popupEntity;
+import static com.example.demo.infrastructure.persistence.entity.popup.QPopupLocationEntity.popupLocationEntity;
 
 @Component
 @RequiredArgsConstructor
@@ -33,6 +38,8 @@ public class PopupPortAdapter implements PopupPort {
     private final PopupCategoryRepository popupCategoryRepository;
     private final PopupEntityMapper popupEntityMapper;
     private final CategoryJpaRepository categoryJpaRepository;
+
+    private final JPAQueryFactory jpaQueryFactory;
 
     @Override
     @Transactional(readOnly = true)
@@ -91,7 +98,7 @@ public class PopupPortAdapter implements PopupPort {
 
         // 3) 주간 스케줄 저장
         var scheduleEntities = popup.getSchedule().weeklyOpeningHours().toList().stream()
-                .map(it -> com.example.demo.infrastructure.persistence.entity.popup.PopupWeeklyScheduleEntity.builder()
+                .map(it -> PopupWeeklyScheduleEntity.builder()
                         .popupId(popupId)
                         .dayOfWeek(it.dayOfWeek())
                         .openTime(it.openTime())
@@ -102,9 +109,9 @@ public class PopupPortAdapter implements PopupPort {
 
         // 4) 이미지 저장 (메인 이미지와 브랜드 스토리 이미지 분리 저장)
         // 메인 이미지들 저장 (MAIN 타입)
-        List<com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity> mainImageEntities =
+        List<PopupImageEntity> mainImageEntities =
                 popup.getDisplay().mainImageUrls().stream()
-                        .map(url -> com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity.builder()
+                        .map(url -> PopupImageEntity.builder()
                                 .popupId(popupId)
                                 .type(PopupImageType.MAIN)
                                 .url(url)
@@ -114,9 +121,9 @@ public class PopupPortAdapter implements PopupPort {
         popupImageRepository.saveAll(mainImageEntities);
 
         // 브랜드 스토리 이미지들 저장 (DESCRIPTION 타입)
-        List<com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity> brandStoryImageEntities =
+        List<PopupImageEntity> brandStoryImageEntities =
                 popup.getDisplay().brandStoryImageUrls().stream()
-                        .map(url -> com.example.demo.infrastructure.persistence.entity.popup.PopupImageEntity.builder()
+                        .map(url -> PopupImageEntity.builder()
                                 .popupId(popupId)
                                 .type(PopupImageType.DESCRIPTION)
                                 .url(url)
@@ -126,12 +133,12 @@ public class PopupPortAdapter implements PopupPort {
         popupImageRepository.saveAll(brandStoryImageEntities);
 
         // 5) 컨텐츠 저장 (introduction=1, notice=2)
-        var intro = com.example.demo.infrastructure.persistence.entity.popup.PopupContentEntity.builder()
+        var intro = PopupContentEntity.builder()
                 .popupId(popupId)
                 .contentText(popup.getDisplay().content().introduction())
                 .sortOrder(1)
                 .build();
-        var notice = com.example.demo.infrastructure.persistence.entity.popup.PopupContentEntity.builder()
+        var notice = PopupContentEntity.builder()
                 .popupId(popupId)
                 .contentText(popup.getDisplay().content().notice())
                 .sortOrder(2)
@@ -139,8 +146,8 @@ public class PopupPortAdapter implements PopupPort {
         popupContentRepository.saveAll(java.util.List.of(intro, notice));
 
         // 6) SNS 저장
-        List<com.example.demo.infrastructure.persistence.entity.popup.PopupSocialEntity> socialEntities = popup.getDisplay().sns().stream()
-                .map(s -> com.example.demo.infrastructure.persistence.entity.popup.PopupSocialEntity.builder()
+        List<PopupSocialEntity> socialEntities = popup.getDisplay().sns().stream()
+                .map(s -> PopupSocialEntity.builder()
                         .popupId(popupId)
                         .iconUrl(s.icon())
                         .linkUrl(s.url())
@@ -169,7 +176,7 @@ public class PopupPortAdapter implements PopupPort {
 
     private String categoryNameOrNull(Long categoryId) {
         return categoryJpaRepository.findById(categoryId)
-                .map(com.example.demo.infrastructure.persistence.entity.CategoryEntity::getName)
+                .map(CategoryEntity::getName)
                 .orElse(null);
     }
 
@@ -182,18 +189,11 @@ public class PopupPortAdapter implements PopupPort {
         // 키워드 검색이 있는 경우
         if (query.keyword() != null && !query.keyword().trim().isEmpty()) {
             popupEntities = findByKeywordSearch(query, pageable);
+        } else if (query.popupId() != null) {
+            popupEntities = popupJpaRepository.findById(query.popupId()).stream().toList();
         } else {
-            // 기존 필터 검색
-            popupEntities = popupJpaRepository.findFilteredPopups(
-                    query.popupId(),
-                    query.startDate(),
-                    query.endDate(),
-                    query.types().isEmpty() ? null : query.types(),
-                    query.categories().isEmpty() ? null : query.categories(),
-                    query.region1DepthName(),
-                    query.lastPopupId(),
-                    pageable
-            );
+            // QueryDSL을 이용한 동적 필터 검색
+            popupEntities = findFilteredPopupsWithQueryDsl(query, pageable);
         }
 
         return popupEntities.stream()
@@ -214,6 +214,93 @@ public class PopupPortAdapter implements PopupPort {
                     return popupEntityMapper.toDomain(entity, location, schedules, allImages, contents, socials, categories);
                 })
                 .toList();
+    }
+
+    /**
+     * 키워드 검색을 수행한다.
+     * 키워드를 토큰화하고 각 토큰에 대해 검색을 수행하여 결과를 통합한다.
+     */
+    private List<PopupEntity> findByKeywordSearch(PopupQuery query, Pageable pageable) {
+        String keyword = query.keyword().trim();
+
+        // 키워드를 띄어쓰기 기준으로 토큰화하고 공백문자 및 의미 없는 문자 제거
+        List<String> tokens = Arrays.stream(keyword.split("\\s+"))
+                .map(String::trim)
+                .filter(token -> !token.isEmpty())
+                .distinct()
+                .toList();
+
+        if (tokens.isEmpty()) {
+            return List.of();
+        }
+
+        // 각 토큰에 대해 검색을 수행하고 결과를 통합 (중복 제거)
+        Set<PopupEntity> resultSet = new LinkedHashSet<>();
+
+        for (String token : tokens) {
+            List<PopupEntity> tokenResults = popupJpaRepository.findByKeyword(
+                    query.popupId(),
+                    token,
+                    query.lastPopupId(),
+                    pageable
+            );
+            resultSet.addAll(tokenResults);
+        }
+
+        return resultSet.stream()
+                .limit(query.size() + 1) // 페이징 처리
+                .toList();
+    }
+
+    /**
+     * QueryDSL을 사용하여 동적 WHERE 조건으로 팝업을 검색한다.
+     */
+    private List<PopupEntity> findFilteredPopupsWithQueryDsl(PopupQuery query, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder();
+
+        // 날짜 범위 조건
+        if (query.startDate() != null && query.endDate() != null) {
+            builder.and(popupEntity.endDate.goe(query.startDate())
+                    .and(popupEntity.startDate.loe(query.endDate())));
+        }
+
+        // 팝업 타입 조건
+        if (query.types() != null && !query.types().isEmpty()) {
+            List<PopupType> popupTypes = query.types().stream()
+                    .map(PopupType::valueOf)
+                    .toList();
+            builder.and(popupEntity.type.in(popupTypes));
+        }
+
+        // 카테고리 조건 (EXISTS 서브쿼리)
+        if (query.categories() != null && !query.categories().isEmpty()) {
+            builder.and(jpaQueryFactory.selectOne()
+                    .from(popupCategoryEntity)
+                    .where(popupCategoryEntity.popupId.eq(popupEntity.id).and(popupCategoryEntity.name.in(query.categories())))
+                    .exists());
+        }
+
+        // 지역 조건 (EXISTS 서브쿼리)
+        if (query.region1DepthName() != null && !query.region1DepthName().trim().isEmpty()) {
+            builder.and(jpaQueryFactory.selectOne()
+                    .from(popupLocationEntity)
+                    .where(popupLocationEntity.id.eq(popupEntity.popupLocationId).and(popupLocationEntity.region1DepthName.eq(query.region1DepthName())))
+                    .exists());
+        }
+
+        // 커서 기반 페이징 조건
+        if (query.lastPopupId() != null) {
+            builder.and(popupEntity.id.gt(query.lastPopupId()));
+        }
+
+        // 메인 쿼리 실행
+        return jpaQueryFactory
+                .selectFrom(popupEntity)
+                .where(builder)
+                .orderBy(popupEntity.startDate.asc(), popupEntity.id.asc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
     }
 
     @Override
@@ -306,41 +393,5 @@ public class PopupPortAdapter implements PopupPort {
     private boolean hasMatchingCategory(Long popupId, List<String> categories) {
         return popupCategoryRepository.findAllByPopupId(popupId).stream()
                 .anyMatch(category -> categories.contains(category.getName()));
-    }
-
-    /**
-     * 키워드 검색을 수행한다.
-     * 키워드를 토큰화하고 각 토큰에 대해 검색을 수행하여 결과를 통합한다.
-     */
-    private List<PopupEntity> findByKeywordSearch(PopupQuery query, Pageable pageable) {
-        String keyword = query.keyword().trim();
-
-        // 키워드를 띄어쓰기 기준으로 토큰화하고 공백문자 및 의미 없는 문자 제거
-        List<String> tokens = Arrays.stream(keyword.split("\\s+"))
-                .map(String::trim)
-                .filter(token -> !token.isEmpty())
-                .distinct()
-                .toList();
-
-        if (tokens.isEmpty()) {
-            return List.of();
-        }
-
-        // 각 토큰에 대해 검색을 수행하고 결과를 통합 (중복 제거)
-        Set<PopupEntity> resultSet = new LinkedHashSet<>();
-
-        for (String token : tokens) {
-            List<PopupEntity> tokenResults = popupJpaRepository.findByKeyword(
-                    query.popupId(),
-                    token,
-                    query.lastPopupId(),
-                    pageable
-            );
-            resultSet.addAll(tokenResults);
-        }
-
-        return resultSet.stream()
-                .limit(query.size() + 1) // 페이징 처리
-                .toList();
     }
 }
