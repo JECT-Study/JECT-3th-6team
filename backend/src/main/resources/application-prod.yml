@@ -33,3 +33,6 @@ custom:
   metrics:
     userName: ${METRICS_USER}
     password: ${METRICS_PASSWORD}
+  app:
+    cors-allowed-origins:
+      - https://www.spotit.co.kr
