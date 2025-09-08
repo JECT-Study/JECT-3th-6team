@@ -8,6 +8,9 @@ import com.example.demo.presentation.controller.handler.OAuth2FailureHandler;
 import com.example.demo.presentation.controller.handler.OAuth2SuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/oauth/kakao")
 @RequiredArgsConstructor
+@Tag(name = "OAuth 인증", description = "카카오 OAuth 2.0 인증 관련 API")
 public class OAuthController {
 
     private final OAuth2Service oAuth2Service;
@@ -30,9 +34,11 @@ public class OAuthController {
     private String frontendUrl;
 
     @GetMapping("/callback")
-    public void kakaoCallback(@RequestParam(required = false) String code,
-        @RequestParam(required = false) String error,
-        @RequestParam String state,
+    @Operation(summary = "카카오 OAuth 콜백", description = "카카오 OAuth 2.0 인증 후 콜백을 처리합니다.")
+    public void kakaoCallback(
+        @Parameter(description = "인증 코드") @RequestParam(required = false) String code,
+        @Parameter(description = "에러 메시지") @RequestParam(required = false) String error,
+        @Parameter(description = "상태 값") @RequestParam String state,
         HttpServletResponse response) throws IOException {
 
         if (error != null) {
