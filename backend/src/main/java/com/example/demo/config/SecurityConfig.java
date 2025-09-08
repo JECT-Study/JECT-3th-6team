@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,6 +42,7 @@ public class SecurityConfig {
     private final AppProperties appProperties;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final Environment environment;
     @Value("${custom.metrics.userName:username}")
     private String metricUsername;
     @Value("${custom.metrics.password:password}")
@@ -109,6 +112,8 @@ public class SecurityConfig {
                                 "/admin-popup-create.html",
                                 "/admin-popup-create.js"
                         ).permitAll()
+                                // Swagger UI 관련 경로 허용 (dev 환경에서만)
+                                .requestMatchers(request -> environment.acceptsProfiles(Profiles.of("dev")) && isSwaggerPath(request.getRequestURI())).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
                         .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
                         .requestMatchers(HttpMethod.POST, "/api/images/upload").permitAll() // 임시: 이미지 업로드 무인증 허용
@@ -122,5 +127,15 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+
+    /**
+     * Swagger 관련 경로인지 확인
+     */
+    private boolean isSwaggerPath(String requestURI) {
+        return requestURI.startsWith("/swagger-ui") || 
+               requestURI.startsWith("/v3/api-docs") || 
+               requestURI.equals("/swagger-ui.html");
     }
 } 
