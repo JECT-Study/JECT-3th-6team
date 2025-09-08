@@ -22,6 +22,4 @@ spring:
 
 custom:
   app:
-    cors-allowed-origins:
-      - https://www.dev.spotit.co.kr
-      - https://local.spotit.co.kr
+    cors-allowed-origins: ${CORS_ALLOWED_ORIGINS}
