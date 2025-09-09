@@ -7,7 +7,7 @@ import EmptyNotificationView from '@/features/notification/ui/EmptyNotificationV
 
 interface NotificationCardListViewProps {
   data: NotificationType[];
-  handleDelete: (notificationId: number) => void;
+  handleDelete: (notification: NotificationType) => void;
   lastElementRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -29,7 +29,7 @@ export default function NotificationCardListView({
             data={notification}
             key={notificationId}
             onClick={() => handleClick(notification)}
-            onClose={() => handleDelete(notificationId)}
+            onClose={() => handleDelete(notification)}
           />
         );
       })}
