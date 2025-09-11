@@ -31,10 +31,8 @@ public class OAuth2SuccessHandler {
         ResponseCookie responseCookie = CookieUtils.createAccessTokenCookie(accessToken, jwtProperties.expirationSeconds());
         response.setHeader("Set-Cookie", responseCookie.toString());
 
-        String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl)
-                .path(state)
-                .build()
-                .toUriString();
+        // state에 담긴 풀 URL을 그대로 사용
+        String redirectUrl = state != null && !state.trim().isEmpty() ? state : frontendUrl;
 
         response.sendRedirect(redirectUrl);
     }
