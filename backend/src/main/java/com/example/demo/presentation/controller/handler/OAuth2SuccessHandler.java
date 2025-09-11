@@ -22,7 +22,7 @@ public class OAuth2SuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
 
-    public void onAuthenticationSuccess(HttpServletResponse response, Member member, String redirectBase, String path) throws IOException {
+    public void onAuthenticationSuccess(HttpServletResponse response, Member member, String state, String frontendUrl) throws IOException {
         UserPrincipal principal = UserPrincipal.create(member.id(), member.email());
         Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 
@@ -31,39 +31,11 @@ public class OAuth2SuccessHandler {
         ResponseCookie responseCookie = CookieUtils.createAccessTokenCookie(accessToken, jwtProperties.expirationSeconds());
         response.setHeader("Set-Cookie", responseCookie.toString());
 
-        // path 정규화 및 보안 검증
-        String safePath = normalizePath(path);
-        
-        String redirectUrl = UriComponentsBuilder.fromUriString(redirectBase)
-                .replacePath(safePath) // 기존 path 완전히 대체
-                .build(true)           // 인코딩 보장
+        String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl)
+                .path(state)
+                .build()
                 .toUriString();
 
         response.sendRedirect(redirectUrl);
-    }
-    
-    /**
-     * 경로를 정규화하고 보안 검증을 수행합니다.
-     * @param path 정규화할 경로
-     * @return 안전한 경로
-     */
-    private String normalizePath(String path) {
-        if (path == null || path.trim().isEmpty()) {
-            return "/";
-        }
-        
-        String safePath = path.trim();
-        
-        // 스킴/호스트 포함 금지 (방어적 차단)
-        if (safePath.startsWith("http://") || safePath.startsWith("https://")) {
-            return "/";
-        }
-        
-        // 슬래시로 시작하지 않으면 추가
-        if (!safePath.startsWith("/")) {
-            safePath = "/" + safePath;
-        }
-        
-        return safePath;
     }
 } 
