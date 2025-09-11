@@ -7,3 +7,4 @@ export { default as ReactQueryClientProvider } from './ReactQueryClientProvider'
 export { useGetMapBounds } from './useGetMapBounds';
 export { default as GTMInit } from './GTMInit';
 export { default as extractLinkMetaFromButton } from './extractLinkMetaFromButton';
+export { default as logger } from './logger';
