@@ -4,7 +4,6 @@ import com.example.demo.common.jwt.JwtProperties;
 import com.example.demo.common.jwt.JwtTokenProvider;
 import com.example.demo.common.security.UserPrincipal;
 import com.example.demo.common.util.CookieUtils;
-import com.example.demo.common.util.RedirectUrlValidator;
 import com.example.demo.domain.model.Member;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ public class OAuth2SuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
-    private final RedirectUrlValidator redirectUrlValidator;
 
     public void onAuthenticationSuccess(HttpServletResponse response, Member member, String redirectBase, String path) throws IOException {
         UserPrincipal principal = UserPrincipal.create(member.id(), member.email());
@@ -33,13 +31,10 @@ public class OAuth2SuccessHandler {
         ResponseCookie responseCookie = CookieUtils.createAccessTokenCookie(accessToken, jwtProperties.expirationSeconds());
         response.setHeader("Set-Cookie", responseCookie.toString());
 
-        // redirectBase URL 검증
-        String validatedRedirectBase = redirectUrlValidator.getValidatedRedirectUrl(redirectBase);
-        
         // path 정규화 및 보안 검증
         String safePath = normalizePath(path);
         
-        String redirectUrl = UriComponentsBuilder.fromUriString(validatedRedirectBase)
+        String redirectUrl = UriComponentsBuilder.fromUriString(redirectBase)
                 .replacePath(safePath) // 기존 path 완전히 대체
                 .build(true)           // 인코딩 보장
                 .toUriString();

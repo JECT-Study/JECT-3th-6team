@@ -1,6 +1,7 @@
 package com.example.demo.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
@@ -12,9 +13,11 @@ import java.util.List;
 @Component
 public class RedirectUrlValidator {
 
+    private final String defaultFrontendUrl;
     private final Environment environment;
 
-    public RedirectUrlValidator(Environment environment) {
+    public RedirectUrlValidator(@Value("${custom.app.frontend-url}") String defaultFrontendUrl, Environment environment) {
+        this.defaultFrontendUrl = defaultFrontendUrl;
         this.environment = environment;
     }
 
@@ -61,16 +64,16 @@ public class RedirectUrlValidator {
     }
 
     /**
-     * 검증된 리다이렉트 URL을 반환합니다. 검증 실패 시 환경에 맞는 기본 URL을 반환합니다.
+     * 검증된 리다이렉트 URL을 반환합니다. 검증 실패 시 기본 URL을 반환합니다.
      * @param url 검증할 URL
-     * @return 검증된 URL 또는 환경에 맞는 기본 URL
+     * @return 검증된 URL 또는 기본 URL
      */
     public String getValidatedRedirectUrl(String url) {
         if (isAllowedRedirect(url)) {
             return url;
         }
-        String fallbackUrl = getEnvironmentSpecificDefaultUrl();
-        return fallbackUrl;
+        log.info("Using default frontend URL due to validation failure: {}", defaultFrontendUrl);
+        return defaultFrontendUrl;
     }
 
     private boolean isLocalDevelopment(String host, int port) {
@@ -117,23 +120,6 @@ public class RedirectUrlValidator {
                 "localhost",
                 "127.0.0.1"
             );
-        }
-    }
-    
-    /**
-     * 현재 환경에 맞는 기본 URL을 반환합니다.
-     * @return 환경별 기본 URL
-     */
-    private String getEnvironmentSpecificDefaultUrl() {
-        if (environment.acceptsProfiles(Profiles.of("dev"))) {
-            // 개발 환경: dev 도메인 사용
-            return "https://dev.spotit.co.kr";
-        } else if (environment.acceptsProfiles(Profiles.of("prod"))) {
-            // 운영 환경: 운영 도메인 사용
-            return "https://spotit.co.kr";
-        } else {
-            // 로컬 환경: 로컬 개발 URL 사용
-            return "http://localhost:3000";
         }
     }
 }
