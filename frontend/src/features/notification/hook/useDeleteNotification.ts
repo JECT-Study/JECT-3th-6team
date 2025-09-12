@@ -34,7 +34,6 @@ export default function useDeleteNotification() {
       deleteNotificationApi({ notificationId }),
     // mutationFn이 호출되기 지직전에 실행됨
     onMutate: async (notificationId: number) => {
-      performance.mark(`delete_${notificationId}_start`);
       // 1. 현재 쿼리 백업
       const prevData = queryClient.getQueryData<NotificationListData>(
         NOTIFICATION_LIST_QUERY_KEY
@@ -53,19 +52,6 @@ export default function useDeleteNotification() {
         });
       }
 
-      performance.mark(`delete_${notificationId}_end`);
-      performance.measure(
-        `delete_${notificationId}_perceived_latency`,
-        `delete_${notificationId}_start`,
-        `delete_${notificationId}_end`
-      );
-
-      const duration = performance
-        .getEntriesByName(`delete_${notificationId}_perceived_latency`)
-        .at(-1)?.duration;
-
-      console.log(`[Perf] perceived latency: ${duration} ms`);
-
       // 3. 에러시 롤백
       return { prevData };
     },
@@ -81,21 +67,6 @@ export default function useDeleteNotification() {
       await queryClient.invalidateQueries({
         queryKey: NOTIFICATION_LIST_QUERY_KEY,
       });
-    },
-    // onSettled: refetch 완료 후 호출됨
-    onSettled: (data, error, notificationId) => {
-      performance.mark(`delete_${notificationId}_consistency_end`);
-      performance.measure(
-        `delete_${notificationId}_consistency_latency`,
-        `delete_${notificationId}_start`,
-        `delete_${notificationId}_consistency_end`
-      );
-
-      const duration = performance
-        .getEntriesByName(`delete_${notificationId}_consistency_latency`)
-        .at(-1)?.duration;
-
-      console.log(`[Perf] consistency latency: ${duration} ms`);
     },
   });
 }
