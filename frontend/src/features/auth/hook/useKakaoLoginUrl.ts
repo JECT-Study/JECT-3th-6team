@@ -14,9 +14,10 @@ export function useKakaoLoginUrl({
 
     const params = new URLSearchParams(window.location.search);
     const redirectPath = params.get('redirect_path');
+    const baseUrl = window.location.origin;
     const redirectPathAfterLogin = redirectPath
-      ? `/kakao?redirect_path=${redirectPath}`
-      : '/kakao';
+      ? `${baseUrl}/kakao?redirect_path=${redirectPath}`
+      : `${baseUrl}/kakao`;
 
     const kakaoUrl =
       `https://kauth.kakao.com/oauth/authorize` +
