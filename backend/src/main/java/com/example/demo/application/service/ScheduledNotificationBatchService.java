@@ -156,7 +156,6 @@ public class ScheduledNotificationBatchService {
                 log.debug("SSE 연결이 없는 회원입니다. 실시간 알림을 스킵합니다. - 멤버 ID: {}", memberId);
             }
             // 3. 이메일 알림이 필요한 경우 발송
-            // TODO : 이메일 알림 정책이 일반 알림 정책과 다른 부분 고려해 리팩토링
             String eventType = notification.getEvent().getEventType();
 
             if (eventType.equals(WaitingEventType.ENTER_NOW.name())) {

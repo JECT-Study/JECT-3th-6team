@@ -48,7 +48,6 @@ public class SecurityConfig {
     @Value("${custom.metrics.password:password}")
     private String metricPassword;
 
-    // TODO: 아키텍처 리팩토링 https://github.com/JECT-Study/JECT-3th-6team/pull/99
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -92,7 +91,7 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic
                         .realmName("Actuator")
                 )
-                //h2 확인을 위한 설정 TODO: MySQL 연결시 삭제
+                //h2 확인을 위한 설정
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

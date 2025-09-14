@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
 
     private final ImageService imageService;
-    //TODO 임시 코드 삭제 필요
     @Value("${custom.admin.password}")
     private String adminPassword;
 
@@ -30,7 +29,6 @@ public class ImageController {
             @Parameter(description = "업로드할 이미지 파일") @RequestParam("file") MultipartFile file,
             @Parameter(description = "관리자 비밀번호") @RequestHeader("Authorization") String password
     ) {
-        //TODO 임시 코드 삭제 필요
         if (!password.equals(adminPassword)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("비밀번호가 잘못되었습니다.", null));
         }
