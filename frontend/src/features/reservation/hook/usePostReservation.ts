@@ -18,7 +18,7 @@ export default function usePostReservation() {
     },
     onSuccess: data => {
       toast.success('대기 예약 완료!');
-      router.push(`/reservation/complete/${data.waitingId}`);
+      router.replace(`/reservation/complete/${data.waitingId}`);
     },
   });
 }

@@ -3,7 +3,7 @@
 import { useUserHydrated } from '@/entities/user/lib/useUserStore';
 import dynamic from 'next/dynamic';
 
-const AuthGuard = dynamic(() => import('@/features/auth/lib/AuthGuard'), {
+const AuthGuardClient = dynamic(() => import('@/features/auth/lib/AuthGuard'), {
   ssr: false,
   loading: () => (
     <div className="flex h-[60vh] items-center justify-center">
@@ -22,5 +22,5 @@ export default function AuthRequiredLayout({
   const hasHydrated = useUserHydrated();
 
   if (!hasHydrated) return null;
-  return <AuthGuard>{children}</AuthGuard>;
+  return <AuthGuardClient>{children}</AuthGuardClient>;
 }
