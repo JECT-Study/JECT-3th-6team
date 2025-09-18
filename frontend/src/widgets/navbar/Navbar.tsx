@@ -1,15 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import IconHome from '@/assets/icons/Navigation/Icon_Home.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import IconMyHistory from '@/assets/icons/Navigation/Icon_My_History.svg';
 import IconSetting from '@/assets/icons/Navigation/Icon_Setting.svg';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 export default function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams.toString());
 
   const navItems = [
     {
@@ -37,8 +39,14 @@ export default function Navbar() {
         const isActive = pathname === item.path;
         const color = isActive ? 'var(--color-main)' : 'var(--color-black)';
         return (
-          <Link
-            href={item.path}
+          <div
+            onClick={() => {
+              const newPath =
+                item.path === '/'
+                  ? `/?${params.toString()}`
+                  : `${item.path}/?${params.toString()}`;
+              router.push(newPath);
+            }}
             key={index}
             className={'flex-col items-center justify-center'}
           >
@@ -56,7 +64,7 @@ export default function Navbar() {
             >
               {item.label}
             </span>
-          </Link>
+          </div>
         );
       })}
     </div>
