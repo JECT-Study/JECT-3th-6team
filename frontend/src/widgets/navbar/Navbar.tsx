@@ -6,8 +6,17 @@ import IconMyHistory from '@/assets/icons/Navigation/Icon_My_History.svg';
 import IconSetting from '@/assets/icons/Navigation/Icon_Setting.svg';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Suspense } from 'react';
 
 export default function Navbar() {
+  return (
+    <Suspense fallback={null}>
+      <Navigation />
+    </Suspense>
+  );
+}
+
+function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
