@@ -1,7 +1,5 @@
 package com.example.demo.domain.model.waiting;
 
-import com.example.demo.common.exception.BusinessException;
-import com.example.demo.common.exception.ErrorType;
 
 /**
  * 대기 상태 enum.
@@ -18,7 +16,6 @@ public enum WaitingStatus {
      *
      * @param status 상태 문자열
      * @return WaitingStatus (null이면 null 반환)
-     * @throws IllegalArgumentException 유효하지 않은 상태인 경우
      */
     public static WaitingStatus fromString(String status) {
         if (status == null) {
@@ -27,7 +24,7 @@ public enum WaitingStatus {
         try {
             return valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status);
+            return null;
         }
     }
 } 
