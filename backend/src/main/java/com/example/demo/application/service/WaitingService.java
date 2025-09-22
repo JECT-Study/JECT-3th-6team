@@ -2,6 +2,8 @@ package com.example.demo.application.service;
 
 import com.example.demo.application.dto.waiting.*;
 import com.example.demo.application.mapper.WaitingDtoMapper;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
@@ -40,17 +42,19 @@ public class WaitingService {
     public WaitingCreateResponse createWaiting(WaitingCreateRequest request) {
         // 1. 팝업 존재 여부 확인
         var popup = popupPort.findById(request.popupId())
-                .orElse(null);
+                .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 
         // 해당 팝업에 예약한 적 있는지 확인
-        // 중복 체크 제거
+        if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId()))) {
+            throw new BusinessException(ErrorType.DUPLICATE_WAITING, String.valueOf(request.popupId()));
+        }
 
         // 2. 다음 대기 번호 조회
         Integer nextWaitingNumber = waitingPort.getNextWaitingNumber(request.popupId());
 
         // 3. 회원 정보 조회
         Member member = memberPort.findById(request.memberId())
-                .orElse(null);
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(request.memberId())));
 
         // 4. 대기 정보 생성
         Waiting waiting = new Waiting(
@@ -99,10 +103,12 @@ public class WaitingService {
             Waiting waiting = waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId))
                     .stream()
                     .findFirst()
-                    .orElse(null);
+                    .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(waitingId)));
 
             // 본인의 대기 정보인지 확인
-            // 접근 권한 체크 제거
+            if (!waiting.member().id().equals(memberId)) {
+                throw new BusinessException(ErrorType.ACCESS_DENIED_WAITING, String.valueOf(waitingId));
+            }
 
             WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting);
             return new VisitHistoryCursorResponse(List.of(waitingResponse), waitingId, false);
@@ -136,9 +142,11 @@ public class WaitingService {
         Waiting waiting = waitingPort.findByQuery(query)
                 .stream()
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(request.waitingId())));
 
-        // 대기번호 체크 제거
+        if (waiting.waitingNumber() != 0) {
+            throw new BusinessException(ErrorType.WAITING_NOT_READY, String.valueOf(request.waitingId()));
+        }
         // 2. 입장 처리
         Waiting enteredWaiting = waiting.enter();
 

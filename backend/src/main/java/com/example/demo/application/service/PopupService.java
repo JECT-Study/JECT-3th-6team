@@ -9,6 +9,8 @@ import com.example.demo.application.dto.popup.PopupCursorResponse;
 import com.example.demo.application.dto.popup.PopupCreateRequest;
 import com.example.demo.application.dto.popup.PopupCreateResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 
 import com.example.demo.domain.model.BrandStory;
 import com.example.demo.domain.model.popup.Popup;
@@ -49,6 +51,7 @@ public class PopupService {
   
     @Transactional(readOnly = true)
     public PopupCursorResponse getFilteredPopups(PopupFilterRequest request) {
+        // TODO: https://github.com/JECT-Study/JECT-3th-6team/pull/92#discussion_r2210591165
         PopupQuery query = popupDtoMapper.toQuery(request);
         int size = Optional.ofNullable(request.size()).orElse(10);
         List<Popup> popups = popupPort.findByQuery(query);
@@ -64,7 +67,7 @@ public class PopupService {
     @Transactional(readOnly = true)
     public PopupDetailResponse getPopupDetail(Long popupId, Long memberId) {
         var popup = popupPort.findById(popupId)
-                .orElse(null);
+                .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(popupId)));
 
         var brandStory = brandStoryPort.findByPopupId(popupId)
                 .orElse(new BrandStory(Collections.emptyList(), Collections.emptyList()));
