@@ -1,5 +1,7 @@
 package com.example.demo.domain.model.popup;
 
+import com.example.demo.common.exception.BusinessException;
+import com.example.demo.common.exception.ErrorType;
 
 /**
  * 팝업 유형을 나타내는 열거형.
@@ -35,6 +37,6 @@ public enum PopupType {
                 return type;
             }
         }
-        return null;
+        throw new BusinessException(ErrorType.INVALID_POPUP_TYPE, value);
     }
 } 

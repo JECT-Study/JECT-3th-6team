@@ -1,5 +1,7 @@
 package com.example.demo.application.dto.popup;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -9,48 +11,48 @@ import java.util.List;
  * 팝업 생성 요청 DTO
  */
 public record PopupCreateRequest(
-        String name,
-        String type, // PopupType enum name (e.g., EXPERIENTIAL, EXHIBITION, RETAIL)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @NotBlank String name,
+        @NotBlank String type, // PopupType enum name (e.g., EXPERIENTIAL, EXHIBITION, RETAIL)
+        @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
-        LocationCreate location,
+        @NotNull @Valid LocationCreate location,
 
-        List<OpeningHoursCreate> weeklyOpeningHours,
+        @NotNull @Size(min = 1) List<@Valid OpeningHoursCreate> weeklyOpeningHours,
 
         // 기존 imageUrls를 두 개로 분리
-        List<String> mainImageUrls,        // 메인 이미지들 (필수)
-        List<String> brandStoryImageUrls,  // 브랜드 스토리 이미지들 (필수)
+        @NotNull @Size(min = 1) List<@NotBlank String> mainImageUrls,        // 메인 이미지들 (필수)
+        @NotNull @Size(min = 1) List<@NotBlank String> brandStoryImageUrls,  // 브랜드 스토리 이미지들 (필수)
 
-        ContentCreate content,
+        @NotNull @Valid ContentCreate content,
 
-        List<SnsCreate> sns,
+        @NotNull List<@Valid SnsCreate> sns,
 
-        List<Long> categoryIds
+        @NotNull @Size(min = 1) List<@NotNull Long> categoryIds
 ) {
     public record LocationCreate(
-            String addressName,
-            String region1DepthName,
-            String region2DepthName,
+            @NotBlank String addressName,
+            @NotBlank String region1DepthName,
+            @NotBlank String region2DepthName,
             String region3DepthName,
-            Double longitude,
-            Double latitude
+            @NotNull Double longitude,
+            @NotNull Double latitude
     ) {}
 
     public record OpeningHoursCreate(
-            String dayOfWeek, // java.time.DayOfWeek name
-            String openTime,  // HH:mm
-            String closeTime  // HH:mm
+            @NotBlank String dayOfWeek, // java.time.DayOfWeek name
+            @NotBlank String openTime,  // HH:mm
+            @NotBlank String closeTime  // HH:mm
     ) {}
 
     public record ContentCreate(
-            String introduction,
-            String notice
+            @NotBlank String introduction,
+            @NotBlank String notice
     ) {}
 
     public record SnsCreate(
-            String iconUrl,
-            String linkUrl
+            @NotBlank String iconUrl,
+            @NotBlank String linkUrl
     ) {}
 }
 

@@ -305,6 +305,7 @@ public class PopupPortAdapter implements PopupPort {
 
     @Override
     public void deleteById(Long popupId) {
+        // TODO: 연관된 모든 엔티티(location, schedule 등)를 함께 삭제하는 로직 구현 필요
         popupJpaRepository.deleteById(popupId);
     }
 

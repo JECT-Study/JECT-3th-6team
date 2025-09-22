@@ -37,6 +37,7 @@ public class WaitingPortAdapter implements WaitingPort {
 
     @Override
     public List<Waiting> findByQuery(WaitingQuery query) {
+        // TODO 다른 기술을 활용한 동적 쿼리 작성 필요
         if (query.waitingId() != null) {
             return waitingJpaRepository.findById(query.waitingId())
                     .stream()
@@ -60,6 +61,7 @@ public class WaitingPortAdapter implements WaitingPort {
                     waitingJpaRepository.findByMemberIdOrderByStatusReservedFirstThenCreatedAtDesc(
                             query.memberId(), WaitingStatus.WAITING, PageRequest.of(0, query.size()));
         };
+        // TODO 성능 고려 해야 함.
         return waitingEntities.stream()
                 .map(this::mapEntityToDomain)
                 .filter(Objects::nonNull)
