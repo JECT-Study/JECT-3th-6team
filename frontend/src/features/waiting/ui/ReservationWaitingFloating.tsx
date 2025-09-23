@@ -59,7 +59,7 @@ export default function ReservationWaitingFloating() {
         {/*대기순번과 화살표*/}
         <div className={'flex items-center gap-x-[14px]'}>
           <span className={'text-[24px] font-semibold text-main'}>
-            {data.waitingNumber}번
+            {data.waitingNumber === 0 ? '지금 입장' : `${data.waitingNumber}번`}
           </span>
           <IconArrow width={22} height={22} fill={'var(--color-gray80)'} />
         </div>
