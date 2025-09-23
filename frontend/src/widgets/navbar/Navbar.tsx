@@ -33,6 +33,10 @@ function Navigation() {
     { label: '설정', path: '/setting', icon: IconSetting },
   ];
 
+  const handleClick = (path: string) => {
+    const queryParams = params.toString();
+    router.push(queryParams ? `${path}?${queryParams}` : path);
+  };
   return (
     <div
       className={
@@ -49,13 +53,7 @@ function Navigation() {
         const color = isActive ? 'var(--color-main)' : 'var(--color-black)';
         return (
           <div
-            onClick={() => {
-              const newPath =
-                item.path === '/'
-                  ? `/?${params.toString()}`
-                  : `${item.path}/?${params.toString()}`;
-              router.push(newPath);
-            }}
+            onClick={() => handleClick(item.path)}
             key={index}
             className={'flex-col items-center justify-center'}
           >
