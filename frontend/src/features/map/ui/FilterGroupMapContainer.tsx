@@ -60,7 +60,6 @@ export default function FilterGroupMapContainer() {
     },
     enabled: !!searchKeyword,
   });
-  // console.log('searchResponse', searchResponse);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -158,6 +157,8 @@ export default function FilterGroupMapContainer() {
     ],
   };
 
+  console.log('isSearchFocused', isSearchFocused);
+
   const { data: popupList, isLoading: isPopupListLoading } = useQuery({
     queryKey: ['mapPopupList', popupType, category],
     queryFn: async () => {
@@ -221,10 +222,23 @@ export default function FilterGroupMapContainer() {
 
             {/* 검색 결과 표시 */}
             {searchResponse?.content && searchResponse.content.length > 0 && (
-              <div className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2  bg-white  p-3">
+              <div
+                className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2 bg-white p-3"
+                onMouseDown={e => {
+                  // blur이벤트 방지 - popupcard선택 시 지도 페이지로 이동하는 오류 수정
+                  e.preventDefault();
+                }}
+              >
                 {searchResponse.content.map(popup => {
                   return (
-                    <div key={popup.popupId}>
+                    <div
+                      key={popup.popupId}
+                      onClick={() => {
+                        // 상세 페이지로 이동
+                        window.location.href = `/detail/${popup.popupId}`;
+                      }}
+                      className="cursor-pointer"
+                    >
                       <BadgedPopupCard {...popup} />
                     </div>
                   );
@@ -317,10 +331,8 @@ export default function FilterGroupMapContainer() {
           handleMoveToCurrentLocation(mapRef, setCenter, setMyLocationMarker)
         }
       />
-      {selectedPopupData && (
+      {!isSearchFocused && selectedPopupData && (
         <div className="absolute bottom-10 left-0 right-0 z-50">
-          {/* <div className="absolute bottom-[140px] md:bottom-[140px] left-0 right-0 z-50"> */}
-          {/* <div className="absolute bottom-[140px] left-0 right-0 z-50"> */}
           <div className="w-full max-w-sm mx-auto transform scale-100">
             <BadgedPopupCard {...selectedPopupData} />
           </div>
