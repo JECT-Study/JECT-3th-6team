@@ -8,6 +8,7 @@ import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
 import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
+import IconBracketLeft from '@/assets/icons/Normal/Icon_Bracket_Left.svg';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import KeywordFilterPreview, {
@@ -59,6 +60,7 @@ export default function FilterGroupMapContainer() {
     },
     enabled: !!searchKeyword,
   });
+  // console.log('searchResponse', searchResponse);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -195,15 +197,26 @@ export default function FilterGroupMapContainer() {
           {/* 검색 입력창과 결과를 포함하는 컨테이너 */}
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] max-w-[90vw]">
             {/* 검색 입력창 */}
-            <div className="rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 mb-3">
-              <SearchInput
-                id={'search-input'}
-                value={searchValue}
-                onChange={handleChange}
-                onFocus={handleSearchFocus}
-                onBlur={handleSearchBlur}
-                onKeyDown={handleKeyDown}
-              />
+            <div className="rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 mb-3 relative flex items-center">
+              <button
+                onClick={() => handleSearchBlur()}
+                className="flex-shrink-0 mr-2 cursor-pointer"
+              >
+                <IconBracketLeft
+                  width={24}
+                  height={24}
+                  fill={'var(--color-gray60)'}
+                />
+              </button>
+              <div className="flex-grow">
+                <SearchInput
+                  value={searchValue}
+                  onChange={handleChange}
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
             </div>
 
             {/* 검색 결과 표시 */}
