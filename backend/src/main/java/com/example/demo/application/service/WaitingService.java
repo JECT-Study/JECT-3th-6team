@@ -5,13 +5,11 @@ import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
+import com.example.demo.domain.model.ban.BanQuery;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
-import com.example.demo.domain.port.MemberPort;
-import com.example.demo.domain.port.NotificationPort;
-import com.example.demo.domain.port.PopupPort;
-import com.example.demo.domain.port.WaitingPort;
+import com.example.demo.domain.port.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +29,8 @@ public class WaitingService {
     private final NotificationPort notificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
     private final WaitingNotificationService waitingNotificationService;
+    private final BanPort banPort;
+    private final WaitingStatisticsPort waitingStatisticsPort;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
     private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
@@ -44,8 +44,22 @@ public class WaitingService {
         var popup = popupPort.findById(request.popupId())
                 .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 
-        // 해당 팝업에 예약한 적 있는지 확인
-        if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId()))) {
+        // 팝업이 운영 중인지 확인
+        LocalDateTime now = LocalDateTime.now();
+        if (!popup.isOpenAt(now)) {
+            throw new BusinessException(ErrorType.POPUP_NOT_OPENED);
+        }
+
+        // 제재 여부 확인
+        boolean notPopupBan = banPort.findByQuery(BanQuery.byMemberAndPopup(request.memberId(), request.popupId())).isEmpty();
+        boolean notGlobalBan = banPort.findByQuery(BanQuery.byMemberIdFromAll(request.memberId())).isEmpty();
+
+        if (!notPopupBan || !notGlobalBan) {
+            throw new BusinessException(ErrorType.BANNED_MEMBER, String.valueOf(request.memberId()));
+        }
+
+        // 그날 해당 팝업에 예약한 적 있는지 확인 TODO : 당일 노쇼 처리된 예약 1개만 있는 경우 제외 필요.
+        if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId(), now.toLocalDate()))) {
             throw new BusinessException(ErrorType.DUPLICATE_WAITING, String.valueOf(request.popupId()));
         }
 
@@ -55,6 +69,9 @@ public class WaitingService {
         // 3. 회원 정보 조회
         Member member = memberPort.findById(request.memberId())
                 .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(request.memberId())));
+
+        Integer expectedWaitingTime = waitingStatisticsPort.findCompletedStatisticsByPopupId(request.popupId())
+                .calculateExpectedWaitingTime(nextWaitingNumber);
 
         // 4. 대기 정보 생성
         Waiting waiting = new Waiting(
@@ -66,8 +83,12 @@ public class WaitingService {
                 request.peopleCount(),
                 nextWaitingNumber,
                 WaitingStatus.WAITING,
-                LocalDateTime.now()
+                now,
+                null,
+                null,
+                expectedWaitingTime
         );
+
 
         // 5. 대기 정보 저장
         Waiting savedWaiting = waitingPort.save(waiting);

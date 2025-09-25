@@ -1,5 +1,6 @@
 package com.example.demo.domain.model.waiting;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -13,7 +14,8 @@ public record WaitingQuery(
         Long lastWaitingId,
         WaitingStatus status,
         SortOrder sortOrder,
-        Long popupId
+        Long popupId,
+        LocalDate date
 ) {
 
     /**
@@ -30,14 +32,14 @@ public record WaitingQuery(
      * 첫 페이지 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
      */
     public static WaitingQuery firstPage(Long memberId, Integer size) {
-        return new WaitingQuery(null, memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null);
+        return new WaitingQuery(null, memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null);
     }
 
     /**
      * 상태 필터링이 포함된 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
      */
     public static WaitingQuery withStatus(Long memberId, Integer size, WaitingStatus status) {
-        return new WaitingQuery(null, memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null);
+        return new WaitingQuery(null, memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null);
     }
 
     /**
@@ -52,7 +54,7 @@ public record WaitingQuery(
      */
     public static WaitingQuery forVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status) {
         return Optional.ofNullable(lastWaitingId)
-                .map(id -> new WaitingQuery(null, memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null))
+                .map(id -> new WaitingQuery(null, memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null))
                 .orElseGet(() -> Optional.ofNullable(WaitingStatus.fromString(status))
                         .map(waitingStatus -> withStatus(memberId, size, waitingStatus))
                         .orElse(firstPage(memberId, size))
@@ -60,21 +62,21 @@ public record WaitingQuery(
     }
 
     public static WaitingQuery forWaitingId(Long waitingId) {
-        return new WaitingQuery(waitingId, null, null, null, null, null, null);
+        return new WaitingQuery(waitingId, null, null, null, null, null, null, null);
     }
 
     /**
      * 팝업별 대기 조회용 생성자
      */
     public static WaitingQuery forPopup(Long popupId, WaitingStatus status) {
-        return new WaitingQuery(null, null, null, null, status, null, popupId);
+        return new WaitingQuery(null, null, null, null, status, null, popupId, null);
     }
 
     public WaitingQuery(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder) {
-        this(waitingId, memberId, size, lastWaitingId, status, sortOrder, null);
+        this(waitingId, memberId, size, lastWaitingId, status, sortOrder, null, null);
     }
 
-    public static WaitingQuery forDuplicateCheck(Long memberId, Long popupId) {
-        return new WaitingQuery(null, memberId, null, null, null, null, popupId);
+    public static WaitingQuery forDuplicateCheck(Long memberId, Long popupId, LocalDate date) {
+        return new WaitingQuery(null, memberId, null, null, null, null, popupId, date);
     }
 } 
