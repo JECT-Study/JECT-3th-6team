@@ -10,8 +10,9 @@ import com.example.demo.common.exception.ErrorType;
 public enum WaitingStatus {
     WAITING,    // 예약/대기중
     VISITED,   // 방문완료
-    CANCELED,  // 취소됨
-    NONE;
+    CANCELED,  // 취소됨 (사용 안함)
+    NONE,      // 사용 안함
+    NO_SHOW;   // 노쇼
 
     /**
      * 문자열을 WaitingStatus로 파싱한다.

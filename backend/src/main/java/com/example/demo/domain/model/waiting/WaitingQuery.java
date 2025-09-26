@@ -77,4 +77,70 @@ public record WaitingQuery(
     public static WaitingQuery forDuplicateCheck(Long memberId, Long popupId) {
         return new WaitingQuery(null, memberId, null, null, null, null, popupId);
     }
+
+    /**
+     * 상태별 조회용 생성자
+     */
+    public static WaitingQuery forStatus(WaitingStatus status) {
+        return new WaitingQuery(null, null, null, null, status, null, null);
+    }
+
+    /**
+     * 빌더 패턴을 위한 정적 메서드
+     */
+    public static WaitingQueryBuilder builder() {
+        return new WaitingQueryBuilder();
+    }
+
+    /**
+     * WaitingQuery 빌더 클래스
+     */
+    public static class WaitingQueryBuilder {
+        private Long waitingId;
+        private Long memberId;
+        private Integer size;
+        private Long lastWaitingId;
+        private WaitingStatus status;
+        private SortOrder sortOrder;
+        private Long popupId;
+
+        public WaitingQueryBuilder waitingId(Long waitingId) {
+            this.waitingId = waitingId;
+            return this;
+        }
+
+        public WaitingQueryBuilder memberId(Long memberId) {
+            this.memberId = memberId;
+            return this;
+        }
+
+        public WaitingQueryBuilder size(Integer size) {
+            this.size = size;
+            return this;
+        }
+
+        public WaitingQueryBuilder lastWaitingId(Long lastWaitingId) {
+            this.lastWaitingId = lastWaitingId;
+            return this;
+        }
+
+        public WaitingQueryBuilder status(WaitingStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public WaitingQueryBuilder sortOrder(SortOrder sortOrder) {
+            this.sortOrder = sortOrder;
+            return this;
+        }
+
+        public WaitingQueryBuilder popupId(Long popupId) {
+            this.popupId = popupId;
+            return this;
+        }
+
+        public WaitingQuery build() {
+            return new WaitingQuery(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId);
+        }
+    }
 } 
