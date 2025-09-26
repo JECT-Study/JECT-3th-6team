@@ -153,7 +153,8 @@ public class ScheduledNoShowProcessService {
             }
             
             // TODO: 예상 대기 시간 업데이트 로직 구현 필요
-            // - 앞의 대기팀 수 × 15분으로 예상 대기 시간 계산
+            // - 앞의 대기팀 수 × 5분으로 예상 대기 시간 계산
+            // - 5팀 이상일 시엔 계산식 활용
             // - 각 대기자의 estimatedWaitingTime 필드 업데이트
         }
     }
