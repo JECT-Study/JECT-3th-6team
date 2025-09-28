@@ -170,4 +170,27 @@ public record Waiting(
                 expectedWaitingTimeMinutes
         );
     }
+
+    /**
+     * 예상 대기시간을 업데이트한다.
+     *
+     * @param newExpectedWaitingTimeMinutes 새로운 예상 대기시간(분)
+     * @return 예상 대기시간이 업데이트된 새로운 Waiting 객체
+     */
+    public Waiting updateExpectedWaitingTime(Integer newExpectedWaitingTimeMinutes) {
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                status,
+                registeredAt,
+                enteredAt,
+                canEnterAt,
+                newExpectedWaitingTimeMinutes
+        );
+    }
 }

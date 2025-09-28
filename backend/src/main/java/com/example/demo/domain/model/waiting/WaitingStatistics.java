@@ -33,4 +33,24 @@ public class WaitingStatistics {
         }
         return (double) totalTime.toMinutes() / initialWaitingNumber;
     }
+
+    /**
+     * 입장 완료된 Waiting 객체로부터 WaitingStatistics를 생성한다.
+     *
+     * @param waiting 입장 완료된 대기 정보
+     * @return 생성된 대기 통계
+     */
+    public static WaitingStatistics fromCompletedWaiting(Waiting waiting) {
+        if (waiting.enteredAt() == null) {
+            throw new IllegalArgumentException("입장 완료된 대기 정보만 통계로 변환할 수 있습니다");
+        }
+
+        return WaitingStatistics.builder()
+                .popupId(waiting.popup().getId())
+                .waitingId(waiting.id())
+                .initialWaitingNumber(waiting.waitingNumber())
+                .reservedAt(waiting.registeredAt())
+                .enteredAt(waiting.enteredAt())
+                .build();
+    }
 }

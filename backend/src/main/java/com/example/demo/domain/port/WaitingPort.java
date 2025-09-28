@@ -41,5 +41,12 @@ public interface WaitingPort {
 
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
 
+    /**
+     * 여러 대기 정보를 배치로 저장한다.
+     *
+     * @param waitings 저장할 대기 정보 목록
+     * @return 저장된 대기 정보 목록
+     */
+    List<Waiting> saveAll(List<Waiting> waitings);
 
-} 
+}

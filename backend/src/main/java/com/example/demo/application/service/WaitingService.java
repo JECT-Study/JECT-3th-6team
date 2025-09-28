@@ -8,7 +8,9 @@ import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.ban.BanQuery;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
+import com.example.demo.domain.model.waiting.WaitingStatistics;
 import com.example.demo.domain.model.waiting.WaitingStatus;
+import com.example.demo.domain.model.waiting.PopupWaitingStatistics;
 import com.example.demo.domain.port.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -174,27 +176,41 @@ public class WaitingService {
         // 3. 입장 처리된 대기 저장
         waitingPort.save(enteredWaiting);
 
-        // 4. 같은 팝업의 나머지 대기자들 순번 앞당기기
-        reorderWaitingNumbers(waiting.popup().getId());
+        // 4. 새로운 통계 데이터 생성
+        WaitingStatistics newStatistics = WaitingStatistics.fromCompletedWaiting(enteredWaiting);
+        waitingStatisticsPort.save(newStatistics);
+
+        // 5. 같은 팝업의 나머지 대기자들 순번 앞당기기 및 예상 대기시간 업데이트
+        reorderWaitingNumbersAndUpdateExpectedTime(waiting.popup().getId());
     }
 
     /**
-     * 특정 팝업의 대기 순번을 앞당긴다.
+     * 특정 팝업의 대기 순번을 앞당기고 예상 대기시간을 업데이트한다.
      *
      * @param popupId 팝업 ID
      */
-    private void reorderWaitingNumbers(Long popupId) {
+    private void reorderWaitingNumbersAndUpdateExpectedTime(Long popupId) {
         // 1. 해당 팝업의 모든 대기중인 대기 조회
         WaitingQuery popupQuery = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
         List<Waiting> waitingList = waitingPort.findByQuery(popupQuery);
 
-        // 2. 입장 처리된 대기번호보다 큰 번호들만 필터링하여 순번 앞당기기
+        // 2. 순번 앞당기기
         List<Waiting> reorderedWaitings = waitingList.stream()
                 .filter(w -> w.waitingNumber() > 0)
                 .map(Waiting::minusWaitingNumber)
                 .toList();
 
-        // 3. 변경된 대기들 모두 저장
-        reorderedWaitings.forEach(waitingPort::save);
+        // 3. 업데이트된 통계로 예상 대기시간 재계산
+        PopupWaitingStatistics updatedStatistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
+
+        List<Waiting> finalWaitings = reorderedWaitings.stream()
+                .map(waiting -> {
+                    Integer newExpectedTime = updatedStatistics.calculateExpectedWaitingTime(waiting.waitingNumber());
+                    return waiting.updateExpectedWaitingTime(newExpectedTime);
+                })
+                .toList();
+
+        // 4. 배치로 저장
+        waitingPort.saveAll(finalWaitings);
     }
 } 
