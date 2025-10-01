@@ -79,7 +79,7 @@ public class WaitingNotificationService {
     @Transactional
     public void sendGlobalBanNotification(Long memberId) {
         log.info("글로벌 밴 알림 발송 - 회원 ID: {}", memberId);
-
+        // todo: 정책 확정 시 반영
         String content = "누적 노쇼로 인해 3일간 모든 팝업 예약이 제한됩니다.";
 
         // 글로벌 밴 알림은 대기 정보가 없으므로 간단한 알림 생성
@@ -191,7 +191,7 @@ public class WaitingNotificationService {
      */
     private void sendFirstNoShowNotification(Waiting waiting) {
         log.info("첫 번째 노쇼 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
-
+        // todo: 정책 확정 시 반영
         String content = String.format("노쇼가 기록되었습니다. %s 팝업에 재예약이 가능합니다.", waiting.popup().getName());
 
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NO_SHOW_FIRST);
@@ -209,7 +209,7 @@ public class WaitingNotificationService {
      */
     private void sendSecondNoShowNotification(Waiting waiting) {
         log.info("두 번째 노쇼 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
-
+        // todo: 정책 확정 시 반영
         String content = String.format("재예약 횟수를 모두 사용했습니다. %s 팝업에 내일 다시 예약해주세요.", waiting.popup().getName());
 
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NO_SHOW_SECOND);
