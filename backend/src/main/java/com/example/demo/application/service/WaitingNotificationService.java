@@ -1,6 +1,7 @@
 package com.example.demo.application.service;
 
 import com.example.demo.application.dto.notification.WaitingEntryNotificationRequest;
+import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.Notification;
 import com.example.demo.domain.model.notification.ScheduledNotification;
@@ -315,11 +316,14 @@ public class WaitingNotificationService {
     }
 
     /**
-     * 매장 위치 링크 생성
+     * 매장 위치 링크 생성 (카카오맵)
      */
-    private String generateMapLink(Object location) {
-        // 실제 구현에서는 location 객체에서 위도/경도 추출하여 카카오맵 링크 생성
-        return "https://map.kakao.com/link/search/매장위치";
+    private String generateMapLink(Location location) {
+        return String.format("https://map.kakao.com/link/map/%s,%s,%s",
+                location.addressName(),
+                location.latitude(),
+                location.longitude()
+        );
     }
 
     // === 알림 정책 유틸리티 메서드들 ===
