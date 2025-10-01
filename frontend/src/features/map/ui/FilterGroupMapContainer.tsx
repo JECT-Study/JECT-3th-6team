@@ -313,7 +313,10 @@ export default function FilterGroupMapContainer() {
                           selectedPopupId === popup.id
                             ? selectedPopupIconSrc
                             : popupListIconSrc,
-                        size: { width: 32, height: 32 },
+                        size:
+                          selectedPopupId === popup.id
+                            ? { width: 52, height: 52 }
+                            : { width: 32, height: 32 },
                       }}
                       zIndex={selectedPopupId === popup.id ? 9 : 1}
                       onClick={() => handleClickMarker(popup.id)}
