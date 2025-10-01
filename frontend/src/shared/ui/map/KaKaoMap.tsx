@@ -65,7 +65,7 @@ const KakaoMap = forwardRef<
   ) => {
     const [isMapLoaded, setIsMapLoaded] = useState(false);
     const [mapError, setMapError] = useState<string | null>(null);
-    const myLocationImageUrl = '/icons/Color/Icon_MyLocation.svg';
+    const myLocationImageUrl = '/icons/Color/Icon_Map.svg';
 
     useEffect(() => {
       // 카카오맵 SDK 로딩 확인
