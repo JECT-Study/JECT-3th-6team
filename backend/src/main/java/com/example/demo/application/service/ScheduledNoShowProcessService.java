@@ -179,22 +179,28 @@ public class ScheduledNoShowProcessService {
         // 전체 노쇼 개수 확인 (2번 노쇼된 경우만 카운트)
         long totalNoShowCount = getTotalNoShowCount(memberId);
         
-        if (totalNoShowCount >= 10) {
-            // 이미 글로벌 밴이 있는지 확인
-            if (globalBanPort.findActiveBanByMemberId(memberId).isEmpty()) {
-                LocalDate startDate = LocalDate.now();
-                LocalDate endDate = startDate.plusDays(3);
-                
-                GlobalBan globalBan = new GlobalBan(null, memberId, startDate, endDate);
-                globalBanPort.save(globalBan);
-                
-                log.info("글로벌 밴 적용 - 회원 ID: {}, 밴 기간: {} ~ {}", 
-                        memberId, startDate, endDate);
-                
-                // 10번 누적 노쇼 알림 발송
-                waitingNotificationService.sendGlobalBanNotification(memberId);
-            }
+        // 10번 미만이면 글로벌 밴 적용하지 않음
+        if (totalNoShowCount < 10) {
+            return;
         }
+        
+        // 이미 글로벌 밴이 있으면 중복 적용하지 않음
+        if (globalBanPort.findActiveBanByMemberId(memberId).isPresent()) {
+            return;
+        }
+        
+        // 글로벌 밴 적용
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(3);
+        
+        GlobalBan globalBan = new GlobalBan(null, memberId, startDate, endDate);
+        globalBanPort.save(globalBan);
+        
+        log.info("글로벌 밴 적용 - 회원 ID: {}, 밴 기간: {} ~ {}", 
+                memberId, startDate, endDate);
+        
+        // 10번 누적 노쇼 알림 발송
+        waitingNotificationService.sendGlobalBanNotification(memberId);
     }
 
     /**
