@@ -17,7 +17,6 @@ import QrScanGuideModal from '@/features/detail/ui/QrScanGuideModal';
 
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
-import DefaultImage from '/public/images/default-popup-image.png';
 
 import { PopupDetailResponseDto } from '@/entities/popup/detail/types/type';
 import TagManager from 'react-gtm-module';
