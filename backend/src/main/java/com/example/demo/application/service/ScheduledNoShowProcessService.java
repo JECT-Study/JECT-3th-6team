@@ -1,10 +1,8 @@
 package com.example.demo.application.service;
 
-import com.example.demo.domain.model.ban.GlobalBan;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
-import com.example.demo.domain.port.GlobalBanPort;
 import com.example.demo.domain.port.WaitingPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +25,6 @@ import java.util.Map;
 public class ScheduledNoShowProcessService {
 
     private final WaitingPort waitingPort;
-    private final GlobalBanPort globalBanPort;
     private final WaitingNotificationService waitingNotificationService;
 
     /**
@@ -98,8 +95,8 @@ public class ScheduledNoShowProcessService {
         // 4. 스토어 밴 체크
         checkAndApplyStoreBan(waiting);
         
-        // 5. 글로벌 밴 체크
-        checkAndApplyGlobalBan(waiting.member().id());
+        // 5. 글로벌 밴 체크 (도메인/어플리케이션 레이어 구현 후 추가 예정)
+        // checkAndApplyGlobalBan(waiting.member().id());
         
         log.info("노쇼 처리 완료 - 대기 ID: {}", waiting.id());
     }
@@ -172,36 +169,37 @@ public class ScheduledNoShowProcessService {
         }
     }
 
-    /**
-     * 글로벌 밴을 체크하고 적용한다.
-     */
-    private void checkAndApplyGlobalBan(Long memberId) {
-        // 전체 노쇼 개수 확인 (2번 노쇼된 경우만 카운트)
-        long totalNoShowCount = getTotalNoShowCount(memberId);
-        
-        // 10번 미만이면 글로벌 밴 적용하지 않음
-        if (totalNoShowCount < 10) {
-            return;
-        }
-        
-        // 이미 글로벌 밴이 있으면 중복 적용하지 않음
-        if (globalBanPort.findActiveBanByMemberId(memberId).isPresent()) {
-            return;
-        }
-        
-        // 글로벌 밴 적용
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(3);
-        
-        GlobalBan globalBan = new GlobalBan(null, memberId, startDate, endDate);
-        globalBanPort.save(globalBan);
-        
-        log.info("글로벌 밴 적용 - 회원 ID: {}, 밴 기간: {} ~ {}", 
-                memberId, startDate, endDate);
-        
-        // 10번 누적 노쇼 알림 발송
-        waitingNotificationService.sendGlobalBanNotification(memberId);
-    }
+    // TODO: 글로벌 밴 기능은 도메인/어플리케이션 레이어 구현 후 추가 예정
+    // /**
+    //  * 글로벌 밴을 체크하고 적용한다.
+    //  */
+    // private void checkAndApplyGlobalBan(Long memberId) {
+    //     // 전체 노쇼 개수 확인 (2번 노쇼된 경우만 카운트)
+    //     long totalNoShowCount = getTotalNoShowCount(memberId);
+    //     
+    //     // 10번 미만이면 글로벌 밴 적용하지 않음
+    //     if (totalNoShowCount < 10) {
+    //         return;
+    //     }
+    //     
+    //     // 이미 글로벌 밴이 있으면 중복 적용하지 않음
+    //     if (globalBanPort.findActiveBanByMemberId(memberId).isPresent()) {
+    //         return;
+    //     }
+    //     
+    //     // 글로벌 밴 적용
+    //     LocalDate startDate = LocalDate.now();
+    //     LocalDate endDate = startDate.plusDays(3);
+    //     
+    //     GlobalBan globalBan = new GlobalBan(null, memberId, startDate, endDate);
+    //     globalBanPort.save(globalBan);
+    //     
+    //     log.info("글로벌 밴 적용 - 회원 ID: {}, 밴 기간: {} ~ {}", 
+    //             memberId, startDate, endDate);
+    //     
+    //     // 10번 누적 노쇼 알림 발송
+    //     waitingNotificationService.sendGlobalBanNotification(memberId);
+    // }
 
     /**
      * 오늘 같은 팝업에서의 노쇼 개수를 조회한다.
@@ -222,74 +220,76 @@ public class ScheduledNoShowProcessService {
                 .count();
     }
 
-    /**
-     * 전체 노쇼 개수를 조회한다 (실제 노쇼 발생한 경우만 카운트).
-     * 재예약 후 방문 완료 시 노쇼 카운트는 초기화됨.
-     */
-    private long getTotalNoShowCount(Long memberId) {
-        // 해당 회원의 모든 NO_SHOW 상태 대기 조회
-        WaitingQuery query = WaitingQuery.builder()
-                .memberId(memberId)
-                .status(WaitingStatus.NO_SHOW)
-                .build();
-        
-        List<Waiting> noShows = waitingPort.findByQuery(query);
-        
-        // 같은 날 같은 팝업별로 그룹화
-        Map<String, List<Waiting>> groupedNoShows = noShows.stream()
-                .collect(java.util.stream.Collectors.groupingBy(
-                        waiting -> waiting.registeredAt().toLocalDate().toString() + "_" + waiting.popup().getId()
-                ));
-        
-        long actualNoShowCount = 0;
-        
-        for (Map.Entry<String, List<Waiting>> entry : groupedNoShows.entrySet()) {
-            List<Waiting> sameDaySamePopup = entry.getValue();
-            
-            // 같은 날 같은 팝업에서 2번 이상 노쇼한 경우만 카운트
-            if (sameDaySamePopup.size() >= 2) {
-                // 재예약 후 방문 완료 여부 확인
-                if (!hasReReservationAndVisit(memberId, sameDaySamePopup.get(0).popup().getId(), 
-                        sameDaySamePopup.get(0).registeredAt().toLocalDate())) {
-                    actualNoShowCount++;
-                }
-            }
-        }
-        
-        return actualNoShowCount;
-    }
+    // TODO: 글로벌 밴 기능 구현 시 사용 예정
+    // /**
+    //  * 전체 노쇼 개수를 조회한다 (실제 노쇼 발생한 경우만 카운트).
+    //  * 재예약 후 방문 완료 시 노쇼 카운트는 초기화됨.
+    //  */
+    // private long getTotalNoShowCount(Long memberId) {
+    //     // 해당 회원의 모든 NO_SHOW 상태 대기 조회
+    //     WaitingQuery query = WaitingQuery.builder()
+    //             .memberId(memberId)
+    //             .status(WaitingStatus.NO_SHOW)
+    //             .build();
+    //     
+    //     List<Waiting> noShows = waitingPort.findByQuery(query);
+    //     
+    //     // 같은 날 같은 팝업별로 그룹화
+    //     Map<String, List<Waiting>> groupedNoShows = noShows.stream()
+    //             .collect(java.util.stream.Collectors.groupingBy(
+    //                     waiting -> waiting.registeredAt().toLocalDate().toString() + "_" + waiting.popup().getId()
+    //             ));
+    //     
+    //     long actualNoShowCount = 0;
+    //     
+    //     for (Map.Entry<String, List<Waiting>> entry : groupedNoShows.entrySet()) {
+    //         List<Waiting> sameDaySamePopup = entry.getValue();
+    //         
+    //         // 같은 날 같은 팝업에서 2번 이상 노쇼한 경우만 카운트
+    //         if (sameDaySamePopup.size() >= 2) {
+    //             // 재예약 후 방문 완료 여부 확인
+    //             if (!hasReReservationAndVisit(memberId, sameDaySamePopup.get(0).popup().getId(), 
+    //                     sameDaySamePopup.get(0).registeredAt().toLocalDate())) {
+    //                 actualNoShowCount++;
+    //             }
+    //         }
+    //     }
+    //     
+    //     return actualNoShowCount;
+    // }
     
-    /**
-     * 재예약 후 방문 완료 여부 확인
-     */
-    private boolean hasReReservationAndVisit(Long memberId, Long popupId, LocalDate date) {
-        // 같은 날 같은 팝업에서 NO_SHOW 1회 + VISITED 1회가 있는지 확인
-        WaitingQuery noShowQuery = WaitingQuery.builder()
-                .memberId(memberId)
-                .popupId(popupId)
-                .status(WaitingStatus.NO_SHOW)
-                .build();
-        
-        WaitingQuery visitedQuery = WaitingQuery.builder()
-                .memberId(memberId)
-                .popupId(popupId)
-                .status(WaitingStatus.VISITED)
-                .build();
-        
-        List<Waiting> noShows = waitingPort.findByQuery(noShowQuery);
-        List<Waiting> visited = waitingPort.findByQuery(visitedQuery);
-        
-        // 같은 날에 NO_SHOW 1회 + VISITED 1회가 있으면 재예약 후 방문 완료
-        long noShowCount = noShows.stream()
-                .filter(waiting -> waiting.registeredAt().toLocalDate().equals(date))
-                .count();
-        
-        long visitedCount = visited.stream()
-                .filter(waiting -> waiting.registeredAt().toLocalDate().equals(date))
-                .count();
-        
-        return noShowCount == 1 && visitedCount == 1;
-    }
+    // TODO: 글로벌 밴 기능 구현 시 사용 예정
+    // /**
+    //  * 재예약 후 방문 완료 여부 확인
+    //  */
+    // private boolean hasReReservationAndVisit(Long memberId, Long popupId, LocalDate date) {
+    //     // 같은 날 같은 팝업에서 NO_SHOW 1회 + VISITED 1회가 있는지 확인
+    //     WaitingQuery noShowQuery = WaitingQuery.builder()
+    //             .memberId(memberId)
+    //             .popupId(popupId)
+    //             .status(WaitingStatus.NO_SHOW)
+    //             .build();
+    //     
+    //     WaitingQuery visitedQuery = WaitingQuery.builder()
+    //             .memberId(memberId)
+    //             .popupId(popupId)
+    //             .status(WaitingStatus.VISITED)
+    //             .build();
+    //     
+    //     List<Waiting> noShows = waitingPort.findByQuery(noShowQuery);
+    //     List<Waiting> visited = waitingPort.findByQuery(visitedQuery);
+    //     
+    //     // 같은 날에 NO_SHOW 1회 + VISITED 1회가 있으면 재예약 후 방문 완료
+    //     long noShowCount = noShows.stream()
+    //             .filter(waiting -> waiting.registeredAt().toLocalDate().equals(date))
+    //             .count();
+    //     
+    //     long visitedCount = visited.stream()
+    //             .filter(waiting -> waiting.registeredAt().toLocalDate().equals(date))
+    //             .count();
+    //     
+    //     return noShowCount == 1 && visitedCount == 1;
+    // }
 
     /**
      * 새로운 0번이 된 대기자에게 입장 알림을 발송한다.
