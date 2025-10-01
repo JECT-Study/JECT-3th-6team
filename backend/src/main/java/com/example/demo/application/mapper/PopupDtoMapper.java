@@ -1,6 +1,7 @@
 package com.example.demo.application.mapper;
 
 import com.example.demo.application.dto.popup.*;
+import com.example.demo.application.dto.popup.PopupCursorResponse.PopupListElementResponse;
 import com.example.demo.domain.model.BrandStory;
 import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+// TODO : 리팩토링 필요
 public class PopupDtoMapper {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -220,6 +222,21 @@ public class PopupDtoMapper {
                 (request.region1DepthName() == null || "전국".equals(request.region1DepthName())) ? null : request.region1DepthName(),
                 request.lastPopupId(),
                 null
+        );
+    }
+
+    public PopupListElementResponse toPopupListElementResponse(Popup popup, int waitingCount) {
+        if (popup == null) return null;
+
+        return new PopupListElementResponse(
+                popup.getId(),
+                popup.getName(),
+                popup.getDisplay().mainImageUrls().getFirst(),
+                toLocationResponse(popup.getLocation()),
+                calculateDDay(popup.getSchedule().dateRange().endDate()),
+                formatPeriod(popup.getSchedule().dateRange()),
+                toSearchTagsResponse(popup),
+                waitingCount
         );
     }
 

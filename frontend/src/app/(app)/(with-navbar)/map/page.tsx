@@ -1,6 +1,5 @@
 'use client';
 
-import { FilterProvider } from '@/features/filtering/lib/FilterContext';
 import FilterBottomSheet from '@/features/filtering/ui/FilterBottomSheet';
 import FilterGroupMapContainer from '@/features/map/ui/FilterGroupMapContainer';
 import { Suspense } from 'react';
@@ -8,11 +7,12 @@ import { QueryErrorResetBoundary } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
 import QueryErrorFallback from '@/shared/ui/error/QueryErrorFallback';
 import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
+import { MapFilterProvider } from '@/features/filtering/lib/FilterProviders';
 
 export default function MapPage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <FilterProvider>
+      <MapFilterProvider>
         <QueryErrorResetBoundary>
           {({ reset }) => (
             <ErrorBoundary
@@ -31,7 +31,7 @@ export default function MapPage() {
           )}
         </QueryErrorResetBoundary>
         <FilterBottomSheet />
-      </FilterProvider>
+      </MapFilterProvider>
     </Suspense>
   );
 }

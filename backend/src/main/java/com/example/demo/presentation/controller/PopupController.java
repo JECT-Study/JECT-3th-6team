@@ -13,6 +13,7 @@ import com.example.demo.presentation.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,13 +31,14 @@ import java.util.Optional;
 public class PopupController {
 
     private final PopupService popupService;
+    //TODO 임시 코드 삭제 필요
     @Value("${custom.admin.password}")
     private String adminPassword;
 
     @GetMapping("/map")
     @Operation(summary = "지도 내 팝업 조회", description = "지정된 지도 영역 내의 팝업스토어 목록을 조회합니다.")
     public ApiResponse<List<PopupMapResponse>> getPopupsOnMap(
-            @Parameter(description = "지도 영역 정보") PopupMapRequest request) {
+            @Parameter(description = "지도 영역 정보") @Valid PopupMapRequest request) {
         List<PopupMapResponse> response = popupService.getPopupsOnMap(request);
         return new ApiResponse<>("지도 내 팝업 조회가 성공했습니다.", response);
     }
@@ -44,7 +46,7 @@ public class PopupController {
     @GetMapping
     @Operation(summary = "팝업 목록 조회", description = "필터 조건에 따른 팝업스토어 목록을 조회합니다.")
     public ResponseEntity<ApiResponse<PopupCursorResponse>> getPopups(
-            @Parameter(description = "필터 조건") PopupFilterRequest request) {
+            @Parameter(description = "필터 조건") @Valid PopupFilterRequest request) {
         PopupCursorResponse response = popupService.getFilteredPopups(request);
         return ResponseEntity.ok(new ApiResponse<>("팝업 목록 조회에 성공했습니다.", response));
     }
@@ -62,9 +64,10 @@ public class PopupController {
     @PostMapping
     @Operation(summary = "팝업 생성", description = "새로운 팝업스토어를 등록합니다.")
     public ResponseEntity<ApiResponse<PopupCreateResponse>> createPopup(
-            @Parameter(description = "팝업 생성 정보") @RequestBody PopupCreateRequest request,
+            @Parameter(description = "팝업 생성 정보") @Valid @RequestBody PopupCreateRequest request,
             @Parameter(description = "관리자 비밀번호") @RequestHeader("Authorization") String password
     ) {
+        //TODO 임시 코드 삭제 필요
         if (!password.equals(adminPassword)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("비밀번호가 잘못되었습니다.", null));
         }
