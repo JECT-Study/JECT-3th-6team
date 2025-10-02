@@ -27,7 +27,7 @@ interface OnsiteReservationFormProps {
   ) => void;
   handleReset: () => void;
   isFormValid: boolean;
-  handleModalOpen: () => void;
+  handleCheck: () => void;
 }
 
 export default function OnsiteReservationForm({
@@ -36,7 +36,7 @@ export default function OnsiteReservationForm({
   handleChange,
   handleReset,
   isFormValid,
-  handleModalOpen,
+  handleCheck,
 }: OnsiteReservationFormProps) {
   const headcountError =
     formValue.headCount >= MAX_HEAD_COUNT
@@ -94,7 +94,7 @@ export default function OnsiteReservationForm({
         </StandardButton>
 
         <StandardButton
-          onClick={handleModalOpen}
+          onClick={handleCheck}
           disabled={!isFormValid}
           size={'full'}
           color={'primary'}
@@ -106,3 +106,11 @@ export default function OnsiteReservationForm({
     </div>
   );
 }
+
+// 예약 폼 -> 확인 버튼을 누르면 모달을 띄워서 작성한 내용을 확인하던 시나리오에서
+// 예약 폼 -> 확인 버튼을 누르면 페이지 처러럼 생긴 Ui가 뜨면서 작성한 내용 + 이용약관을 보여줌.
+// 폼 상태는 useForm 훅에서 관리중.
+// OnsiteReservationContainer에서 useForm을 사용중이고, 해당 컴포넌트 하위로, OnsiteReservationForm, Modal이 보여짐
+// 바뀐 변경사항을 어떻게 구현할까?
+// 1. 예약 확인을 하는 페이지를 만든다. /reservation/onsite/3  => /reservation/onsite/3?check=true
+// 2. 폼과 예약 확인 창을 조건부 랜더링 한다.

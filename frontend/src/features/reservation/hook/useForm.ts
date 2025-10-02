@@ -28,7 +28,7 @@ export type OnsiteReservationFormError = {
   email: string;
 };
 
-interface UseFormProps<T extends FormType> {
+export interface UseFormProps<T extends FormType> {
   formType: T;
   initialFormValue: FormValueMap[T];
   initialError: FormErrorMap[T];
