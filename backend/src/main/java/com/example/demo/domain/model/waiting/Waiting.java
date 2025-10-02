@@ -193,4 +193,52 @@ public record Waiting(
                 newExpectedWaitingTimeMinutes
         );
     }
+
+    /**
+     * 노쇼 상태로 변경한다.
+     *
+     * @return 노쇼 상태로 변경된 새로운 Waiting 객체
+     */
+    public Waiting markAsNoShow() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.NO_SHOW,
+                registeredAt,
+                enteredAt,
+                canEnterAt
+        );
+    }
+
+    /**
+     * 방문 완료로 상태 변경
+     */
+    public Waiting markAsVisited() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.VISITED,
+                registeredAt,
+                LocalDateTime.now(), // 방문 완료 시간
+                canEnterAt
+        );
+    }
+
 }
