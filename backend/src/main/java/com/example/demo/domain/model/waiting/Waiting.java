@@ -25,7 +25,8 @@ public record Waiting(
         WaitingStatus status,
         LocalDateTime registeredAt,
         LocalDateTime enteredAt,
-        LocalDateTime canEnterAt
+        LocalDateTime canEnterAt,
+        Integer expectedWaitingTimeMinutes
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
@@ -79,7 +80,7 @@ public record Waiting(
             WaitingStatus status,
             LocalDateTime registeredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null, null);
     }
 
     /**
@@ -108,7 +109,7 @@ public record Waiting(
             LocalDateTime registeredAt,
             LocalDateTime enteredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null, null);
     }
 
 
@@ -138,7 +139,8 @@ public record Waiting(
                 WaitingStatus.VISITED,
                 registeredAt,
                 LocalDateTime.now(),
-                canEnterAt
+                canEnterAt,
+                expectedWaitingTimeMinutes
         );
     }
 
@@ -164,7 +166,31 @@ public record Waiting(
                 WaitingStatus.WAITING,
                 registeredAt,
                 enteredAt,
-                canEnterAt
+                canEnterAt,
+                expectedWaitingTimeMinutes
+        );
+    }
+
+    /**
+     * 예상 대기시간을 업데이트한다.
+     *
+     * @param newExpectedWaitingTimeMinutes 새로운 예상 대기시간(분)
+     * @return 예상 대기시간이 업데이트된 새로운 Waiting 객체
+     */
+    public Waiting updateExpectedWaitingTime(Integer newExpectedWaitingTimeMinutes) {
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                status,
+                registeredAt,
+                enteredAt,
+                canEnterAt,
+                newExpectedWaitingTimeMinutes
         );
     }
 }
