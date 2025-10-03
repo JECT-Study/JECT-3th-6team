@@ -36,6 +36,13 @@ public class WaitingPortAdapter implements WaitingPort {
     }
 
     @Override
+    public List<Waiting> saveAll(List<Waiting> waitings) { // TODO 성능 고려 필요
+        return waitings.stream()
+                .map(this::save)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Waiting> findByQuery(WaitingQuery query) {
         // TODO 다른 기술을 활용한 동적 쿼리 작성 필요
         if (query.waitingId() != null) {

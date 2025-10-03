@@ -32,7 +32,8 @@ public class WaitingEntityMapper {
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getEnteredAt(),
-                entity.getCanEnterAt()
+                entity.getCanEnterAt(),
+                null // TODO: expectedWaitingTimeMinutes 계산 로직 추가 필요
         );
     }
 

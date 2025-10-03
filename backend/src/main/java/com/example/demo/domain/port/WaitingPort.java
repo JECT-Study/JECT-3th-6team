@@ -21,6 +21,14 @@ public interface WaitingPort {
     Waiting save(Waiting waiting);
 
     /**
+     * 여러 대기 정보를 배치로 저장한다.
+     *
+     * @param waitings 저장할 대기 정보 목록
+     * @return 저장된 대기 정보 목록
+     */
+    List<Waiting> saveAll(List<Waiting> waitings);
+
+    /**
      * 조회 조건에 따라 대기 정보 목록을 조회한다.
      * (waitingId가 있으면 단건 조회로 동작)
      *
@@ -40,13 +48,5 @@ public interface WaitingPort {
     Integer getNextWaitingNumber(Long popupId);
 
     Optional<Waiting> findByMemberIdAndPopupId(Long memberId, Long popupId);
-
-    /**
-     * 여러 대기 정보를 배치로 저장한다.
-     *
-     * @param waitings 저장할 대기 정보 목록
-     * @return 저장된 대기 정보 목록
-     */
-    List<Waiting> saveAll(List<Waiting> waitings);
 
 }

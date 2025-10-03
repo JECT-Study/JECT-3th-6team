@@ -215,7 +215,8 @@ public record Waiting(
                 WaitingStatus.NO_SHOW,
                 registeredAt,
                 enteredAt,
-                canEnterAt
+                canEnterAt,
+                expectedWaitingTimeMinutes
         );
     }
 
@@ -237,7 +238,8 @@ public record Waiting(
                 WaitingStatus.VISITED,
                 registeredAt,
                 LocalDateTime.now(), // 방문 완료 시간
-                canEnterAt
+                canEnterAt,
+                expectedWaitingTimeMinutes
         );
     }
 
