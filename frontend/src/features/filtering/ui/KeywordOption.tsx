@@ -1,30 +1,25 @@
 import KEYWORD_OPTIONS from '@/features/filtering/lib/keywordOptions';
 import { ChipButton } from '@/shared/ui';
-import KeywordFilterPreview, { KeywordChip } from './KeywordFilterPreview';
 
 import { toast } from 'sonner';
-import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
 import { KeywordType } from '@/features/filtering/hook/type';
+import { KeywordChip } from '@/features/filtering/ui/KeywordFilterPreview';
+
+const MAX_CATEGORY_LENGTH = 3;
 
 export interface KeywordOptionProps {
   selected: KeywordType;
   onSelect: (value: KeywordType) => void;
-  onDelete: (chip: KeywordChip) => void;
+  onDelete?: (chip: KeywordChip) => void;
 }
 
 export default function KeywordOption({
   selected,
   onSelect,
-  onDelete,
 }: KeywordOptionProps) {
   const popupTypeOptions: string[] = KEYWORD_OPTIONS['popupType'];
   const categoryOptions: string[] = KEYWORD_OPTIONS['category'];
-  const { popupType, category } = selected;
-
-  const keywords: KeywordChip[] = [
-    ...toKeywordChips(popupType, 'popupType'),
-    ...toKeywordChips(category, 'category'),
-  ];
+  const { category } = selected;
 
   const handleKeywordClick = (type: keyof KeywordType, value: string) => {
     const current = selected[type];
@@ -39,7 +34,7 @@ export default function KeywordOption({
     }
 
     // 카테고리는 최대 3개 제한
-    if (type === 'category' && current.length >= 3) {
+    if (type === 'category' && current.length >= MAX_CATEGORY_LENGTH) {
       toast.info('카테고리는 최대 3개까지 선택가능해요');
       return;
     }
@@ -53,13 +48,6 @@ export default function KeywordOption({
 
   return (
     <div className={'w-full mb-14 flex flex-col gap-y-[24px]'}>
-      <KeywordFilterPreview
-        initialStatus={'select'}
-        onClick={() => {}}
-        keywords={keywords}
-        onDelete={onDelete}
-      />
-
       {/*팝업 타입 선택*/}
       <div className={'flex flex-col gap-y-[12px]'}>
         <h3 className={'text-[16px] text-black'}>팝업 유형</h3>
@@ -79,7 +67,12 @@ export default function KeywordOption({
 
       {/*팝업 카테고리 선택*/}
       <div className={'w-full flex flex-col gap-y-[12px]'}>
-        <h3 className={'text-[16px] text-black'}>카테고리</h3>
+        <div className={'flex flex-row items-center gap-[10px]'}>
+          <h3 className={'text-[16px] text-black'}>카테고리</h3>
+          <span className={'text-base text-gray60 font-regular'}>
+            {category.length}/{MAX_CATEGORY_LENGTH}
+          </span>
+        </div>
         <div className={'w-full flex gap-x-2 gap-y-2 flex-wrap'}>
           {categoryOptions.map((option, index) => (
             <ChipButton
