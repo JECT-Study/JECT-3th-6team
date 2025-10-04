@@ -9,68 +9,92 @@
 ### 전체 프로세스 흐름
 
 ```
-요청 수신 → 팝업 존재 확인 → 중복 신청 확인 → 대기번호 생성 → 회원 정보 확인 → 대기 정보 생성 → 저장 → 알림 처리 → 응답 반환
+요청 수신 → 팝업 존재 확인 → 팝업 운영 확인 → 제재 여부 확인 → 중복 신청 확인 → 대기번호 생성 → 회원 정보 확인 → 예상 대기 시간 계산 → 대기 정보 생성 → 저장 → 알림 처리 → 응답 반환
 ```
 
 ### 단계별 상세 로직
 
 #### 1. 팝업 존재 여부 확인
 ```java
-// WaitingService.java:44-45
+// WaitingService.java:46-47
 var popup = popupPort.findById(request.popupId())
         .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 ```
 - **목적**: 신청하려는 팝업이 실제로 존재하는지 확인
 - **실패 시**: `POPUP_NOT_FOUND` 예외 발생
 
-#### 2. 중복 신청 확인
+#### 2. 팝업 운영 확인
 ```java
-// WaitingService.java:48-50
-if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId()))) {
+// WaitingService.java:49-53
+LocalDateTime now = LocalDateTime.now();
+if (!popup.isOpenAt(now)) {
+    throw new BusinessException(ErrorType.POPUP_NOT_OPENED);
+}
+```
+- **목적**: 팝업이 현재 운영 중인지 확인
+- **검증 조건**: 현재 시간이 팝업 운영 시간 범위 내인지 확인
+- **실패 시**: `POPUP_NOT_OPENED` 예외 발생
+
+#### 3. 제재 여부 확인
+```java
+// WaitingService.java:55-61
+boolean notPopupBan = banPort.findByQuery(BanQuery.byMemberAndPopup(request.memberId(), request.popupId())).isEmpty();
+boolean notGlobalBan = banPort.findByQuery(BanQuery.byMemberIdFromAll(request.memberId())).isEmpty();
+
+if (!notPopupBan || !notGlobalBan) {
+    throw new BusinessException(ErrorType.BANNED_MEMBER, String.valueOf(request.memberId()));
+}
+```
+- **목적**: 회원이 제재 대상인지 확인
+- **검증 항목**:
+  - 팝업별 제재: 특정 팝업에 대한 이용 제한
+  - 전체 제재: 모든 팝업에 대한 이용 제한
+- **실패 시**: `BANNED_MEMBER` 예외 발생
+- **참고**: 제재 시스템 상세 정보는 [제재 시스템 비즈니스 로직](ban-system-business-logic.md) 참조
+
+#### 4. 중복 신청 확인
+```java
+// WaitingService.java:63-66
+if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId(), now.toLocalDate()))) {
     throw new BusinessException(ErrorType.DUPLICATE_WAITING, String.valueOf(request.popupId()));
 }
 ```
-- **목적**: 동일한 회원이 같은 팝업에 이미 대기 신청했는지 확인
+- **목적**: 당일 동일한 회원이 같은 팝업에 이미 대기 신청했는지 확인
+- **검증 범위**: 당일 기준 (날짜가 바뀌면 다시 신청 가능)
 - **실패 시**: `DUPLICATE_WAITING` 예외 발생
-- **구현**: `existsByMemberIdAndPopupId` 쿼리 사용 (WaitingPortAdapter.java:73)
+- **미완성 요구사항**: 당일 노쇼 처리된 예약 1개만 있는 경우 재신청 허용 (TODO)
 
-#### 3. 다음 대기 번호 생성
+#### 5. 다음 대기 번호 생성
 ```java
-// WaitingService.java:53
+// WaitingService.java:68-69
 Integer nextWaitingNumber = waitingPort.getNextWaitingNumber(request.popupId());
 ```
 - **목적**: 해당 팝업의 다음 대기 순번을 계산
 - **로직**: 현재 WAITING 상태인 최대 대기번호 + 1
 - **빈 대기열 처리**: 아무도 대기하지 않으면 0번 할당
 
+#### 6. 회원 정보 확인
 ```java
-// WaitingPortAdapter.java:86-97
-public Integer getNextWaitingNumber(Long popupId) {
-    List<WaitingEntity> allWaitng = waitingJpaRepository.findByPopupIdAndStatusOrderByWaitingNumberAsc(popupId, WaitingStatus.WAITING);
-    
-    if (allWaitng.isEmpty()) {
-        return 0; // 아무도 대기하지 않는 경우 0 반환
-    }
-    
-    return allWaitng.stream()
-            .mapToInt(WaitingEntity::getWaitingNumber)
-            .max()
-            .orElse(0) + 1; // 최대 대기 번호 + 1 반환
-}
-```
-
-#### 4. 회원 정보 확인
-```java
-// WaitingService.java:56-57
+// WaitingService.java:71-73
 Member member = memberPort.findById(request.memberId())
         .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND, String.valueOf(request.memberId())));
 ```
 - **목적**: 신청자의 회원 정보가 존재하는지 확인
 - **실패 시**: `MEMBER_NOT_FOUND` 예외 발생
 
-#### 5. 대기 정보 생성
+#### 7. 예상 대기 시간 계산
 ```java
-// WaitingService.java:60-70
+// WaitingService.java:75-76
+Integer expectedWaitingTime = waitingStatisticsPort.findCompletedStatisticsByPopupId(request.popupId())
+        .calculateExpectedWaitingTime(nextWaitingNumber);
+```
+- **목적**: 통계 기반으로 예상 대기 시간 제공
+- **계산 방식**: 과거 완료된 대기 통계를 기반으로 현재 대기번호에 따른 예상 시간 산출
+- **활용**: 사용자에게 대기 시간 정보 제공 (UX 개선)
+
+#### 8. 대기 정보 생성
+```java
+// WaitingService.java:78-92
 Waiting waiting = new Waiting(
         null, // ID는 저장소에서 생성
         popup,
@@ -80,35 +104,40 @@ Waiting waiting = new Waiting(
         request.peopleCount(),
         nextWaitingNumber,
         WaitingStatus.WAITING,
-        LocalDateTime.now()
+        now,
+        null,
+        null,
+        expectedWaitingTime
 );
 ```
 - **목적**: 검증된 정보로 Waiting 도메인 객체 생성
 - **초기 상태**: `WaitingStatus.WAITING`
 - **등록 시간**: 현재 시간으로 자동 설정
+- **예상 대기 시간**: 계산된 예상 시간 포함
 
-#### 6. 대기 정보 저장
+#### 9. 대기 정보 저장
 ```java
-// WaitingService.java:73
+// WaitingService.java:95-96
 Waiting savedWaiting = waitingPort.save(waiting);
 ```
 - **목적**: 생성된 대기 정보를 데이터베이스에 영속화
 - **트랜잭션**: `@Transactional` 범위에서 처리
 
-#### 7. 알림 처리
+#### 10. 알림 처리
 ```java
-// WaitingService.java:76
+// WaitingService.java:98-99
 waitingNotificationService.processWaitingCreatedNotifications(savedWaiting);
 ```
 - **목적**: 대기 신청 완료 알림 및 향후 알림 스케줄링
 - **처리 내용**: 즉시 알림 발송 + 미래 알림 예약
 
-#### 8. 응답 생성
+#### 11. 응답 생성
 ```java
-// WaitingService.java:79
+// WaitingService.java:101-102
 return waitingDtoMapper.toCreateResponse(savedWaiting);
 ```
 - **목적**: 클라이언트에게 반환할 응답 DTO 생성
+- **포함 정보**: 대기 ID, 대기 번호, 예상 대기 시간 등
 
 ## 입력 데이터 검증
 
@@ -163,7 +192,24 @@ String contactEmail
 
 ### 1. 비즈니스 규칙 위반
 
-#### 1.1 존재하지 않는 팝업 (POPUP_NOT_FOUND)
+#### 1.1 팝업이 운영 중이 아님 (POPUP_NOT_OPENED)
+```java
+ErrorType.POPUP_NOT_OPENED (HttpStatus.BAD_REQUEST, "팝업이 운영 중이 아닙니다")
+```
+- **발생 시점**: 팝업 운영 확인 단계
+- **원인**: 현재 시간이 팝업 운영 시간 범위를 벗어남
+- **HTTP 상태**: 400 Bad Request
+
+#### 1.2 제재된 회원 (BANNED_MEMBER)
+```java
+ErrorType.BANNED_MEMBER (HttpStatus.FORBIDDEN, "제재된 회원입니다")
+```
+- **발생 시점**: 제재 여부 확인 단계
+- **원인**: 팝업별 제재 또는 전체 제재 대상 회원
+- **HTTP 상태**: 403 Forbidden
+- **참고**: [제재 시스템 비즈니스 로직](ban-system-business-logic.md) 참조
+
+#### 1.3 존재하지 않는 팝업 (POPUP_NOT_FOUND)
 ```java
 ErrorType.POPUP_NOT_FOUND (HttpStatus.NOT_FOUND, "팝업을 찾을 수 없습니다")
 ```
@@ -171,16 +217,16 @@ ErrorType.POPUP_NOT_FOUND (HttpStatus.NOT_FOUND, "팝업을 찾을 수 없습니
 - **원인**: 잘못된 popupId 또는 삭제된 팝업
 - **HTTP 상태**: 404 Not Found
 
-#### 1.2 중복 신청 (DUPLICATE_WAITING)
+#### 1.4 중복 신청 (DUPLICATE_WAITING)
 ```java
 ErrorType.DUPLICATE_WAITING (HttpStatus.BAD_REQUEST, "이미 대기 했던 팝업입니다")
 ```
 - **발생 시점**: 중복 신청 확인 단계
-- **원인**: 동일 회원이 같은 팝업에 이미 신청
+- **원인**: 당일 동일 회원이 같은 팝업에 이미 신청
 - **HTTP 상태**: 400 Bad Request
-- **검증 로직**: `existsByMemberIdAndPopupId` 쿼리
+- **검증 범위**: 당일 기준 (날짜별 재신청 가능)
 
-#### 1.3 존재하지 않는 회원 (MEMBER_NOT_FOUND)
+#### 1.5 존재하지 않는 회원 (MEMBER_NOT_FOUND)
 ```java
 ErrorType.MEMBER_NOT_FOUND (HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다")
 ```
@@ -240,8 +286,9 @@ message: "대기자 이메일이 형식에 맞지 않습니다."
 - ✅ 유효한 이메일 주소 (표준 이메일 형식)
 
 ### 2. 비즈니스 규칙 준수
-- ✅ 해당 팝업에 중복 신청하지 않음
 - ✅ 팝업이 운영 중인 상태
+- ✅ 제재되지 않은 회원 (팝업별/전체 제재 모두)
+- ✅ 당일 해당 팝업에 중복 신청하지 않음
 
 ### 3. 시스템 정상 동작
 - ✅ 데이터베이스 정상 동작
@@ -255,11 +302,12 @@ message: "대기자 이메일이 형식에 맞지 않습니다."
 {
   "waitingId": 123,
   "popupName": "팝업스토어명",
-  "waitingPersonName": "홍길동", 
+  "waitingPersonName": "홍길동",
   "peopleCount": 2,
   "contactEmail": "hong@example.com",
   "waitingNumber": 5,
   "registeredAt": "2025-01-12T14:30:00",
+  "expectedWaitingTime": 30,  // 예상 대기 시간 (분)
   "location": {
     "addressName": "서울시 강남구...",
     "region1DepthName": "서울시",
