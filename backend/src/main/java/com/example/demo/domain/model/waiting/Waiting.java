@@ -144,7 +144,7 @@ public record Waiting(
         );
     }
 
-    public Waiting minusWaitingNumber() {
+    public Waiting minusWaitingNumber(PopupWaitingStatistics waitingStatistics) {
         if (waitingNumber == 0) {
             throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호는 0 이상이어야 합니다.");
         }
@@ -167,30 +167,7 @@ public record Waiting(
                 registeredAt,
                 enteredAt,
                 canEnterAt,
-                expectedWaitingTimeMinutes
-        );
-    }
-
-    /**
-     * 예상 대기시간을 업데이트한다.
-     *
-     * @param newExpectedWaitingTimeMinutes 새로운 예상 대기시간(분)
-     * @return 예상 대기시간이 업데이트된 새로운 Waiting 객체
-     */
-    public Waiting updateExpectedWaitingTime(Integer newExpectedWaitingTimeMinutes) {
-        return new Waiting(
-                id,
-                popup,
-                waitingPersonName,
-                member,
-                contactEmail,
-                peopleCount,
-                waitingNumber,
-                status,
-                registeredAt,
-                enteredAt,
-                canEnterAt,
-                newExpectedWaitingTimeMinutes
+                waitingStatistics.calculateExpectedWaitingTime(waitingNumber - 1)
         );
     }
 
@@ -219,28 +196,4 @@ public record Waiting(
                 expectedWaitingTimeMinutes
         );
     }
-
-    /**
-     * 방문 완료로 상태 변경
-     */
-    public Waiting markAsVisited() {
-        if (status != WaitingStatus.WAITING) {
-            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
-        }
-        return new Waiting(
-                id,
-                popup,
-                waitingPersonName,
-                member,
-                contactEmail,
-                peopleCount,
-                waitingNumber,
-                WaitingStatus.VISITED,
-                registeredAt,
-                LocalDateTime.now(), // 방문 완료 시간
-                canEnterAt,
-                expectedWaitingTimeMinutes
-        );
-    }
-
 }

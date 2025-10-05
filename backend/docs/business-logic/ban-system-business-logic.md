@@ -51,12 +51,90 @@ public class Ban {
 
 ## 제재 발동 프로세스
 
-### 1. 노쇼 처리 흐름
-```
-노쇼 감지 (10분 초과) → 노쇼 상태 변경 → 순번 재정렬 → 노쇼 알림 → 스토어 제재 확인 → 글로벌 제재 확인
+### 1. 노쇼 감지 및 처리 흐름
+
+#### 1.1 노쇼 대상자 조회 (ScheduledNoShowProcessService.java:71-83)
+```java
+private List<Waiting> findNoShowTargets() {
+    // canEnterAt이 현재 시간보다 10분 이상 이전이고, WAITING 상태인 대기자들
+    LocalDateTime tenMinutesAgo = LocalDateTime.now().minusMinutes(10);
+
+    // 모든 WAITING 상태 대기자 조회 후 필터링
+    WaitingQuery query = WaitingQuery.forStatus(WaitingStatus.WAITING);
+    List<Waiting> allWaiting = waitingPort.findByQuery(query);
+
+    return allWaiting.stream()
+            .filter(waiting -> waiting.canEnterAt() != null)
+            .filter(waiting -> waiting.canEnterAt().isBefore(tenMinutesAgo))
+            .toList();
+}
 ```
 
-### 2. 스토어 제재 발동 (ScheduledNoShowProcessService.java:107-125)
+**노쇼 판단 기준**:
+- `canEnterAt` 필드가 null이 아니어야 함 (입장 가능 시간이 설정됨)
+- `canEnterAt`이 현재 시간 - 10분보다 이전이어야 함
+- 대기 상태가 `WAITING`이어야 함
+
+**예시**:
+- 현재 시간: 14:30
+- 대기자 A의 `canEnterAt`: 14:15 → 15분 경과 → 노쇼 대상 ✅
+- 대기자 B의 `canEnterAt`: 14:25 → 5분 경과 → 노쇼 대상 아님 ❌
+
+#### 1.2 노쇼 처리 흐름
+```
+노쇼 감지 (canEnterAt + 10분 초과) → 노쇼 상태 변경 → 순번 재정렬 → 노쇼 횟수 조회 → 노쇼 알림 → 스토어 제재 확인 → 글로벌 제재 확인
+```
+
+### 2. 스토어 제재 발동
+
+#### 2.1 노쇼 처리 흐름 (ScheduledNoShowProcessService.java:88-107)
+```java
+private void processNoShow(Waiting waiting) {
+    // 1. 노쇼 상태로 변경
+    Waiting noShowWaiting = waiting.markAsNoShow();
+    waitingPort.save(noShowWaiting);
+
+    // 2. 순번 재정렬
+    reorderWaitingNumbers(waiting.popup().getId());
+
+    // 3. 노쇼 알림 발송
+    long noShowCount = getNoShowCountForToday(waiting.member().id(), waiting.popup().getId());
+    waitingNotificationService.processNoShowNotifications(waiting, noShowCount);
+
+    // 4. 스토어 제재 확인
+    storeBanIfNeed(waiting, noShowCount);
+
+    // 5. 글로벌 제재 확인
+    globalBanIfNeed(waiting);
+}
+```
+
+#### 2.2 당일 노쇼 횟수 조회 (ScheduledNoShowProcessService.java:210-224)
+```java
+private long getNoShowCountForToday(Long memberId, Long popupId) {
+    LocalDate today = LocalDate.now();
+
+    WaitingQuery query = WaitingQuery.builder()
+            .memberId(memberId)
+            .popupId(popupId)
+            .status(WaitingStatus.NO_SHOW)
+            .build();
+
+    List<Waiting> noShows = waitingPort.findByQuery(query);
+
+    // 당일 등록된 노쇼만 카운트
+    return noShows.stream()
+            .filter(waiting -> waiting.registeredAt().toLocalDate().equals(today))
+            .count();
+}
+```
+
+**조회 로직**:
+1. 회원 ID와 팝업 ID로 모든 노쇼 내역 조회
+2. `registeredAt`(등록 시간)의 날짜가 오늘인 것만 필터링
+3. 필터링된 노쇼 개수 반환
+
+#### 2.3 스토어 제재 발동 로직 (ScheduledNoShowProcessService.java:110-128)
 ```java
 private void storeBanIfNeed(Waiting waiting, long noShowCount) {
     if (noShowCount >= 2) {  // 당일 2회 이상 노쇼
@@ -74,7 +152,7 @@ private void storeBanIfNeed(Waiting waiting, long noShowCount) {
 ```
 
 **발동 조건**:
-- 당일 동일 팝업에서 노쇼 횟수 2회 이상
+- 당일 동일 팝업에서 노쇼 횟수 2회 이상 (`noShowCount >= 2`)
 - 즉시 제재 적용 (1일간)
 
 ### 3. 글로벌 제재 발동 (ScheduledNoShowProcessService.java:127-166)

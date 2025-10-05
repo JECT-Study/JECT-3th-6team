@@ -6,11 +6,7 @@ import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.ban.BanQuery;
-import com.example.demo.domain.model.waiting.Waiting;
-import com.example.demo.domain.model.waiting.WaitingQuery;
-import com.example.demo.domain.model.waiting.WaitingStatistics;
-import com.example.demo.domain.model.waiting.WaitingStatus;
-import com.example.demo.domain.model.waiting.PopupWaitingStatistics;
+import com.example.demo.domain.model.waiting.*;
 import com.example.demo.domain.port.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,8 +56,23 @@ public class WaitingService {
             throw new BusinessException(ErrorType.BANNED_MEMBER, String.valueOf(request.memberId()));
         }
 
-        // 그날 해당 팝업에 예약한 적 있는지 확인 TODO : 당일 노쇼 처리된 예약 1개만 있는 경우 제외 필요.
-        if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId(), now.toLocalDate()))) {
+        // 그날 해당 팝업에 예약한 적 있는지 확인
+        // 노쇼 1개만 있는 경우는 재신청 허용
+        List<Waiting> todayWaitings = waitingPort.findByQuery(
+                WaitingQuery.forMemberAndPopupOnDate(request.memberId(), request.popupId(), now.toLocalDate())
+        );
+
+        // 노쇼가 아닌 예약이 있는지 확인
+        boolean hasActiveWaiting = todayWaitings.stream()
+                .anyMatch(w -> w.status() != WaitingStatus.NO_SHOW);
+
+        // 노쇼 개수 확인
+        long noShowCount = todayWaitings.stream()
+                .filter(w -> w.status() == WaitingStatus.NO_SHOW)
+                .count();
+
+        // 활성 예약이 있거나, 노쇼가 2개 이상이면 중복 신청 불가
+        if (hasActiveWaiting || noShowCount >= 2) {
             throw new BusinessException(ErrorType.DUPLICATE_WAITING, String.valueOf(request.popupId()));
         }
 
@@ -194,23 +205,16 @@ public class WaitingService {
         WaitingQuery popupQuery = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
         List<Waiting> waitingList = waitingPort.findByQuery(popupQuery);
 
-        // 2. 순번 앞당기기
-        List<Waiting> reorderedWaitings = waitingList.stream()
-                .filter(w -> w.waitingNumber() > 0)
-                .map(Waiting::minusWaitingNumber)
-                .toList();
-
-        // 3. 업데이트된 통계로 예상 대기시간 재계산
+        // 2. 최신 통계 데이터 조회
         PopupWaitingStatistics updatedStatistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
 
-        List<Waiting> finalWaitings = reorderedWaitings.stream()
-                .map(waiting -> {
-                    Integer newExpectedTime = updatedStatistics.calculateExpectedWaitingTime(waiting.waitingNumber());
-                    return waiting.updateExpectedWaitingTime(newExpectedTime);
-                })
+        // 3. 순번 앞당기기
+        List<Waiting> reorderedWaitings = waitingList.stream()
+                .filter(w -> w.waitingNumber() > 0)
+                .map(waiting -> waiting.minusWaitingNumber(updatedStatistics))
                 .toList();
 
         // 4. 배치로 저장
-        waitingPort.saveAll(finalWaitings);
+        waitingPort.saveAll(reorderedWaitings);
     }
 } 

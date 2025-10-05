@@ -3,11 +3,13 @@ package com.example.demo.application.service;
 import com.example.demo.domain.model.ban.Ban;
 import com.example.demo.domain.model.ban.BanQuery;
 import com.example.demo.domain.model.ban.BanType;
+import com.example.demo.domain.model.waiting.PopupWaitingStatistics;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.BanPort;
 import com.example.demo.domain.port.WaitingPort;
+import com.example.demo.domain.port.WaitingStatisticsPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +33,7 @@ public class ScheduledNoShowProcessService {
     private final WaitingPort waitingPort;
     private final WaitingNotificationService waitingNotificationService;
     private final BanPort banPort;
+    private final WaitingStatisticsPort waitingStatisticsPort;
 
     /**
      * 30초마다 노쇼 대상을 찾아서 처리
@@ -182,12 +185,14 @@ public class ScheduledNoShowProcessService {
                 .sorted((w1, w2) -> w1.waitingNumber().compareTo(w2.waitingNumber()))
                 .toList();
 
+        PopupWaitingStatistics popupWaitingStatistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
+
         // 순번 재정렬 (0번부터 순차적으로)
         for (int i = 0; i < sortedWaitings.size(); i++) {
             Waiting waiting = sortedWaitings.get(i);
 
             // 대기 번호와 canEnterAt을 업데이트한 새로운 Waiting 객체 생성
-            Waiting updatedWaiting = waiting.minusWaitingNumber();
+            Waiting updatedWaiting = waiting.minusWaitingNumber(popupWaitingStatistics);
 
             waitingPort.save(updatedWaiting);
 
@@ -196,11 +201,6 @@ public class ScheduledNoShowProcessService {
                 case 0 -> sendEnterNowNotification(updatedWaiting);
                 case 3 -> sendEnter3TeamsBeforeNotification(updatedWaiting);
             }
-
-            // TODO: 예상 대기 시간 업데이트 로직 구현 필요
-            // - 앞의 대기팀 수 × 5분으로 예상 대기 시간 계산
-            // - 5팀 이상일 시엔 계산식 활용
-            // - 각 대기자의 estimatedWaitingTime 필드 업데이트
         }
     }
 

@@ -18,7 +18,8 @@ public record WaitingQuery(
         WaitingStatus status,
         SortOrder sortOrder,
         Long popupId,
-        LocalDate date
+        LocalDate date,
+        Boolean excludeNoShow  // 노쇼 제외 여부
 ) {
 
     /**
@@ -35,14 +36,14 @@ public record WaitingQuery(
      * 첫 페이지 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
      */
     public static WaitingQuery firstPage(Long memberId, Integer size) {
-        return new WaitingQuery(null, memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null);
+        return new WaitingQuery(null, memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null, null);
     }
 
     /**
      * 상태 필터링이 포함된 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
      */
     public static WaitingQuery withStatus(Long memberId, Integer size, WaitingStatus status) {
-        return new WaitingQuery(null, memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null);
+        return new WaitingQuery(null, memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null, null);
     }
 
     /**
@@ -57,7 +58,7 @@ public record WaitingQuery(
      */
     public static WaitingQuery forVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status) {
         return Optional.ofNullable(lastWaitingId)
-                .map(id -> new WaitingQuery(null, memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null))
+                .map(id -> new WaitingQuery(null, memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null, null))
                 .orElseGet(() -> Optional.ofNullable(WaitingStatus.fromString(status))
                         .map(waitingStatus -> withStatus(memberId, size, waitingStatus))
                         .orElse(firstPage(memberId, size))
@@ -65,28 +66,35 @@ public record WaitingQuery(
     }
 
     public static WaitingQuery forWaitingId(Long waitingId) {
-        return new WaitingQuery(waitingId, null, null, null, null, null, null, null);
+        return new WaitingQuery(waitingId, null, null, null, null, null, null, null, null);
     }
 
     /**
      * 팝업별 대기 조회용 생성자
      */
     public static WaitingQuery forPopup(Long popupId, WaitingStatus status) {
-        return new WaitingQuery(null, null, null, null, status, null, popupId, null);
+        return new WaitingQuery(null, null, null, null, status, null, popupId, null, null);
     }
 
     public WaitingQuery(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder) {
-        this(waitingId, memberId, size, lastWaitingId, status, sortOrder, null, null);
+        this(waitingId, memberId, size, lastWaitingId, status, sortOrder, null, null, null);
     }
 
     public static WaitingQuery forDuplicateCheck(Long memberId, Long popupId, LocalDate date) {
-        return new WaitingQuery(null, memberId, null, null, null, null, popupId, date);
+        return new WaitingQuery(null, memberId, null, null, null, null, popupId, date, null);
+    }
+
+    /**
+     * 특정 회원과 팝업의 당일 예약을 조회 (모든 상태 포함)
+     */
+    public static WaitingQuery forMemberAndPopupOnDate(Long memberId, Long popupId, LocalDate date) {
+        return new WaitingQuery(null, memberId, null, null, null, null, popupId, date, null);
     }
 
     /**
      * 상태별 조회용 생성자
      */
     public static WaitingQuery forStatus(WaitingStatus status) {
-        return new WaitingQuery(null, null, null, null, status, null, null, null);
+        return new WaitingQuery(null, null, null, null, status, null, null, null, null);
     }
 } 

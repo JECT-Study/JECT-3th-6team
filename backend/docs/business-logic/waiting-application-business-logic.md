@@ -54,15 +54,34 @@ if (!notPopupBan || !notGlobalBan) {
 
 #### 4. 중복 신청 확인
 ```java
-// WaitingService.java:63-66
-if (waitingPort.checkDuplicate(WaitingQuery.forDuplicateCheck(request.memberId(), request.popupId(), now.toLocalDate()))) {
+// WaitingService.java:61-77
+List<Waiting> todayWaitings = waitingPort.findByQuery(
+        WaitingQuery.forMemberAndPopupOnDate(request.memberId(), request.popupId(), now.toLocalDate())
+);
+
+// 노쇼가 아닌 예약이 있는지 확인
+boolean hasActiveWaiting = todayWaitings.stream()
+        .anyMatch(w -> w.status() != WaitingStatus.NO_SHOW);
+
+// 노쇼 개수 확인
+long noShowCount = todayWaitings.stream()
+        .filter(w -> w.status() == WaitingStatus.NO_SHOW)
+        .count();
+
+// 활성 예약이 있거나, 노쇼가 2개 이상이면 중복 신청 불가
+if (hasActiveWaiting || noShowCount >= 2) {
     throw new BusinessException(ErrorType.DUPLICATE_WAITING, String.valueOf(request.popupId()));
 }
 ```
 - **목적**: 당일 동일한 회원이 같은 팝업에 이미 대기 신청했는지 확인
 - **검증 범위**: 당일 기준 (날짜가 바뀌면 다시 신청 가능)
+- **검증 로직**:
+  1. 당일 해당 팝업의 모든 대기 내역 조회
+  2. 노쇼가 아닌 활성 예약 존재 여부 확인
+  3. 노쇼 예약 개수 카운트
+  4. 활성 예약이 있거나 노쇼가 2개 이상이면 신청 차단
+- **재신청 허용 조건**: 노쇼 1개만 있는 경우 재신청 가능
 - **실패 시**: `DUPLICATE_WAITING` 예외 발생
-- **미완성 요구사항**: 당일 노쇼 처리된 예약 1개만 있는 경우 재신청 허용 (TODO)
 
 #### 5. 다음 대기 번호 생성
 ```java
