@@ -6,7 +6,10 @@ import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.ban.BanQuery;
-import com.example.demo.domain.model.waiting.*;
+import com.example.demo.domain.model.waiting.PopupWaitingStatistics;
+import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingQuery;
+import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -186,10 +189,6 @@ public class WaitingService {
 
         // 3. 입장 처리된 대기 저장
         waitingPort.save(enteredWaiting);
-
-        // 4. 새로운 통계 데이터 생성
-        WaitingStatistics newStatistics = WaitingStatistics.fromCompletedWaiting(enteredWaiting);
-        waitingStatisticsPort.save(newStatistics);
 
         // 5. 같은 팝업의 나머지 대기자들 순번 앞당기기 및 예상 대기시간 업데이트
         reorderWaitingNumbersAndUpdateExpectedTime(waiting.popup().getId());
