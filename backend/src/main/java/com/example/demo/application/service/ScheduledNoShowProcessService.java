@@ -210,11 +210,7 @@ public class ScheduledNoShowProcessService {
     private long getNoShowCountForToday(Long memberId, Long popupId) {
         LocalDate today = LocalDate.now();
 
-        WaitingQuery query = WaitingQuery.builder()
-                .memberId(memberId)
-                .popupId(popupId)
-                .status(WaitingStatus.NO_SHOW)
-                .build();
+        WaitingQuery query = WaitingQuery.forMemberAndPopupWithStatus(memberId, popupId, WaitingStatus.NO_SHOW);
 
         List<Waiting> noShows = waitingPort.findByQuery(query);
 

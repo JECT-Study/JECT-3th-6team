@@ -132,7 +132,7 @@ class WaitingServiceTest {
             when(banPort.findByQuery(any())).thenReturn(List.of());
 
             // Mock: 당일 중복 신청 없음
-            when(waitingPort.findByQuery(argThat(query -> query.date() != null)))
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
                     .thenReturn(List.of());
 
             // Mock: 예상 대기시간 계산
@@ -177,7 +177,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(banPort, times(2)).findByQuery(any());
-            verify(waitingPort).findByQuery(argThat(query -> query.date() != null));
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort).findById(1L);
             verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(1L);
@@ -248,7 +248,7 @@ class WaitingServiceTest {
             when(banPort.findByQuery(any())).thenReturn(List.of());
 
             // Mock: 당일 중복 신청 없음
-            when(waitingPort.findByQuery(argThat(query -> query.date() != null)))
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
                     .thenReturn(List.of());
 
             // Mock: 예상 대기시간 계산
@@ -268,7 +268,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(banPort, times(2)).findByQuery(any());
-            verify(waitingPort).findByQuery(argThat(query -> query.date() != null));
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort).findById(1L);
             verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(1L);
@@ -285,7 +285,7 @@ class WaitingServiceTest {
             when(banPort.findByQuery(any())).thenReturn(List.of());
 
             // Mock: 당일 중복 신청 없음
-            when(waitingPort.findByQuery(argThat(query -> query.date() != null)))
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
                     .thenReturn(List.of());
 
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
@@ -297,7 +297,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(banPort, times(2)).findByQuery(any());
-            verify(waitingPort).findByQuery(argThat(query -> query.date() != null));
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort, never()).findById(any());
             verify(waitingStatisticsPort, never()).findCompletedStatisticsByPopupId(anyLong());
@@ -639,7 +639,7 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
             verify(waitingDtoMapper).toResponse(waiting);
         }
 
@@ -657,7 +657,7 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
 
@@ -682,7 +682,7 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
     }
