@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class WaitingController {
                 request.peopleCount(),
                 request.contactEmail()
         );
-        WaitingCreateResponse response = waitingService.createWaiting(createRequest);
+        WaitingCreateResponse response = waitingService.createWaiting(createRequest, LocalDateTime.now());
 
         return ResponseEntity.ok(new ApiResponse<>("성공적으로 대기가 등록되었습니다.", response));
     }

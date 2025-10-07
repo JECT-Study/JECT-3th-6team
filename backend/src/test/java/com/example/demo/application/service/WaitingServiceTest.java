@@ -68,6 +68,7 @@ class WaitingServiceTest {
     @Nested
     @DisplayName("createWaiting 테스트")
     class Test01 {
+        LocalDateTime now = LocalDateTime.of(2024, 6, 10, 10, 0);
         // 테스트용 유효한 데이터
         private final Popup validPopup = Popup.builder()
                 .id(1L)
@@ -85,15 +86,15 @@ class WaitingServiceTest {
                 .schedule(
                         new PopupSchedule(
                                 new DateRange(
-                                        LocalDate.now(),
-                                        LocalDate.now().plusDays(30)
+                                        now.toLocalDate(),
+                                        now.toLocalDate().plusDays(30)
                                 ),
                                 new WeeklyOpeningHours(
                                         List.of(
                                                 new OpeningHours(
                                                         DayOfWeek.MONDAY,
-                                                        LocalTime.now(),
-                                                        LocalTime.now().plusHours(1)
+                                                        now.toLocalTime(),
+                                                        now.toLocalTime().plusHours(1)
                                                 )
                                         )
                                 )
@@ -131,7 +132,7 @@ class WaitingServiceTest {
             when(banPort.findByQuery(any())).thenReturn(List.of());
 
             // Mock: 당일 중복 신청 없음
-            when(waitingPort.findByQuery(argThat(query -> query.date() != null)))
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
                     .thenReturn(List.of());
 
             // Mock: 예상 대기시간 계산
@@ -167,7 +168,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toCreateResponse(savedWaiting)).thenReturn(expectedResponse);
 
             // when
-            WaitingCreateResponse response = waitingService.createWaiting(validRequest);
+            WaitingCreateResponse response = waitingService.createWaiting(validRequest, now);
 
             // then
             assertNotNull(response);
@@ -176,7 +177,7 @@ class WaitingServiceTest {
             // verify
             verify(popupPort).findById(1L);
             verify(banPort, times(2)).findByQuery(any());
-            verify(waitingPort).findByQuery(argThat(query -> query.date() != null));
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort).findById(1L);
             verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(1L);
@@ -197,7 +198,7 @@ class WaitingServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> waitingService.createWaiting(invalidRequest)
+                    () -> waitingService.createWaiting(invalidRequest, now)
             );
 
             assertEquals(ErrorType.POPUP_NOT_FOUND, exception.getErrorType());
@@ -225,7 +226,7 @@ class WaitingServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> waitingService.createWaiting(invalidRequest)
+                    () -> waitingService.createWaiting(invalidRequest, now)
             );
 
             assertEquals(ErrorType.MEMBER_NOT_FOUND, exception.getErrorType());
@@ -247,7 +248,7 @@ class WaitingServiceTest {
             when(banPort.findByQuery(any())).thenReturn(List.of());
 
             // Mock: 당일 중복 신청 없음
-            when(waitingPort.findByQuery(argThat(query -> query.date() != null)))
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
                     .thenReturn(List.of());
 
             // Mock: 예상 대기시간 계산
@@ -262,12 +263,12 @@ class WaitingServiceTest {
             when(waitingPort.save(any(Waiting.class))).thenThrow(new RuntimeException("저장 실패"));
 
             // when & then
-            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest));
+            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest, now));
 
             // verify
             verify(popupPort).findById(1L);
             verify(banPort, times(2)).findByQuery(any());
-            verify(waitingPort).findByQuery(argThat(query -> query.date() != null));
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort).findById(1L);
             verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(1L);
@@ -284,19 +285,19 @@ class WaitingServiceTest {
             when(banPort.findByQuery(any())).thenReturn(List.of());
 
             // Mock: 당일 중복 신청 없음
-            when(waitingPort.findByQuery(argThat(query -> query.date() != null)))
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
                     .thenReturn(List.of());
 
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenThrow(new RuntimeException("대기 번호 조회 실패"));
 
             // when & then
-            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest));
+            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest, now));
 
             // verify
             verify(popupPort).findById(1L);
             verify(banPort, times(2)).findByQuery(any());
-            verify(waitingPort).findByQuery(argThat(query -> query.date() != null));
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort, never()).findById(any());
             verify(waitingStatisticsPort, never()).findCompletedStatisticsByPopupId(anyLong());
@@ -638,7 +639,7 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
             verify(waitingDtoMapper).toResponse(waiting);
         }
 
@@ -656,7 +657,7 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
 
@@ -681,7 +682,7 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
             verify(waitingDtoMapper, never()).toResponse(any());
         }
     }

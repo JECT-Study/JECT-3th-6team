@@ -27,7 +27,6 @@ public class WaitingService {
     private final WaitingPort waitingPort;
     private final PopupPort popupPort;
     private final MemberPort memberPort;
-    private final NotificationPort notificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
     private final WaitingNotificationService waitingNotificationService;
     private final BanPort banPort;
@@ -40,14 +39,13 @@ public class WaitingService {
      * 현장 대기 신청
      */
     @Transactional
-    public WaitingCreateResponse createWaiting(WaitingCreateRequest request) {
+    public WaitingCreateResponse createWaiting(WaitingCreateRequest request, LocalDateTime requestTime) {
         // 1. 팝업 존재 여부 확인
         var popup = popupPort.findById(request.popupId())
                 .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 
         // 팝업이 운영 중인지 확인
-        LocalDateTime now = LocalDateTime.now();
-        if (!popup.isOpenAt(now)) {
+        if (!popup.isOpenAt(requestTime)) {
             throw new BusinessException(ErrorType.POPUP_NOT_OPENED);
         }
 
@@ -62,7 +60,7 @@ public class WaitingService {
         // 그날 해당 팝업에 예약한 적 있는지 확인
         // 노쇼 1개만 있는 경우는 재신청 허용
         List<Waiting> todayWaitings = waitingPort.findByQuery(
-                WaitingQuery.forMemberAndPopupOnDate(request.memberId(), request.popupId(), now.toLocalDate())
+                WaitingQuery.forMemberAndPopupOnDate(request.memberId(), request.popupId(), requestTime.toLocalDate())
         );
 
         // 노쇼가 아닌 예약이 있는지 확인
@@ -99,7 +97,7 @@ public class WaitingService {
                 request.peopleCount(),
                 nextWaitingNumber,
                 WaitingStatus.WAITING,
-                now,
+                requestTime,
                 null,
                 null,
                 expectedWaitingTime
@@ -114,19 +112,6 @@ public class WaitingService {
 
         // 8. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
-    }
-
-    /**
-     * 웨이팅 확정 알림 내용 생성
-     */
-    private String generateWaitingConfirmedContent(Waiting waiting) {
-        LocalDateTime registeredAt = waiting.registeredAt();
-        String dateText = registeredAt.format(DATE_FORMATTER);
-        String dayText = registeredAt.format(DAY_FORMATTER);
-        int peopleCount = waiting.peopleCount();
-
-        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!",
-                dateText, dayText, peopleCount);
     }
 
     /**

@@ -37,8 +37,6 @@ public interface WaitingPort {
      */
     List<Waiting> findByQuery(WaitingQuery query);
 
-    boolean checkDuplicate(WaitingQuery query);
-
     /**
      * 팝업의 다음 대기 번호를 조회한다. 아무도 대기하지 않는 경우 0을 반환한다.
      *

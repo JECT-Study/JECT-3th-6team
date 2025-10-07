@@ -33,15 +33,6 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
             @Param("reservedStatus") WaitingStatus reservedStatus,
             Pageable pageable);
 
-    /**
-     * 팝업 ID로 최대 대기 번호를 조회한다.
-     *
-     * @param popupId 팝업 ID
-     * @return 최대 대기 번호 (없으면 0)
-     */
-    @Query("SELECT MAX(w.waitingNumber) FROM WaitingEntity w WHERE w.popupId = :popupId")
-    Optional<Integer> findMaxWaitingNumberByPopupId(@Param("popupId") Long popupId);
-
     Optional<WaitingEntity> findByMemberIdAndPopupId(Long memberId, Long popupId);
 
     /**
