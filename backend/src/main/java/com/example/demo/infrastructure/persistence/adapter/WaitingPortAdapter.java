@@ -126,11 +126,6 @@ public class WaitingPortAdapter implements WaitingPort {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public boolean checkDuplicate(WaitingQuery query) {
-        return waitingJpaRepository.existsByMemberIdAndPopupId(query.getMemberId(), query.getPopupId());
-    }
-
     private Waiting mapEntityToDomain(WaitingEntity entity) {
         var popup = popupPortAdapter.findById(entity.getPopupId()).orElse(null);
         var member = memberPortAdapter.findById(entity.getMemberId()).orElse(null);
