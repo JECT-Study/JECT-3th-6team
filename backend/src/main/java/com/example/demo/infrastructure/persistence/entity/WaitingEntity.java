@@ -39,6 +39,9 @@ public class WaitingEntity extends BaseEntity {
     @Column(name = "people_count", nullable = false)
     private Integer peopleCount;
 
+    @Column(name = "initial_waiting_number", nullable = false)
+    private Integer initialWaitingNumber;
+
     @Column(name = "waiting_number", nullable = false)
     private Integer waitingNumber;
 

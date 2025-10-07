@@ -54,7 +54,7 @@ public class WaitingEntityMapper {
      * @param waiting Waiting 도메인 모델
      * @return WaitingEntity
      */
-    public WaitingEntity toEntity(Waiting waiting) {
+    public WaitingEntity toEntity(Waiting waiting, int initialWaitingNumber) {
         return WaitingEntity.builder()
                 .id(waiting.id())
                 .popupId(waiting.popup().getId())
@@ -66,6 +66,7 @@ public class WaitingEntityMapper {
                 .status(waiting.status())
                 .enteredAt(waiting.enteredAt())
                 .canEnterAt(waiting.canEnterAt())
+                .initialWaitingNumber(initialWaitingNumber)
                 .build();
     }
 } 
