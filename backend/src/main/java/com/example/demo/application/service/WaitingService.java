@@ -27,7 +27,6 @@ public class WaitingService {
     private final WaitingPort waitingPort;
     private final PopupPort popupPort;
     private final MemberPort memberPort;
-    private final NotificationPort notificationPort;
     private final WaitingDtoMapper waitingDtoMapper;
     private final WaitingNotificationService waitingNotificationService;
     private final BanPort banPort;
@@ -114,19 +113,6 @@ public class WaitingService {
 
         // 8. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
-    }
-
-    /**
-     * 웨이팅 확정 알림 내용 생성
-     */
-    private String generateWaitingConfirmedContent(Waiting waiting) {
-        LocalDateTime registeredAt = waiting.registeredAt();
-        String dateText = registeredAt.format(DATE_FORMATTER);
-        String dayText = registeredAt.format(DAY_FORMATTER);
-        int peopleCount = waiting.peopleCount();
-
-        return String.format("%s (%s) %d인 웨이팅이 완료되었습니다. 현재 대기 번호를 확인해주세요!",
-                dateText, dayText, peopleCount);
     }
 
     /**
