@@ -27,4 +27,15 @@ public class Ban {
     public boolean isActive() {
         return LocalDateTime.now().isBefore(getExpiresAt());
     }
+
+    public Ban withId(Long id) {
+        return Ban.builder()
+                .id(id)
+                .member(this.member)
+                .type(this.type)
+                .bannedAt(this.bannedAt)
+                .durationDays(this.durationDays)
+                .popup(this.popup)
+                .build();
+    }
 }
