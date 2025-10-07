@@ -3,6 +3,7 @@ package com.example.demo.infrastructure.persistence.mapper;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingStatistics;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,16 @@ public class WaitingEntityMapper {
                 entity.getCanEnterAt(),
                 null // TODO: expectedWaitingTimeMinutes 계산 로직 추가 필요
         );
+    }
+
+    public static WaitingStatistics toWaitingStatistics(WaitingEntity entity) {
+        return WaitingStatistics.builder()
+                .popupId(entity.getPopupId())
+                .waitingId(entity.getId())
+                .initialWaitingNumber(1) // TODO: 실제 initialWaitingNumber 값을 가져오도록 수정 필요
+                .reservedAt(entity.getCreatedAt())
+                .enteredAt(entity.getEnteredAt())
+                .build();
     }
 
     /**

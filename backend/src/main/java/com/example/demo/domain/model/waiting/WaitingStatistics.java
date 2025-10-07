@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class WaitingStatistics {
-    private final Long id;
     private final Long popupId;
     private final Long waitingId;
     private final int initialWaitingNumber;
