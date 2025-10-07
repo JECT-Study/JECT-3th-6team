@@ -68,6 +68,7 @@ class WaitingServiceTest {
     @Nested
     @DisplayName("createWaiting 테스트")
     class Test01 {
+        LocalDateTime now = LocalDateTime.of(2024, 6, 10, 10, 0);
         // 테스트용 유효한 데이터
         private final Popup validPopup = Popup.builder()
                 .id(1L)
@@ -85,15 +86,15 @@ class WaitingServiceTest {
                 .schedule(
                         new PopupSchedule(
                                 new DateRange(
-                                        LocalDate.now(),
-                                        LocalDate.now().plusDays(30)
+                                        now.toLocalDate(),
+                                        now.toLocalDate().plusDays(30)
                                 ),
                                 new WeeklyOpeningHours(
                                         List.of(
                                                 new OpeningHours(
                                                         DayOfWeek.MONDAY,
-                                                        LocalTime.now(),
-                                                        LocalTime.now().plusHours(1)
+                                                        now.toLocalTime(),
+                                                        now.toLocalTime().plusHours(1)
                                                 )
                                         )
                                 )
@@ -167,7 +168,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toCreateResponse(savedWaiting)).thenReturn(expectedResponse);
 
             // when
-            WaitingCreateResponse response = waitingService.createWaiting(validRequest);
+            WaitingCreateResponse response = waitingService.createWaiting(validRequest, now);
 
             // then
             assertNotNull(response);
@@ -197,7 +198,7 @@ class WaitingServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> waitingService.createWaiting(invalidRequest)
+                    () -> waitingService.createWaiting(invalidRequest, now)
             );
 
             assertEquals(ErrorType.POPUP_NOT_FOUND, exception.getErrorType());
@@ -225,7 +226,7 @@ class WaitingServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> waitingService.createWaiting(invalidRequest)
+                    () -> waitingService.createWaiting(invalidRequest, now)
             );
 
             assertEquals(ErrorType.MEMBER_NOT_FOUND, exception.getErrorType());
@@ -262,7 +263,7 @@ class WaitingServiceTest {
             when(waitingPort.save(any(Waiting.class))).thenThrow(new RuntimeException("저장 실패"));
 
             // when & then
-            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest));
+            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest, now));
 
             // verify
             verify(popupPort).findById(1L);
@@ -291,7 +292,7 @@ class WaitingServiceTest {
             when(waitingPort.getNextWaitingNumber(1L)).thenThrow(new RuntimeException("대기 번호 조회 실패"));
 
             // when & then
-            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest));
+            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest, now));
 
             // verify
             verify(popupPort).findById(1L);

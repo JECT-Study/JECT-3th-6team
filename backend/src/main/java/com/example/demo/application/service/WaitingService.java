@@ -39,14 +39,13 @@ public class WaitingService {
      * 현장 대기 신청
      */
     @Transactional
-    public WaitingCreateResponse createWaiting(WaitingCreateRequest request) {
+    public WaitingCreateResponse createWaiting(WaitingCreateRequest request, LocalDateTime requestTime) {
         // 1. 팝업 존재 여부 확인
         var popup = popupPort.findById(request.popupId())
                 .orElseThrow(() -> new BusinessException(ErrorType.POPUP_NOT_FOUND, String.valueOf(request.popupId())));
 
         // 팝업이 운영 중인지 확인
-        LocalDateTime now = LocalDateTime.now();
-        if (!popup.isOpenAt(now)) {
+        if (!popup.isOpenAt(requestTime)) {
             throw new BusinessException(ErrorType.POPUP_NOT_OPENED);
         }
 
@@ -61,7 +60,7 @@ public class WaitingService {
         // 그날 해당 팝업에 예약한 적 있는지 확인
         // 노쇼 1개만 있는 경우는 재신청 허용
         List<Waiting> todayWaitings = waitingPort.findByQuery(
-                WaitingQuery.forMemberAndPopupOnDate(request.memberId(), request.popupId(), now.toLocalDate())
+                WaitingQuery.forMemberAndPopupOnDate(request.memberId(), request.popupId(), requestTime.toLocalDate())
         );
 
         // 노쇼가 아닌 예약이 있는지 확인
@@ -98,7 +97,7 @@ public class WaitingService {
                 request.peopleCount(),
                 nextWaitingNumber,
                 WaitingStatus.WAITING,
-                now,
+                requestTime,
                 null,
                 null,
                 expectedWaitingTime
