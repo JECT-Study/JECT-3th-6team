@@ -34,7 +34,7 @@ public class WaitingEntityMapper {
                 entity.getCreatedAt(),
                 entity.getEnteredAt(),
                 entity.getCanEnterAt(),
-                null // TODO: expectedWaitingTimeMinutes 계산 로직 추가 필요
+                entity.getExpectedWaitingTimeMinutes()
         );
     }
 
@@ -42,7 +42,7 @@ public class WaitingEntityMapper {
         return WaitingStatistics.builder()
                 .popupId(entity.getPopupId())
                 .waitingId(entity.getId())
-                .initialWaitingNumber(1) // TODO: 실제 initialWaitingNumber 값을 가져오도록 수정 필요
+                .initialWaitingNumber(entity.getInitialWaitingNumber())
                 .reservedAt(entity.getCreatedAt())
                 .enteredAt(entity.getEnteredAt())
                 .build();
@@ -66,6 +66,7 @@ public class WaitingEntityMapper {
                 .status(waiting.status())
                 .enteredAt(waiting.enteredAt())
                 .canEnterAt(waiting.canEnterAt())
+                .expectedWaitingTimeMinutes(waiting.expectedWaitingTimeMinutes())
                 .build();
     }
 } 

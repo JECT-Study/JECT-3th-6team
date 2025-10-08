@@ -24,7 +24,8 @@ public class WaitingStatisticsPortAdaptor implements WaitingStatisticsPort {
     public PopupWaitingStatistics findCompletedStatisticsByPopupId(Long popupId) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(waitingEntity.status.eq(WaitingStatus.VISITED))
-                .and(waitingEntity.popupId.eq(popupId));
+                .and(waitingEntity.popupId.eq(popupId))
+                .and(waitingEntity.initialWaitingNumber.isNotNull());
         List<WaitingStatistics> waitingStatistics = jpaQueryFactory.selectFrom(waitingEntity)
                 .where(builder)
                 .fetch()
