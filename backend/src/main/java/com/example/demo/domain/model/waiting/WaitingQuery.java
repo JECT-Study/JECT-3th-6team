@@ -63,6 +63,10 @@ public sealed class WaitingQuery {
         return new ForMemberAndPopupWithStatus(memberId, popupId, status);
     }
 
+    public static ForCanEnterWaiting forCanEnterWaiting() {
+        return new ForCanEnterWaiting();
+    }
+
     /**
      * 정렬 순서를 정의하는 enum
      */
@@ -147,6 +151,16 @@ public sealed class WaitingQuery {
 
         public ForMemberAndPopupWithStatus(Long memberId, Long popupId, WaitingStatus status) {
             this(null, memberId, null, null, status, null, popupId, null, null);
+        }
+    }
+
+    public static final class ForCanEnterWaiting extends WaitingQuery {
+        private ForCanEnterWaiting(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForCanEnterWaiting() {
+            this(null, null, null, null, WaitingStatus.WAITING, null, null, null, false);
         }
     }
 } 

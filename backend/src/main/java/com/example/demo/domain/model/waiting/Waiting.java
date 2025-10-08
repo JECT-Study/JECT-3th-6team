@@ -196,4 +196,25 @@ public record Waiting(
                 expectedWaitingTimeMinutes
         );
     }
+
+    public Waiting markAsCanEnter() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.WAITING,
+                registeredAt,
+                enteredAt,
+                LocalDateTime.now(),
+                expectedWaitingTimeMinutes
+        );
+    }
 }

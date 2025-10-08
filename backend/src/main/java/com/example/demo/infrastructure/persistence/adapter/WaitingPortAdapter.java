@@ -117,6 +117,13 @@ public class WaitingPortAdapter implements WaitingPort {
                         .where(builder)
                         .fetch();
             }
+            case WaitingQuery.ForCanEnterWaiting q -> {
+                builder.and(waitingEntity.waitingNumber.eq(0))
+                        .and(waitingEntity.status.eq(WaitingStatus.WAITING));
+                waitingEntities = jpaQueryFactory.selectFrom(waitingEntity)
+                        .where(builder)
+                        .fetch();
+            }
             case null, default -> throw new BusinessException(ErrorType.FEATURE_NOT_IMPLEMENTED);
         }
 
