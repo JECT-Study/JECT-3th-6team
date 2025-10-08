@@ -119,7 +119,8 @@ public class WaitingPortAdapter implements WaitingPort {
             }
             case WaitingQuery.ForCanEnterWaiting q -> {
                 builder.and(waitingEntity.waitingNumber.eq(0))
-                        .and(waitingEntity.status.eq(WaitingStatus.WAITING));
+                        .and(waitingEntity.status.eq(WaitingStatus.WAITING))
+                        .and(waitingEntity.canEnterAt.isNull());
                 waitingEntities = jpaQueryFactory.selectFrom(waitingEntity)
                         .where(builder)
                         .fetch();
