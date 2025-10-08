@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 @DataJpaTest
-@Import({WaitingPortAdapter.class, WaitingEntityMapper.class})
+@Import({WaitingPortAdapter.class, WaitingEntityMapper.class, com.example.demo.infrastructure.persistence.config.QueryDslConfig.class})
 class WaitingPortAdapterTest {
 
     @Autowired
@@ -136,7 +136,7 @@ class WaitingPortAdapterTest {
         @DisplayName("정렬 조건이 RESERVED_FIRST_THEN_DATE_DESC 일때 대기들이 조회된다")
         void shouldSortByStatusAndWaitThenDateDesc() {
             // given
-            WaitingQuery query = new WaitingQuery(null, member.id(), 10, null, null, WaitingQuery.SortOrder.RESERVED_FIRST_THEN_DATE_DESC);
+            WaitingQuery query = new WaitingQuery.ForVisitHistory(member.id(), 10, null, null);
 
             // when
             List<Waiting> result = waitingPortAdapter.findByQuery(query);

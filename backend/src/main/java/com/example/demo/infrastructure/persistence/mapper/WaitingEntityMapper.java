@@ -3,6 +3,7 @@ package com.example.demo.infrastructure.persistence.mapper;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.waiting.Waiting;
+import com.example.demo.domain.model.waiting.WaitingStatistics;
 import com.example.demo.infrastructure.persistence.entity.WaitingEntity;
 import org.springframework.stereotype.Component;
 
@@ -32,8 +33,19 @@ public class WaitingEntityMapper {
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getEnteredAt(),
-                entity.getCanEnterAt()
+                entity.getCanEnterAt(),
+                entity.getExpectedWaitingTimeMinutes()
         );
+    }
+
+    public static WaitingStatistics toWaitingStatistics(WaitingEntity entity) {
+        return WaitingStatistics.builder()
+                .popupId(entity.getPopupId())
+                .waitingId(entity.getId())
+                .initialWaitingNumber(entity.getInitialWaitingNumber())
+                .reservedAt(entity.getCreatedAt())
+                .enteredAt(entity.getEnteredAt())
+                .build();
     }
 
     /**
@@ -54,6 +66,7 @@ public class WaitingEntityMapper {
                 .status(waiting.status())
                 .enteredAt(waiting.enteredAt())
                 .canEnterAt(waiting.canEnterAt())
+                .expectedWaitingTimeMinutes(waiting.expectedWaitingTimeMinutes())
                 .build();
     }
 } 

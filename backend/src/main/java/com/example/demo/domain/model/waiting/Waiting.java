@@ -25,7 +25,8 @@ public record Waiting(
         WaitingStatus status,
         LocalDateTime registeredAt,
         LocalDateTime enteredAt,
-        LocalDateTime canEnterAt
+        LocalDateTime canEnterAt,
+        Integer expectedWaitingTimeMinutes
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
@@ -79,7 +80,7 @@ public record Waiting(
             WaitingStatus status,
             LocalDateTime registeredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null, null);
     }
 
     /**
@@ -108,7 +109,7 @@ public record Waiting(
             LocalDateTime registeredAt,
             LocalDateTime enteredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null, null);
     }
 
 
@@ -138,11 +139,12 @@ public record Waiting(
                 WaitingStatus.VISITED,
                 registeredAt,
                 LocalDateTime.now(),
-                canEnterAt
+                canEnterAt,
+                expectedWaitingTimeMinutes
         );
     }
 
-    public Waiting minusWaitingNumber() {
+    public Waiting minusWaitingNumber(PopupWaitingStatistics waitingStatistics) {
         if (waitingNumber == 0) {
             throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호는 0 이상이어야 합니다.");
         }
@@ -164,7 +166,34 @@ public record Waiting(
                 WaitingStatus.WAITING,
                 registeredAt,
                 enteredAt,
-                canEnterAt
+                canEnterAt,
+                waitingStatistics.calculateExpectedWaitingTime(waitingNumber - 1)
+        );
+    }
+
+    /**
+     * 노쇼 상태로 변경한다.
+     *
+     * @return 노쇼 상태로 변경된 새로운 Waiting 객체
+     */
+    public Waiting markAsNoShow() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.NO_SHOW,
+                registeredAt,
+                enteredAt,
+                canEnterAt,
+                expectedWaitingTimeMinutes
         );
     }
 }

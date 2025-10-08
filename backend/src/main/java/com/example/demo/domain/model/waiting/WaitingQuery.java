@@ -1,43 +1,31 @@
 package com.example.demo.domain.model.waiting;
 
-import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.time.LocalDate;
 
 /**
  * 대기 조회 조건을 표현하는 클래스.
  * 커서 기반 페이지네이션과 필터링 조건을 포함한다.
  */
-public record WaitingQuery(
-        Long waitingId,
-        Long memberId,
-        Integer size,
-        Long lastWaitingId,
-        WaitingStatus status,
-        SortOrder sortOrder,
-        Long popupId
-) {
+@Getter
+@AllArgsConstructor
+@EqualsAndHashCode
+public sealed class WaitingQuery {
+    private final Long waitingId;
+    private final Long memberId;
+    private final Integer size;
+    private final Long lastWaitingId;
+    private final WaitingStatus status;
+    private final SortOrder sortOrder;
+    private final Long popupId;
+    private final LocalDate date;
+    private final Boolean excludeNoShow;
 
-    /**
-     * 정렬 순서를 정의하는 enum
-     */
-    public enum SortOrder {
-        /**
-         * RESERVED 상태가 먼저, 그 다음 날짜 최신순
-         */
-        RESERVED_FIRST_THEN_DATE_DESC,
-    }
-
-    /**
-     * 첫 페이지 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
-     */
-    public static WaitingQuery firstPage(Long memberId, Integer size) {
-        return new WaitingQuery(null, memberId, size, null, null, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null);
-    }
-
-    /**
-     * 상태 필터링이 포함된 조회용 생성자 (기본 정렬: RESERVED_FIRST_THEN_DATE_DESC)
-     */
-    public static WaitingQuery withStatus(Long memberId, Integer size, WaitingStatus status) {
-        return new WaitingQuery(null, memberId, size, null, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null);
+    public static ForWaitingId forWaitingId(Long waitingId) {
+        return new ForWaitingId(waitingId);
     }
 
     /**
@@ -50,31 +38,115 @@ public record WaitingQuery(
      * @return WaitingQuery 객체
      * @throws IllegalArgumentException 유효하지 않은 상태인 경우
      */
-    public static WaitingQuery forVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status) {
-        return Optional.ofNullable(lastWaitingId)
-                .map(id -> new WaitingQuery(null, memberId, size, id, WaitingStatus.fromString(status), SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null))
-                .orElseGet(() -> Optional.ofNullable(WaitingStatus.fromString(status))
-                        .map(waitingStatus -> withStatus(memberId, size, waitingStatus))
-                        .orElse(firstPage(memberId, size))
-                );
+    public static ForVisitHistory forVisitHistory(Long memberId, Integer size, Long lastWaitingId, String status) {
+        WaitingStatus waitingStatus = WaitingStatus.fromString(status);
+        return new ForVisitHistory(memberId, size, lastWaitingId, waitingStatus);
     }
 
-    public static WaitingQuery forWaitingId(Long waitingId) {
-        return new WaitingQuery(waitingId, null, null, null, null, null, null);
+    public static ForPopup forPopup(Long popupId, WaitingStatus status) {
+        return new ForPopup(popupId, status);
+    }
+
+    public static ForDuplicateCheck forDuplicateCheck(Long memberId, Long popupId, LocalDate date) {
+        return new ForDuplicateCheck(memberId, popupId, date);
+    }
+
+    public static ForMemberAndPopupOnDate forMemberAndPopupOnDate(Long memberId, Long popupId, LocalDate date) {
+        return new ForMemberAndPopupOnDate(memberId, popupId, date);
+    }
+
+    public static ForStatus forStatus(WaitingStatus status) {
+        return new ForStatus(status);
+    }
+
+    public static ForMemberAndPopupWithStatus forMemberAndPopupWithStatus(Long memberId, Long popupId, WaitingStatus status) {
+        return new ForMemberAndPopupWithStatus(memberId, popupId, status);
     }
 
     /**
-     * 팝업별 대기 조회용 생성자
+     * 정렬 순서를 정의하는 enum
      */
-    public static WaitingQuery forPopup(Long popupId, WaitingStatus status) {
-        return new WaitingQuery(null, null, null, null, status, null, popupId);
+    public enum SortOrder {
+        /**
+         * RESERVED 상태가 먼저, 그 다음 날짜 최신순
+         */
+        RESERVED_FIRST_THEN_DATE_DESC,
     }
 
-    public WaitingQuery(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status, SortOrder sortOrder) {
-        this(waitingId, memberId, size, lastWaitingId, status, sortOrder, null);
+    public static final class ForWaitingId extends WaitingQuery {
+        private ForWaitingId(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                             SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForWaitingId(Long waitingId) {
+            this(waitingId, null, null, null, null, null, null, null, null);
+        }
     }
 
-    public static WaitingQuery forDuplicateCheck(Long memberId, Long popupId) {
-        return new WaitingQuery(null, memberId, null, null, null, null, popupId);
+    public static final class ForVisitHistory extends WaitingQuery {
+        private ForVisitHistory(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                                SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForVisitHistory(Long memberId, Integer size, Long lastWaitingId, WaitingStatus status) {
+            this(null, memberId, size, lastWaitingId, status, SortOrder.RESERVED_FIRST_THEN_DATE_DESC, null, null, null);
+        }
+    }
+
+    public static final class ForPopup extends WaitingQuery {
+        private ForPopup(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                         SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForPopup(Long popupId, WaitingStatus status) {
+            this(null, null, null, null, status, null, popupId, null, null);
+        }
+    }
+
+    public static final class ForDuplicateCheck extends WaitingQuery {
+        private ForDuplicateCheck(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                                  SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForDuplicateCheck(Long memberId, Long popupId, LocalDate date) {
+            this(null, memberId, null, null, null, null, popupId, date, null);
+        }
+    }
+
+    public static final class ForMemberAndPopupOnDate extends WaitingQuery {
+        private ForMemberAndPopupOnDate(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                                        SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForMemberAndPopupOnDate(Long memberId, Long popupId, LocalDate date) {
+            this(null, memberId, null, null, null, null, popupId, date, null);
+        }
+    }
+
+    public static final class ForStatus extends WaitingQuery {
+        private ForStatus(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                          SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForStatus(WaitingStatus status) {
+            this(null, null, null, null, status, null, null, null, null);
+        }
+    }
+
+    public static final class ForMemberAndPopupWithStatus extends WaitingQuery {
+        private ForMemberAndPopupWithStatus(Long waitingId, Long memberId, Integer size, Long lastWaitingId, WaitingStatus status,
+                                            SortOrder sortOrder, Long popupId, LocalDate date, Boolean excludeNoShow) {
+            super(waitingId, memberId, size, lastWaitingId, status, sortOrder, popupId, date, excludeNoShow);
+        }
+
+        public ForMemberAndPopupWithStatus(Long memberId, Long popupId, WaitingStatus status) {
+            this(null, memberId, null, null, status, null, popupId, null, null);
+        }
     }
 } 

@@ -42,6 +42,9 @@ public class WaitingEntity extends BaseEntity {
     @Column(name = "waiting_number", nullable = false)
     private Integer waitingNumber;
 
+    @Column(name = "initial_waiting_number")
+    private Integer initialWaitingNumber;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private WaitingStatus status;
@@ -51,4 +54,13 @@ public class WaitingEntity extends BaseEntity {
 
     @Column(name = "can_enter_at")
     private LocalDateTime canEnterAt;
+
+    @Column(name = "expected_waiting_time_minutes")
+    private Integer expectedWaitingTimeMinutes;
 } 
+
+/*
+1. 웨이팅 엔티티에는 필드 추가
+2. 웨이팅에서는 시간만
+3. 웨이팅 통계에서는 인이셔널
+ */
