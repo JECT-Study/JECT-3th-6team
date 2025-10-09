@@ -9,31 +9,44 @@ document.addEventListener('DOMContentLoaded', () => {
   const qs = (sel) => document.querySelector(sel);
   const qsa = (sel) => Array.from(document.querySelectorAll(sel));
   
+  // 인증 확인
+  function checkAuth() {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      window.location.href = '/admin-login.html';
+      return null;
+    }
+    return token;
+  }
+
+  // 페이지 로드 시 인증 확인
+  const token = checkAuth();
+  if (!token) return;
+  
   // Authorization 헤더 생성 함수
   const getAuthHeaders = () => {
-    const password = qs('#adminPassword').value.trim();
-    const headers = {};
-    
-    if (password) {
-      headers['Authorization'] = password;
-    }
-    
-    return headers;
+    const token = localStorage.getItem('adminToken');
+    return {
+      'X-Admin-Token': token
+    };
   };
   
-  // 비밀번호 입력 시 상태 업데이트
+  // 인증 상태 업데이트
   const updateAuthStatus = () => {
-    const password = qs('#adminPassword').value.trim();
+    const token = localStorage.getItem('adminToken');
     const statusDiv = qs('#authStatus');
     
-    if (password) {
-      statusDiv.textContent = '✅ 비밀번호가 설정되었습니다. API 호출이 가능합니다.';
+    if (token) {
+      statusDiv.textContent = '✅ 로그인되어 있습니다. API 호출이 가능합니다.';
       statusDiv.className = 'success';
     } else {
-      statusDiv.textContent = '⚠️ 비밀번호를 입력해야 API 호출이 가능합니다.';
-      statusDiv.className = 'muted';
+      statusDiv.textContent = '⚠️ 로그인이 필요합니다.';
+      statusDiv.className = 'error';
     }
   };
+
+  updateAuthStatus();
 
   function renderOpeningHours() {
     const container = qs('#openingHoursList');
@@ -184,9 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSns();
   });
 
-  // 비밀번호 입력 이벤트 리스너
-  qs('#adminPassword').addEventListener('input', updateAuthStatus);
-
   // 메인 이미지 업로드 기능
   qs('#uploadMainImages').addEventListener('click', async () => {
     const fileInput = qs('#mainImageFile');
@@ -208,13 +218,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', file);
         
-        const response = await fetch('/api/images/upload', {
+        const response = await fetch('/api/admin/images/upload', {
           method: 'POST',
           body: formData,
           headers: getAuthHeaders(),
-          credentials: 'include',
         });
         
+        if (response.status === 401) {
+          statusDiv.textContent = '세션이 만료되었습니다. 다시 로그인해주세요.';
+          statusDiv.className = 'error';
+          localStorage.removeItem('adminToken');
+          setTimeout(() => { window.location.href = '/admin-login.html'; }, 2000);
+          return;
+        }
+
         const result = await response.json();
         
         if (!response.ok) {
@@ -263,13 +280,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', file);
         
-        const response = await fetch('/api/images/upload', {
+        const response = await fetch('/api/admin/images/upload', {
           method: 'POST',
           body: formData,
           headers: getAuthHeaders(),
-          credentials: 'include',
         });
         
+        if (response.status === 401) {
+          statusDiv.textContent = '세션이 만료되었습니다. 다시 로그인해주세요.';
+          statusDiv.className = 'error';
+          localStorage.removeItem('adminToken');
+          setTimeout(() => { window.location.href = '/admin-login.html'; }, 2000);
+          return;
+        }
+
         const result = await response.json();
         
         if (!response.ok) {
@@ -358,15 +382,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const res = await fetch('/api/popups', {
+      const res = await fetch('/api/admin/popups/create', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...getAuthHeaders()
         },
         body: JSON.stringify(payload),
-        credentials: 'include',
       });
+
+      if (res.status === 401) {
+        result.textContent = '세션이 만료되었습니다. 다시 로그인해주세요.';
+        result.className = 'error';
+        localStorage.removeItem('adminToken');
+        setTimeout(() => { window.location.href = '/admin-login.html'; }, 2000);
+        return;
+      }
+
       const data = await res.json();
       if (!res.ok) {
         result.textContent = `생성 실패: ${data?.message ?? res.status}`;

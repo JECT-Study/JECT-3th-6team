@@ -46,12 +46,11 @@ spring:
 custom:
   app:
     frontend-url: ${FRONTEND_URL}
+    admin-password: ${ADMIN_PASSWORD}
   jwt:
     accessToken:
       secret: ${JWT_ACCESS_TOKEN_SECRET}
       expirationSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
-  admin:
-    password: ${ADMIN_PASSWORD}
 
 app:
   sse:

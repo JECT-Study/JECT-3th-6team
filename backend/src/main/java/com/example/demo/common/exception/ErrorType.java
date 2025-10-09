@@ -50,6 +50,10 @@ public enum ErrorType {
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "만료된 토큰입니다"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "접근이 거부되었습니다"),
     OAUTH_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "OAUTH_MEMBER_NOT_FOUND", "OAuth 계정과 연결된 회원을 찾을 수 없습니다"), // OAuth2Service.java:52
+    
+    // 관리자 인증 관련
+    ADMIN_PASSWORD_REQUIRED(HttpStatus.UNAUTHORIZED, "ADMIN_PASSWORD_REQUIRED", "관리자 비밀번호가 필요합니다"),
+    INVALID_ADMIN_PASSWORD(HttpStatus.UNAUTHORIZED, "INVALID_ADMIN_PASSWORD", "관리자 비밀번호가 올바르지 않습니다"),
 
     // 외부 API 연동 관련
     OAUTH_TOKEN_REQUEST_FAILED(HttpStatus.BAD_GATEWAY, "OAUTH_TOKEN_REQUEST_FAILED", "OAuth 토큰 요청에 실패했습니다"), // OAuth2Service.java:81

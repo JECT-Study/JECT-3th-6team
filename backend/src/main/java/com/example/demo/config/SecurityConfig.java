@@ -109,14 +109,18 @@ public class SecurityConfig {
                                 "/uploads/**", // 업로드된 이미지 파일 접근 허용
                                 "/index.html",
                                 "/index.js",
+                                // 관리자 페이지들 (자체 세션 토큰 인증 사용)
+                                "/admin-login.html",
+                                "/admin-popup.html",
                                 "/admin-popup-create.html",
-                                "/admin-popup-create.js"
+                                "/admin-popup-create.js",
+                                "/admin-waiting.html"
                         ).permitAll()
                                 // Swagger UI 관련 경로 허용 (dev 환경에서만)
                                 .requestMatchers(request -> environment.acceptsProfiles(Profiles.of("dev")) && isSwaggerPath(request.getRequestURI())).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
-                        .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
-                        .requestMatchers(HttpMethod.POST, "/api/images/upload").permitAll() // 임시: 이미지 업로드 무인증 허용
+                        // 관리자 API - 자체 세션 토큰 인증 사용 (Spring Security 인증 제외)
+                        .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ACTUATOR")
                         .anyRequest().authenticated()
                 )
