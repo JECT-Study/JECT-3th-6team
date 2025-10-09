@@ -48,6 +48,7 @@ export interface RawPopupListItemType {
   dDay: number;
   popupImageUrl: string;
   searchTags: searchTagType;
+  waitingCount: number;
 }
 
 /**
@@ -83,6 +84,7 @@ export interface RawPopupHistoryListItemType {
 }
 
 export interface PopupCardViewProps {
+  type: 'HOME' | 'HISTORY';
   popupId: number;
   popupName: string;
   popupImageUrl: string;
@@ -90,6 +92,9 @@ export interface PopupCardViewProps {
   period: string;
   linkTo: string;
   searchTags: string;
+  dDay: number;
+  registeredAt?: string;
+  waitingCount?: number;
   hasRightBar?: boolean;
   Badge?: React.ReactElement;
   rating?: ratingType;
