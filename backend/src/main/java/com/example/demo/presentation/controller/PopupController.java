@@ -31,9 +31,6 @@ import java.util.Optional;
 public class PopupController {
 
     private final PopupService popupService;
-    //TODO 임시 코드 삭제 필요
-    @Value("${custom.admin.password}")
-    private String adminPassword;
 
     @GetMapping("/map")
     @Operation(summary = "지도 내 팝업 조회", description = "지정된 지도 영역 내의 팝업스토어 목록을 조회합니다.")
@@ -61,17 +58,5 @@ public class PopupController {
         return ResponseEntity.ok(new ApiResponse<>("팝업 상세 조회가 성공했습니다.", popupDetail));
     }
 
-    @PostMapping
-    @Operation(summary = "팝업 생성", description = "새로운 팝업스토어를 등록합니다.")
-    public ResponseEntity<ApiResponse<PopupCreateResponse>> createPopup(
-            @Parameter(description = "팝업 생성 정보") @Valid @RequestBody PopupCreateRequest request,
-            @Parameter(description = "관리자 비밀번호") @RequestHeader("Authorization") String password
-    ) {
-        //TODO 임시 코드 삭제 필요
-        if (!password.equals(adminPassword)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("비밀번호가 잘못되었습니다.", null));
-        }
-        PopupCreateResponse response = popupService.create(request);
-        return ResponseEntity.ok(new ApiResponse<>("팝업이 성공적으로 등록되었습니다.", response));
-    }
+    // 팝업 생성 기능은 AdminController로 이동되었습니다
 }

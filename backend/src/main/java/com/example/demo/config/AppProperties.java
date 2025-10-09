@@ -12,4 +12,5 @@ import java.util.List;
 public class AppProperties {
     private String frontendUrl;
     private List<String> corsAllowedOrigins;
+    private String adminPassword;
 } 

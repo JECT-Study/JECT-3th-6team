@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대기 목록 관리 - SPOTIT Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-success:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .waiting-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .waiting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .waiting-item.first {
+            border-color: #4caf50;
+            background: #f1f8f1;
+        }
+
+        .waiting-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            width: 60px;
+            text-align: center;
+        }
+
+        .waiting-item.first .waiting-number {
+            color: #4caf50;
+        }
+
+        .waiting-info {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .waiting-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .waiting-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .waiting-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>👥 대기 목록 관리</h1>
+            <div class="header-buttons">
+                <button class="btn btn-secondary" onclick="goBack()">← 팝업 목록으로</button>
+                <button class="btn btn-primary" onclick="location.reload()">🔄 새로고침</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title" id="popupTitle">팝업 이름</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">총 대기 팀</div>
+                    <div class="stat-value" id="totalCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">현재 페이지</div>
+                    <div class="stat-value" id="currentPage">1</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">전체 페이지</div>
+                    <div class="stat-value" id="totalPages">0</div>
+                </div>
+            </div>
+
+            <div id="waitingList" class="waiting-list">
+                <div class="loading">⏳ 데이터를 불러오는 중...</div>
+            </div>
+
+            <div id="pagination" class="pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '/api/admin';
+        const urlParams = new URLSearchParams(window.location.search);
+        const popupId = urlParams.get('popupId');
+        let currentPage = 0;
+        const pageSize = 20;
+        let totalPages = 0;
+        let waitings = [];
+
+        // 인증 확인
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/admin-login.html';
+                return null;
+            }
+            return token;
+        }
+
+        // 뒤로 가기
+        function goBack() {
+            window.location.href = '/admin-popup.html';
+        }
+
+        // 대기 목록 불러오기
+        async function loadWaitings(page = 0) {
+            const token = checkAuth();
+            if (!token) return;
+
+            if (!popupId) {
+                alert('팝업 ID가 없습니다.');
+                goBack();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/popups/${popupId}/waitings?page=${page}&size=${pageSize}`, {
+                    headers: {
+                        'X-Admin-Token': token
+                    }
+                });
+
+                if (response.status === 401) {
+                    alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+                    localStorage.removeItem('adminToken');
+                    window.location.href = '/admin-login.html';
+                    return;
+                }
+
+                const data = await response.json();
+                const result = data.data;
+
+                waitings = result.waitings || [];
+                currentPage = result.page || 0;
+                totalPages = result.totalPages || 0;
+
+                document.getElementById('totalCount').textContent = result.totalCount || 0;
+                document.getElementById('currentPage').textContent = currentPage + 1;
+                document.getElementById('totalPages').textContent = totalPages;
+
+                renderWaitings();
+                renderPagination();
+            } catch (error) {
+                console.error('대기 목록 로드 오류:', error);
+                document.getElementById('waitingList').innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div>데이터를 불러오는데 실패했습니다.</div></div>';
+            }
+        }
+
+        // 대기 목록 렌더링
+        function renderWaitings() {
+            const listDiv = document.getElementById('waitingList');
+
+            if (waitings.length === 0) {
+                listDiv.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div>대기 중인 팀이 없습니다.</div></div>';
+                return;
+            }
+
+            listDiv.innerHTML = waitings.map(waiting => {
+                const isFirst = waiting.waitingNumber === 0;
+                return `
+                    <div class="waiting-item ${isFirst ? 'first' : ''}">
+                        <div class="waiting-number">${waiting.waitingNumber}</div>
+                        <div class="waiting-info">
+                            <div class="waiting-name">${waiting.waitingPersonName}</div>
+                            <div class="waiting-meta">
+                                <span>👥 ${waiting.peopleCount}명</span>
+                                <span>📧 ${waiting.contactEmail}</span>
+                                <span>⏰ ${formatDateTime(waiting.registeredAt)}</span>
+                            </div>
+                        </div>
+                        <div class="waiting-actions">
+                            <button 
+                                class="btn btn-success btn-small" 
+                                onclick="enterWaiting(${waiting.id})"
+                                ${!isFirst ? 'disabled' : ''}
+                            >
+                                ${isFirst ? '✅ 입장' : '⏳ 대기중'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 페이지네이션 렌더링
+        function renderPagination() {
+            const paginationDiv = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // 이전 버튼
+            html += `<button class="page-btn" onclick="loadWaitings(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>이전</button>`;
+
+            // 페이지 번호
+            for (let i = 0; i < totalPages; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="loadWaitings(${i})">${i + 1}</button>`;
+            }
+
+            // 다음 버튼
+            html += `<button class="page-btn" onclick="loadWaitings(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>다음</button>`;
+
+            paginationDiv.innerHTML = html;
+        }
+
+        // 입장 처리
+        async function enterWaiting(waitingId) {
+            if (!confirm('입장 처리하시겠습니까?')) return;
+
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/waitings/${waitingId}/enter`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Admin-Token': token
+                    }
+                });
+
+                if (response.ok) {
+                    alert('입장 처리되었습니다.');
+                    loadWaitings(currentPage);
+                } else {
+                    const error = await response.json();
+                    alert(`입장 처리에 실패했습니다: ${error.message}`);
+                }
+            } catch (error) {
+                console.error('입장 처리 오류:', error);
+                alert('입장 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 날짜 시간 포맷팅
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '?';
+            const date = new Date(dateTimeStr);
+            return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // 페이지 로드 시 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            loadWaitings(0);
+        });
+    </script>
+</body>
+</html>
+
