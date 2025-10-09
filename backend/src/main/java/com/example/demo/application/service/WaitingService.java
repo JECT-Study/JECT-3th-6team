@@ -157,6 +157,7 @@ public class WaitingService {
     /**
      * 대기열 입장 처리
      */
+    //TODO 관리자 페이지에서 이거 사용하도록 수정하거나 삭제
     @Transactional
     public void makeVisit(WaitingMakeVisitRequest request) {
         // 1. 대기 정보 조회
@@ -166,9 +167,6 @@ public class WaitingService {
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(request.waitingId())));
 
-        if (waiting.waitingNumber() != 0) {
-            throw new BusinessException(ErrorType.WAITING_NOT_READY, String.valueOf(request.waitingId()));
-        }
         // 2. 입장 처리
         Waiting enteredWaiting = waiting.enter();
 
