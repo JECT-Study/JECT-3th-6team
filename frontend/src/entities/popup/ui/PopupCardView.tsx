@@ -119,7 +119,7 @@ const PopupCardContent = ({
       return (
         <span className="text-sm font-light text-gray60">
           현재{' '}
-          <strong className="text-main font-medium">{waitingCount}명</strong>{' '}
+          <strong className="text-main font-medium">{waitingCount}팀</strong>{' '}
           웨이팅 중
         </span>
       );

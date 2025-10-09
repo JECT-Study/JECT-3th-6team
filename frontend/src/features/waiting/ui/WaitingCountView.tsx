@@ -8,7 +8,19 @@ export default function WaitingCountView({
   data: PopupHistoryListItemType;
 }) {
   return (
-    <div className={'w-full h-[70vh]  flex items-center justify-center '}>
+    <div
+      className={
+        'w-full h-[70vh]  flex flex-col items-center justify-center relative '
+      }
+    >
+      <span
+        className={'font-medium text-[20px] text-black absolute top-[34px]'}
+      >
+        예상 대기시간{' '}
+        <strong className={'text-main'}>
+          {data.expectedWaitingTimeMinutes}분
+        </strong>
+      </span>
       <div className={'flex flex-col items-center justify-center gap-y-4'}>
         <Image src={LogoImage} alt="spotit-logo" width={64} height={56} />
         <div className={'flex flex-col items-center gap-y-[10px]'}>

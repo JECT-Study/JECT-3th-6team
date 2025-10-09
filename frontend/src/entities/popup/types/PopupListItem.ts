@@ -65,6 +65,8 @@ export interface RawPopupHistoryListItemType {
   peopleCount: number;
   contactEmail: string;
   registeredAt: string;
+  waitingCount: number;
+  expectedWaitingTimeMinutes: number;
   popup: {
     popupId: number;
     popupName: string;
@@ -82,6 +84,12 @@ export interface RawPopupHistoryListItemType {
     searchTags: searchTagType;
   };
 }
+
+/**
+ * =========================
+ *   팝업 카드 랜더링용 데이터
+ * =========================
+ */
 
 export interface PopupCardViewProps {
   type: 'HOME' | 'HISTORY';

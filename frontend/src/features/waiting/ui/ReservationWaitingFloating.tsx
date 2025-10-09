@@ -7,9 +7,10 @@ import LogoImage from '/public/images/spotit-logo.png';
 import Image from 'next/image';
 import IconArrow from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/shared/lib';
 
 export default function ReservationWaitingFloating() {
-  const { user, isLoggedIn } = useUserStore(state => state.userState);
+  const { isLoggedIn } = useUserStore(state => state.userState);
   const { data, isError, error } = useWaitingNumber();
   const router = useRouter();
 
@@ -19,7 +20,7 @@ export default function ReservationWaitingFloating() {
   }, [data?.status]);
   if (!isLoggedIn) return null;
   if (isError)
-    console.log(
+    logger.error(
       'error :',
       '대기 순번을 불러오는데 실패했습니다.',
       error.message
@@ -39,7 +40,7 @@ export default function ReservationWaitingFloating() {
         }}
         className="w-full h-[72px] rounded-full  bg-white shadow-card flex items-center justify-between px-[16px] cursor-pointer hover:bg-sub2 transition-colors duration-300"
       >
-        {/*이미지와 사용자 이름*/}
+        {/*이미지와 팝업이름*/}
         <div className={'flex items-center gap-x-[12px]'}>
           <div
             className={
@@ -49,9 +50,12 @@ export default function ReservationWaitingFloating() {
             <Image src={LogoImage} alt="spotit-logo" width={25} height={25} />
           </div>
           <div className={'flex flex-col'}>
-            <p className={'font-medium text-[16px]'}>{user?.nickname} 님</p>
+            <p className={'font-medium text-[16px]'}>{data.popup.popupName}</p>
             <span className={'font-regular text-gray80 text-[14px]'}>
-              현재 대기순번
+              예상 대기 시간 :{' '}
+              <strong className={'text-main'}>
+                {data.expectedWaitingTimeMinutes}분
+              </strong>
             </span>
           </div>
         </div>
@@ -59,7 +63,7 @@ export default function ReservationWaitingFloating() {
         {/*대기순번과 화살표*/}
         <div className={'flex items-center gap-x-[14px]'}>
           <span className={'text-[24px] font-semibold text-main'}>
-            {data.waitingNumber === 0 ? '지금 입장' : `${data.waitingNumber}번`}
+            {data.waitingNumber === 0 ? '지금 입장' : `${data.waitingNumber}팀`}
           </span>
           <IconArrow width={22} height={22} fill={'var(--color-gray80)'} />
         </div>

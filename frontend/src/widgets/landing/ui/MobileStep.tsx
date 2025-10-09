@@ -69,7 +69,7 @@ export default function MobileStep(props: StepProps) {
         size={'full'}
         className={'w-[334px] absolute bottom-10'}
       >
-        다음
+        {currentStep === 'GUIDE_3' ? '시작하기' : '다음'}
       </StandardButton>
     </div>
   );
