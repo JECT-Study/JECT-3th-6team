@@ -18,6 +18,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +60,11 @@ public class BanPortAdaptor implements BanPort {
             }
             case null, default -> throw new BusinessException(ErrorType.FEATURE_NOT_IMPLEMENTED);
         }
+
+        if (query.isActiveOnly()) {
+            builder.and(banEntity.endAt.goe(LocalDateTime.now()));
+        }
+
         List<BanEntity> banEntities = jpaQueryFactory.selectFrom(banEntity)
                 .where(builder)
                 .fetch();
