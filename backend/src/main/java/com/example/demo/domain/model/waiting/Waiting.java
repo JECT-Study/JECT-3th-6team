@@ -126,7 +126,7 @@ public record Waiting(
         }
 
         if (waitingNumber != 0) {
-            throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호가 0이 아닙니다.");
+            throw new BusinessException(ErrorType.WAITING_NOT_READY, "대기 번호가 0이 아닙니다.");
         }
 
         LocalDateTime enteredAt = LocalDateTime.now();
@@ -150,7 +150,7 @@ public record Waiting(
 
     public Waiting minusWaitingNumber(PopupWaitingStatistics waitingStatistics) {
         if (waitingNumber == 0) {
-            throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호는 0 이상이어야 합니다.");
+            throw new BusinessException(ErrorType.WAITING_NOT_READY, "대기 번호는 0 이상이어야 합니다.");
         }
 
         if (status != WaitingStatus.WAITING) {
