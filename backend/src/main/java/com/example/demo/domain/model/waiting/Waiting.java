@@ -7,6 +7,7 @@ import com.example.demo.domain.model.popup.Popup;
 import jakarta.validation.constraints.Email;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -128,6 +129,9 @@ public record Waiting(
             throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호가 0이 아닙니다.");
         }
 
+        LocalDateTime enteredAt = LocalDateTime.now();
+        LocalDateTime canEnterAt = Optional.ofNullable(canEnterAt()).orElse(enteredAt); // canEnterAt이 null인 경우 현재 시간 사용
+
         return new Waiting(
                 id,
                 popup,
@@ -138,7 +142,7 @@ public record Waiting(
                 waitingNumber,
                 WaitingStatus.VISITED,
                 registeredAt,
-                LocalDateTime.now(),
+                enteredAt,
                 canEnterAt,
                 expectedWaitingTimeMinutes
         );
@@ -152,8 +156,6 @@ public record Waiting(
         if (status != WaitingStatus.WAITING) {
             throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
         }
-
-        LocalDateTime canEnterAt = waitingNumber == 1 ? LocalDateTime.now() : null;
 
         return new Waiting(
                 id,
@@ -193,6 +195,27 @@ public record Waiting(
                 registeredAt,
                 enteredAt,
                 canEnterAt,
+                expectedWaitingTimeMinutes
+        );
+    }
+
+    public Waiting markAsCanEnter() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.WAITING,
+                registeredAt,
+                enteredAt,
+                LocalDateTime.now(),
                 expectedWaitingTimeMinutes
         );
     }

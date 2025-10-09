@@ -107,8 +107,8 @@ public class WaitingService {
         // 5. 대기 정보 저장
         Waiting savedWaiting = waitingPort.save(waiting);
 
-        // 7. 새로운 알림 서비스로 모든 알림 처리 위임
-        waitingNotificationService.processWaitingCreatedNotifications(savedWaiting);
+        // 7. 확인 알림 발송
+        waitingNotificationService.sendWaitingConfirmedNotification(savedWaiting);
 
         // 8. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
@@ -157,6 +157,7 @@ public class WaitingService {
     /**
      * 대기열 입장 처리
      */
+    //TODO 관리자 페이지에서 이거 사용하도록 수정하거나 삭제
     @Transactional
     public void makeVisit(WaitingMakeVisitRequest request) {
         // 1. 대기 정보 조회
@@ -166,9 +167,6 @@ public class WaitingService {
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(request.waitingId())));
 
-        if (waiting.waitingNumber() != 0) {
-            throw new BusinessException(ErrorType.WAITING_NOT_READY, String.valueOf(request.waitingId()));
-        }
         // 2. 입장 처리
         Waiting enteredWaiting = waiting.enter();
 

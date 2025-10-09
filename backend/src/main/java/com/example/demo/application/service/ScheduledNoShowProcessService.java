@@ -41,13 +41,13 @@ public class ScheduledNoShowProcessService {
     @Scheduled(fixedDelay = 30_000)
     @Transactional
     public void processNoShows() {
-        log.debug("노쇼 처리 스케줄러 시작: {}", LocalDateTime.now());
+        log.info("노쇼 처리 스케줄러 시작: {}", LocalDateTime.now());
 
         // 1. 10분 초과된 대기자들 조회
         List<Waiting> noShowTargets = findNoShowTargets();
 
         if (noShowTargets.isEmpty()) {
-            log.debug("노쇼 대상자가 없습니다.");
+            log.info("노쇼 대상자가 없습니다.");
             return;
         }
 
@@ -62,7 +62,7 @@ public class ScheduledNoShowProcessService {
             }
         });
 
-        log.debug("노쇼 처리 스케줄러 완료: {}", LocalDateTime.now());
+        log.info("노쇼 처리 스케줄러 완료: {}", LocalDateTime.now());
     }
 
     /**
