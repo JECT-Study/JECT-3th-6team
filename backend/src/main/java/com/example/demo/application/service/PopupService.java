@@ -1,18 +1,22 @@
 package com.example.demo.application.service;
 
 import com.example.demo.application.dto.PopupDetailResponse;
+import com.example.demo.application.dto.PopupDetailResponse.WaitingStatusForPopupDetailResponse;
 import com.example.demo.application.dto.popup.*;
 import com.example.demo.application.dto.popup.PopupCursorResponse.PopupListElementResponse;
 import com.example.demo.application.mapper.PopupDtoMapper;
 import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.BrandStory;
+import com.example.demo.domain.model.ban.BanQuery;
+import com.example.demo.domain.model.ban.BanType;
 import com.example.demo.domain.model.popup.Popup;
 import com.example.demo.domain.model.popup.PopupMapQuery;
 import com.example.demo.domain.model.popup.PopupQuery;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
+import com.example.demo.domain.port.BanPort;
 import com.example.demo.domain.port.BrandStoryPort;
 import com.example.demo.domain.port.PopupPort;
 import com.example.demo.domain.port.WaitingPort;
@@ -35,6 +39,7 @@ public class PopupService {
     private final BrandStoryPort brandStoryPort;
     private final PopupDtoMapper popupDtoMapper;
     private final WaitingPort waitingPort;
+    private final BanPort banPort;
 
     @Transactional(readOnly = true)
     public List<PopupMapResponse> getPopupsOnMap(PopupMapRequest request) {
@@ -69,7 +74,7 @@ public class PopupService {
         var brandStory = brandStoryPort.findByPopupId(popupId)
                 .orElse(new BrandStory(Collections.emptyList(), Collections.emptyList()));
         long dDay = ChronoUnit.DAYS.between(LocalDate.now(), popup.getSchedule().dateRange().endDate());
-        WaitingStatus status = calculateReservationStatus(popupId, memberId);
+        WaitingStatusForPopupDetailResponse status = calculateReservationStatus(popupId, memberId);
 
         return new PopupDetailResponse(
                 popup.getId(),
@@ -85,12 +90,25 @@ public class PopupService {
         );
     }
 
-    private WaitingStatus calculateReservationStatus(Long popupId, Long memberId) {
-        if (memberId == null) return WaitingStatus.NONE;
+    private WaitingStatusForPopupDetailResponse calculateReservationStatus(Long popupId, Long memberId) {
+        if (memberId == null) return WaitingStatusForPopupDetailResponse.NONE;
 
-        return waitingPort.findByMemberIdAndPopupId(memberId, popupId)
-                .map(Waiting::status)
-                .orElse(WaitingStatus.NONE);
+        boolean isStoreBan = !banPort.findByQuery(BanQuery.byMemberAndPopup(memberId, popupId)).isEmpty();
+        boolean isGlobalBan = !banPort.findByQuery(BanQuery.byBanType(BanType.GLOBAL)).isEmpty();
+
+        if (isStoreBan) return WaitingStatusForPopupDetailResponse.STORE_BAN;
+        if (isGlobalBan) return WaitingStatusForPopupDetailResponse.GLOBAL_BAN;
+
+        List<Waiting> waitings = waitingPort.findByQuery(WaitingQuery.forMemberAndPopupOnDate(memberId, popupId, LocalDate.now()));
+        if (waitings.isEmpty()) return WaitingStatusForPopupDetailResponse.NONE;
+
+        boolean isWaiting = waitings.stream().anyMatch(it -> it.status() == WaitingStatus.WAITING);
+        boolean isVisited = waitings.stream().anyMatch(it -> it.status() == WaitingStatus.VISITED);
+        boolean isNoShow = waitings.stream().anyMatch(it -> it.status() == WaitingStatus.NO_SHOW);
+        if (isWaiting) return WaitingStatusForPopupDetailResponse.WAITING;
+        if (isVisited) return WaitingStatusForPopupDetailResponse.VISITED;
+        if (isNoShow) return WaitingStatusForPopupDetailResponse.NO_SHOW;
+        return WaitingStatusForPopupDetailResponse.NONE;
     }
 
     @Transactional
