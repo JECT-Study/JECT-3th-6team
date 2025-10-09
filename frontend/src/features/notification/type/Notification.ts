@@ -9,7 +9,9 @@ export type NotificationCodeType =
   | 'WAITING_CONFIRMED'
   | 'ENTER_3TEAMS_BEFORE'
   | 'ENTER_NOW'
-  | 'ENTER_TIME_OVER';
+  | 'ENTER_TIME_OVER'
+  | 'NOSHOW_FIRST'
+  | 'NOSHOW_SECOND';
 
 export default interface NotificationType {
   notificationId: number;
