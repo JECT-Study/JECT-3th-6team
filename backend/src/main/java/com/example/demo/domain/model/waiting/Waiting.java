@@ -153,8 +153,6 @@ public record Waiting(
             throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
         }
 
-        LocalDateTime canEnterAt = waitingNumber == 1 ? LocalDateTime.now() : null;
-
         return new Waiting(
                 id,
                 popup,
