@@ -26,7 +26,7 @@ public class CanEnterAtScheduleService {
                 waiting.id(), waiting.member().id(), waiting.popup().getId());
     }
 
-    @Scheduled(fixedRate = 10, timeUnit = SECONDS)
+    @Scheduled(fixedRate = 5, timeUnit = SECONDS)
     @Transactional
     public void processCanEnterAt() {
         log.info("입장 가능 시간 설정 스케줄러 시작: {}", LocalDateTime.now());
