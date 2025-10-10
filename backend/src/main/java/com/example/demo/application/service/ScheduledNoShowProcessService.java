@@ -59,6 +59,7 @@ public class ScheduledNoShowProcessService {
                 processNoShow(waiting);
             } catch (Exception e) {
                 log.error("노쇼 처리 실패 - 대기 ID: {}", waiting.id(), e);
+                throw e; // 트랜잭션 롤백을 위해 예외 재발생
             }
         });
 
