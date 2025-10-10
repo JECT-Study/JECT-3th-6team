@@ -58,6 +58,21 @@ public class BanPortAdaptor implements BanPort {
                     builder.and(banEntity.popupId.isNull());
                 }
             }
+            case BanQuery.ByBanTypeAndMemberIdAndIsActive banQuery -> {
+                if (banQuery.getType() == BanType.STORE) {
+                    builder.and(banEntity.popupId.isNotNull());
+                } else {
+                    builder.and(banEntity.popupId.isNull());
+                }
+                builder.and(banEntity.memberId.eq(banQuery.getMemberId()));
+            }
+            case BanQuery.StoreBanHistory banQuery -> {
+                builder.and(banEntity.memberId.eq(banQuery.getMemberId())
+                        .and(banEntity.popupId.eq(banQuery.getPopupId())));
+                Optional.ofNullable(banQuery.getLastGlobalBannedAt()).ifPresent(it -> {
+                    builder.and(banEntity.startAt.after(it));
+                });
+            }
             case null, default -> throw new BusinessException(ErrorType.FEATURE_NOT_IMPLEMENTED);
         }
 

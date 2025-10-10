@@ -129,11 +129,9 @@ public class ScheduledNoShowProcessService {
     }
 
     private void globalBanIfNeed(Waiting waiting) {
-        List<Ban> globalBanHistory = banPort.findByQuery(new BanQuery(
-                waiting.member().id(),
+        List<Ban> globalBanHistory = banPort.findByQuery(BanQuery.byBanTypeAndMemberIdAndIsActive(
                 BanType.GLOBAL,
-                null,
-                null,
+                waiting.member().id(),
                 false
         ));
 
@@ -143,14 +141,11 @@ public class ScheduledNoShowProcessService {
                 .max(Comparator.naturalOrder())
                 .orElse(null);
 
-        int banCount = banPort.findByQuery(new BanQuery(
-                        waiting.member().id(),
-                        BanType.STORE,
-                        null,
-                        lastGlobalBannedAt,
-                        false
-                )
-        ).size();
+        int banCount = banPort.findByQuery(BanQuery.storeBanHistory(
+                waiting.member().id(),
+                waiting.popup().getId(),
+                lastGlobalBannedAt
+        )).size();
         if (banCount >= 10) {
             banPort.save(
                     Ban.builder()
