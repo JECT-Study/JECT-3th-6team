@@ -59,6 +59,7 @@ public class ScheduledNoShowProcessService {
                 processNoShow(waiting);
             } catch (Exception e) {
                 log.error("노쇼 처리 실패 - 대기 ID: {}", waiting.id(), e);
+                throw e; // 트랜잭션 롤백을 위해 예외 재발생
             }
         });
 
@@ -128,11 +129,9 @@ public class ScheduledNoShowProcessService {
     }
 
     private void globalBanIfNeed(Waiting waiting) {
-        List<Ban> globalBanHistory = banPort.findByQuery(new BanQuery(
-                waiting.member().id(),
+        List<Ban> globalBanHistory = banPort.findByQuery(BanQuery.byBanTypeAndMemberIdAndIsActive(
                 BanType.GLOBAL,
-                null,
-                null,
+                waiting.member().id(),
                 false
         ));
 
@@ -142,14 +141,11 @@ public class ScheduledNoShowProcessService {
                 .max(Comparator.naturalOrder())
                 .orElse(null);
 
-        int banCount = banPort.findByQuery(new BanQuery(
-                        waiting.member().id(),
-                        BanType.STORE,
-                        null,
-                        lastGlobalBannedAt,
-                        false
-                )
-        ).size();
+        int banCount = banPort.findByQuery(BanQuery.storeBanHistory(
+                waiting.member().id(),
+                waiting.popup().getId(),
+                lastGlobalBannedAt
+        )).size();
         if (banCount >= 10) {
             banPort.save(
                     Ban.builder()

@@ -31,6 +31,14 @@ public sealed class BanQuery {
         return new ByBanType(banType);
     }
 
+    public static BanQuery byBanTypeAndMemberIdAndIsActive(BanType banType, Long memberId, boolean isActiveOnly) {
+        return new ByBanTypeAndMemberIdAndIsActive(banType, memberId, isActiveOnly);
+    }
+
+    public static BanQuery storeBanHistory(Long memberId, Long popupId, LocalDateTime lastGlobalBannedAt) {
+        return new StoreBanHistory(memberId, popupId, lastGlobalBannedAt);
+    }
+
     public static final class ByMemberIdFromAll extends BanQuery {
         private ByMemberIdFromAll(Long memberId, BanType type, Long popupId, LocalDateTime lastGlobalBannedAt, boolean isActiveOnly) {
             super(memberId, type, popupId, lastGlobalBannedAt, isActiveOnly);
@@ -58,6 +66,26 @@ public sealed class BanQuery {
 
         public ByBanType(BanType banType) {
             this(null, banType, null, null, true);
+        }
+    }
+
+    public static final class ByBanTypeAndMemberIdAndIsActive extends BanQuery {
+        private ByBanTypeAndMemberIdAndIsActive(Long memberId, BanType type, Long popupId, LocalDateTime lastGlobalBannedAt, boolean isActiveOnly) {
+            super(memberId, type, popupId, lastGlobalBannedAt, isActiveOnly);
+        }
+
+        public ByBanTypeAndMemberIdAndIsActive(BanType banType, Long memberId, boolean isActiveOnly) {
+            this(memberId, banType, null, null, isActiveOnly);
+        }
+    }
+
+    public static final class StoreBanHistory extends BanQuery {
+        private StoreBanHistory(Long memberId, BanType type, Long popupId, LocalDateTime lastGlobalBannedAt, boolean isActiveOnly) {
+            super(memberId, type, popupId, lastGlobalBannedAt, isActiveOnly);
+        }
+
+        public StoreBanHistory(Long memberId, Long popupId, LocalDateTime lastGlobalBannedAt) {
+            this(memberId, BanType.STORE, popupId, lastGlobalBannedAt, false);
         }
     }
 }
