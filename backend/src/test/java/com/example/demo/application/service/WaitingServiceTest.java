@@ -388,7 +388,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
-                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now
+                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null
             );
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
@@ -399,7 +399,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
-                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now
+                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now, null
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -441,7 +441,7 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일",
                     new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
-            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now);
+            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
@@ -449,7 +449,7 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일",
                     new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
-            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1));
+            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1), null);
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
             when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
@@ -521,7 +521,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now
+                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now, null
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -565,7 +565,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now
+                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now, null
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
@@ -622,7 +622,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now
+                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now, null
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
