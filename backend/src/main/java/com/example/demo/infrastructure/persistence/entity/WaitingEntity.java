@@ -3,7 +3,11 @@ package com.example.demo.infrastructure.persistence.entity;
 import com.example.demo.common.entity.BaseEntity;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "waitings")
 @Getter
-@Builder
+@SuperBuilder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WaitingEntity extends BaseEntity {
@@ -57,10 +61,4 @@ public class WaitingEntity extends BaseEntity {
 
     @Column(name = "expected_waiting_time_minutes")
     private Integer expectedWaitingTimeMinutes;
-} 
-
-/*
-1. 웨이팅 엔티티에는 필드 추가
-2. 웨이팅에서는 시간만
-3. 웨이팅 통계에서는 인이셔널
- */
+}

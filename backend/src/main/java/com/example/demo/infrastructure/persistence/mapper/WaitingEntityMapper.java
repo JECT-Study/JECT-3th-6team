@@ -67,6 +67,7 @@ public class WaitingEntityMapper {
                 .enteredAt(waiting.enteredAt())
                 .canEnterAt(waiting.canEnterAt())
                 .expectedWaitingTimeMinutes(waiting.expectedWaitingTimeMinutes())
+                .createdAt(waiting.registeredAt())
                 .build();
     }
 } 
