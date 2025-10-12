@@ -3,14 +3,11 @@
 import Link from 'next/link';
 import Image, { StaticImageData } from 'next/image';
 import React, { useEffect, useState } from 'react';
-import {
-  PopupCardViewProps,
-  ratingType,
-} from '@/entities/popup/types/PopupListItem';
+import { PopupCardViewProps } from '@/entities/popup/types/PopupListItem';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
-import IconStar from '@/assets/icons/Normal/Icon_Star.svg';
 import IconBracketRight from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
 import DefaultImage from '/public/images/default-popup-image.png';
+import dateToString from '@/entities/popup/lib/dateToString';
 
 type ImgSrc = string | StaticImageData;
 const PopupCardLink = ({
@@ -82,37 +79,76 @@ const PopupCardImage = ({
 const PopupCardContent = ({
   location,
   popupName,
-  rating,
   period,
-  searchTags,
-}: {
-  location: string;
-  popupName: string;
-  rating?: ratingType;
-  period: string;
-  searchTags: string;
-}) => (
-  <div className="relative flex flex-1 flex-col justify-between py-3 pl-4">
-    <div className="flex flex-col gap-y-[3px]">
-      <p className="flex items-center font-medium text-sm text-gray60 gap-x-1">
-        <IconMap width={22} height={30} fill={'var(--color-gray60)'} />
-        <span>{location}</span>
-      </p>
-      <h3 className="text-black font-medium text-base">{popupName}</h3>
-      <p className="text-gray60 font-regular text-[14px]">{searchTags}</p>
-      {rating && (
-        <p className="font-regular text-sm/normal text-gray60 flex gap-x-1 items-center">
-          <IconStar width={16} height={16} fill={'var(--color-main)'} />
-          <span>{rating.averageStar}</span>
-          <span>({rating.reviewCount})</span>
+  waitingCount,
+  dDay,
+  type,
+  registeredAt,
+}: Pick<
+  PopupCardViewProps,
+  | 'location'
+  | 'popupName'
+  | 'period'
+  | 'waitingCount'
+  | 'dDay'
+  | 'type'
+  | 'registeredAt'
+>) => {
+  const isExpired = dDay < 0;
+
+  const renderStatusText = () => {
+    if (type === 'HOME' && isExpired) {
+      return (
+        <span className="text-[14px] font-light text-gray60">
+          운영이 종료되었어요.
+        </span>
+      );
+    }
+
+    if (type === 'HISTORY' && registeredAt !== undefined) {
+      const date = new Date(registeredAt);
+      const dateString = dateToString(date);
+      return (
+        <span className="text-sm font-light text-gray60">
+          {dateString} 방문 완료
+        </span>
+      );
+    }
+
+    if (waitingCount !== undefined) {
+      return (
+        <span className="text-sm font-light text-gray60">
+          현재{' '}
+          <strong className="text-main font-medium">{waitingCount}팀</strong>{' '}
+          웨이팅 중
+        </span>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="relative flex flex-1 flex-col justify-between py-3 pl-4">
+      <div className="flex flex-col gap-y-[3px]">
+        <h3 className="text-black font-medium text-base">{popupName}</h3>
+        <div className="block font-medium text-gray60 text-sm tracking-tight">
+          {period}
+        </div>
+
+        <p className="flex items-center font-medium text-sm text-gray60 gap-x-[3px]">
+          <IconMap width={22} height={30} fill={'var(--color-gray60)'} />
+          <span>{location}</span>
         </p>
-      )}
+      </div>
+
+      {/** 1.접속 일자가 기간 내일 때 & 기본 : 현재 WaitingCount 명 웨이팅 중*/}
+      {/** 2. 접속 일자가 기간 내 일때 & 방문 완료일 때 & 내방문 페이지에서(type===HISTORY) :0월 0일 방문 완료(registerdAt)*/}
+      {/** 3. 접속 일자가 period의 마침 날짜 이후일 때 : 운영이 종료되었어요. (dDay로 판단 - isExpired)*/}
+      {renderStatusText()}
     </div>
-    <div className="block font-medium text-gray60 text-sm tracking-tight">
-      {period}
-    </div>
-  </div>
-);
+  );
+};
 
 const PopupCardRightBar = () => (
   <div className="absolute top-0 right-0 w-[24px] h-full bg-main flex items-center justify-center rounded-r-2xl">
@@ -131,9 +167,11 @@ export default function PopupCardView(props: PopupCardViewProps) {
       <PopupCardContent
         location={props.location}
         popupName={props.popupName}
-        rating={props.rating}
         period={props.period}
-        searchTags={props.searchTags}
+        waitingCount={props.waitingCount}
+        dDay={props.dDay}
+        type={props.type}
+        registeredAt={props.registeredAt}
       />
       {props.hasRightBar && <PopupCardRightBar />}
     </PopupCardLink>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import { useQuery } from '@tanstack/react-query';
 
@@ -129,6 +129,7 @@ export default function FilterGroupMapContainer() {
           category: ['패션'],
         },
         tag: 'DEFAULT' as const,
+        waitingCount: 3,
       };
 
       setSelectedPopupData(mockPopupData);

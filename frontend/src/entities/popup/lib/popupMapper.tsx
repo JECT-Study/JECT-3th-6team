@@ -33,6 +33,7 @@ const mapPopupListItemToViewProps = (
   const renderLocation = `${region1depthName}, ${region2depthName}`;
   const renderTag = formatSearchTags(data.searchTags);
   return {
+    type: 'HOME',
     popupId: data.popupId,
     popupName: data.popupName,
     popupImageUrl: data.popupImageUrl,
@@ -41,7 +42,8 @@ const mapPopupListItemToViewProps = (
     linkTo: `/detail/${data.popupId}`,
     Badge: renderedBadge,
     searchTags: renderTag,
-    //rating: data.rating,
+    waitingCount: data.waitingCount,
+    dDay: data.dDay,
   };
 };
 
@@ -59,6 +61,8 @@ const mapHistoryItemToViewProps = (
   const renderTag = formatSearchTags(data.popup.searchTags);
 
   return {
+    dDay: data.popup.dDay,
+    type: 'HISTORY',
     popupId: data.popup.popupId,
     popupName: data.popup.popupName,
     popupImageUrl: data.popup.popupImageUrl,
@@ -71,7 +75,7 @@ const mapHistoryItemToViewProps = (
         : `/detail/${data.popup.popupId}`,
     Badge: renderedBadge,
     searchTags: renderTag,
-    // rating: data.rating,
+    registeredAt: data.registeredAt,
   };
 };
 
