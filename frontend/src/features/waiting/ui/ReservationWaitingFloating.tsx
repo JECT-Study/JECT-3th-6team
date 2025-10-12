@@ -7,6 +7,7 @@ import LogoImage from '/public/images/spotit-logo.png';
 import Image from 'next/image';
 import IconArrow from '@/assets/icons/Normal/Icon_Bracket_Right.svg';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/shared/lib';
 
 export default function ReservationWaitingFloating() {
   const { user, isLoggedIn } = useUserStore(state => state.userState);
@@ -19,7 +20,7 @@ export default function ReservationWaitingFloating() {
   }, [data?.status]);
   if (!isLoggedIn) return null;
   if (isError)
-    console.log(
+    logger.debug(
       'error :',
       '대기 순번을 불러오는데 실패했습니다.',
       error.message
