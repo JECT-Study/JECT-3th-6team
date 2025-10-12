@@ -15,6 +15,7 @@ public record WaitingResponse(
         int peopleCount, // 예약 인원
         String contactEmail, // 예약 이메일
         PopupSummaryResponse popup,
-        LocalDateTime registeredAt
+        LocalDateTime registeredAt,
+        Integer expectedWaitingTimeMinutes // 예상 대기 시간 (분)
 ) {
 }

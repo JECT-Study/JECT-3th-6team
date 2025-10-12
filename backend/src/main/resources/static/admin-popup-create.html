@@ -22,17 +22,11 @@
   </style>
 </head>
 <body>
-  <h1>관리자 - 팝업 생성</h1>
+  <h1>관리자 - 팝업 생성 | <a href="/admin-popup.html">← 목록으로</a></h1>
 
-  <fieldset style="background-color: #fff3cd; border-color: #ffeaa7;">
-    <legend style="color: #856404; font-weight: bold;">🔒 관리자 인증</legend>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <label style="margin: 0; flex: 0 0 auto;">
-        비밀번호:
-        <input id="adminPassword" type="password" placeholder="관리자 비밀번호를 입력하세요" style="width: 200px; margin-left: 8px;" />
-      </label>
-      <div id="authStatus" class="muted">비밀번호를 입력하면 API 호출이 가능합니다.</div>
-    </div>
+  <fieldset style="background-color: #e7f3ff; border-color: #4a90e2;">
+    <legend style="color: #2c5aa0; font-weight: bold;">✅ 로그인 상태</legend>
+    <div id="authStatus" class="success">로그인되어 있습니다.</div>
   </fieldset>
 
   <fieldset>

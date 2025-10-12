@@ -1,8 +1,9 @@
 package com.example.demo.application.service;
 
+import com.example.demo.application.dto.notification.WaitingEntryNotificationRequest;
+import com.example.demo.domain.model.Location;
+import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.notification.Notification;
-import com.example.demo.domain.model.notification.ScheduledNotification;
-import com.example.demo.domain.model.notification.ScheduledNotificationTrigger;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingDomainEvent;
 import com.example.demo.domain.model.waiting.WaitingEventType;
@@ -16,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 웨이팅 관련 알림 정책을 관리하는 서비스.
@@ -31,36 +30,19 @@ public class WaitingNotificationService {
     private final NotificationPort notificationPort;
     private final ScheduledNotificationPort scheduledNotificationPort;
     private final NotificationEventPort notificationEventPort;
+    private final EmailNotificationService emailNotificationService;
 
     // === 알림 정책 상수 ===
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
     private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
-    private static final int AVERAGE_WAITING_TIME_MINUTES = 15; // 팀당 평균 대기 시간
-
-    /**
-     * 웨이팅 생성 시 알림 정책 실행.
-     * 1. 즉시 알림 (WAITING_CONFIRMED) 발송
-     * 2. 미래 알림들 스케줄링
-     */
-    @Transactional
-    public void processWaitingCreatedNotifications(Waiting waiting) {
-        // 1. 즉시 알림 발송
-        sendWaitingConfirmedNotification(waiting);
-
-        // 2. 미래 알림들 스케줄링
-        List<ScheduledNotification> scheduledNotifications = createScheduledNotifications(waiting);
-        scheduledNotifications.forEach(scheduledNotificationPort::save);
-
-        log.info("웨이팅 알림 처리 완료 - 웨이팅 ID: {}, 스케줄된 알림: {}개",
-                waiting.id(), scheduledNotifications.size());
-    }
 
     /**
      * 웨이팅 확정 알림 즉시 발송 (WAITING_CONFIRMED 정책)
      */
-    private void sendWaitingConfirmedNotification(Waiting waiting) {
+    @Transactional
+    public void sendWaitingConfirmedNotification(Waiting waiting) {
+        log.info("웨이팅 확정 알림 발송 - 팝업 ID: {}, 대기 ID: {}, 회원 ID: {}", waiting.popup().getId(), waiting.id(), waiting.member().id());
         String content = generateWaitingConfirmedContent(waiting);
-        Long memberId = waiting.member().id();
 
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.WAITING_CONFIRMED);
         Notification notification = Notification.builder()
@@ -69,95 +51,185 @@ public class WaitingNotificationService {
                 .content(content)
                 .build();
 
-        // 1. 알림 저장 (DB 저장)
-        Notification savedNotification = notificationPort.save(notification);
+        sendNotification(notification);
+    }
 
-        // 2. SSE를 통한 실시간 알림 발송 (연결된 클라이언트가 있는 경우에만)
-        if (notificationEventPort.isConnected(memberId)) {
-            notificationEventPort.sendRealTimeNotification(memberId, savedNotification);
-            log.debug("실시간 웨이팅 확정 알림 발송 완료 - 웨이팅 ID: {}, 멤버 ID: {}", waiting.id(), memberId);
-        } else {
-            log.debug("SSE 연결이 없는 회원입니다. 실시간 알림을 스킵합니다. - 웨이팅 ID: {}, 멤버 ID: {}", waiting.id(), memberId);
+    /**
+     * 알림 발송 공통 로직
+     */
+    private void sendNotification(Notification notification) {
+        try {
+            // 1. 알림 저장
+            Notification savedNotification = notificationPort.save(notification);
+
+            // 2. 실시간 알림 발송 (SSE 연결이 있는 경우)
+            if (notificationEventPort.isConnected(notification.getMember().id())) {
+                notificationEventPort.sendRealTimeNotification(notification.getMember().id(), savedNotification);
+                log.debug("알림 발송 완료 - 멤버 ID: {}", notification.getMember().id());
+            } else {
+                log.debug("SSE 연결이 없는 회원입니다. 실시간 알림을 스킵합니다. - 멤버 ID: {}", notification.getMember().id());
+            }
+
+        } catch (Exception e) {
+            log.error("알림 발송 실패 - 멤버 ID: {}", notification.getMember().id(), e);
         }
-
-        log.debug("웨이팅 확정 알림 발송 완료 - 웨이팅 ID: {}, 알림 ID: {}", waiting.id(), savedNotification.getId());
     }
 
     /**
-     * 미래 알림들 스케줄 생성
+     * 노쇼 처리 시 알림 정책 실행.
+     * 노쇼 횟수에 따라 다른 알림 발송
      */
-    private List<ScheduledNotification> createScheduledNotifications(Waiting waiting) {
-        List<ScheduledNotification> schedules = new ArrayList<>();
-
-        LocalDateTime estimatedEnterTime = calculateEstimatedEnterTime(waiting);
-
-        // 1. 입장 시작 알림 (ENTER_NOW 정책)
-        schedules.add(createEnterNowSchedule(waiting, estimatedEnterTime));
-
-        // 2. 입장 시간 초과 알림 (ENTER_TIME_OVER 정책) 
-//        schedules.add(createEnterTimeOverSchedule(waiting, estimatedEnterTime));
-
-        // 3. 3팀 전 알림 (ENTER_3TEAMS_BEFORE 정책) - 동적 트리거
-        schedules.add(createEnter3TeamsBeforeSchedule(waiting));
-
-        return schedules;
+    @Transactional
+    public void processNoShowNotifications(Waiting waiting, long noShowCount) {
+        if (noShowCount == 1) {
+            // 첫 번째 노쇼
+            sendFirstNoShowNotification(waiting);
+        } else if (noShowCount == 2) {
+            // 두 번째 노쇼
+            sendSecondNoShowNotification(waiting);
+        }
     }
 
     /**
-     * 입장 시작 알림 스케줄 생성 (ENTER_NOW 정책)
-     * 정책: 예상 입장 시간에 "지금 매장으로 입장 부탁드립니다" 알림
+     * 글로벌 밴 알림 발송
      */
-    private ScheduledNotification createEnterNowSchedule(Waiting waiting, LocalDateTime enterTime) {
+    @Transactional
+    public void sendGlobalBanNotification(Long memberId) {
+        log.info("글로벌 밴 알림 발송 - 회원 ID: {}", memberId);
+        // todo: 정책 확정 시 반영
+        String content = "누적 노쇼로 인해 3일간 모든 팝업 예약이 제한됩니다.";
+
+        // 글로벌 밴 알림은 대기 정보가 없으므로 간단한 알림 생성
+        WaitingDomainEvent event = new WaitingDomainEvent(null, WaitingEventType.NO_SHOW_GLOBAL_BAN);
+        Notification notification = Notification.builder()
+                .member(new Member(memberId, null, null))
+                .event(event)
+                .content(content)
+                .build();
+
+        sendNotification(notification);
+    }
+
+    /**
+     * 첫 번째 노쇼 알림 발송
+     */
+    private void sendFirstNoShowNotification(Waiting waiting) {
+        log.info("첫 번째 노쇼 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
+
+        String content = """
+                입장 시간 10분 초과로 미방문 처리되었습니다. 해당 팝업의 웨이팅 기회가 1회 남았어요.
+                """;
+
+        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NO_SHOW_FIRST);
+        Notification notification = Notification.builder()
+                .member(waiting.member())
+                .event(event)
+                .content(content)
+                .build();
+
+        sendNotification(notification);
+    }
+
+    /**
+     * 두 번째 노쇼 알림 발송
+     */
+    private void sendSecondNoShowNotification(Waiting waiting) {
+        log.info("두 번째 노쇼 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
+        // todo: 정책 확정 시 반영
+        String content = """
+                오늘의 모든 웨이팅 기회를 소진하여 해당 팝업에 대한 이용이 제한되었어요. 내일 다시 이용해주세요!
+                """;
+
+        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NO_SHOW_SECOND);
+        Notification notification = Notification.builder()
+                .member(waiting.member())
+                .event(event)
+                .content(content)
+                .build();
+
+        sendNotification(notification);
+    }
+
+    /**
+     * 새로운 0번이 된 대기자에게 입장 알림 발송
+     */
+    @Transactional
+    public void sendEnterNowNotification(Waiting waiting) {
+        log.info("입장 가능 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
+
+        String content = "지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!";
+
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.ENTER_NOW);
         Notification notification = Notification.builder()
                 .member(waiting.member())
                 .event(event)
-                .content("지금 매장으로 입장 부탁드립니다. 즐거운 시간 보내세요!")
+                .content(content)
                 .build();
 
-        return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_NOW);
+        sendNotification(notification);
+
+        // 이메일 알림도 발송
+        sendEntryEmailNotification(waiting);
     }
 
     /**
-     * 입장 시간 초과 알림 스케줄 생성 (ENTER_TIME_OVER 정책)
-     * 정책: 입장 시간 + 5분 후 "입장 시간이 초과되었습니다" 알림
+     * 3팀 전 알림 발송
      */
-    private ScheduledNotification createEnterTimeOverSchedule(Waiting waiting, LocalDateTime enterTime) {
-        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.ENTER_TIME_OVER);
-        Notification notification = Notification.builder()
-                .member(waiting.member())
-                .event(event)
-                .content("입장 시간이 초과되었습니다. 빠른 입장 부탁드립니다! 입장이 지연될 경우 웨이팅이 취소될 수 있습니다.")
-                .build();
+    @Transactional
+    public void sendEnter3TeamsBeforeNotification(Waiting waiting) {
+        log.info("3팀 전 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
 
-        return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_TIME_OVER);
-    }
+        String content = "앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!";
 
-    /**
-     * 3팀 전 알림 스케줄 생성 (ENTER_3TEAMS_BEFORE 정책)
-     * 정책: 대기 순번이 4번째가 되었을 때 "앞으로 3팀 남았습니다" 알림
-     */
-    private ScheduledNotification createEnter3TeamsBeforeSchedule(Waiting waiting) {
         WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.ENTER_3TEAMS_BEFORE);
         Notification notification = Notification.builder()
                 .member(waiting.member())
                 .event(event)
-                .content("앞으로 3팀 남았습니다! 순서가 다가오니 매장 근처에서 대기해주세요!")
+                .content(content)
                 .build();
 
-        return new ScheduledNotification(notification, ScheduledNotificationTrigger.WAITING_ENTER_3TEAMS_BEFORE);
+        sendNotification(notification);
     }
 
-    // === 알림 정책 유틸리티 메서드들 ===
+    /**
+     * 입장 알림 이메일 발송
+     */
+    private void sendEntryEmailNotification(Waiting waiting) {
+        try {
+            // Waiting에서 필요한 정보 추출
+            var popup = waiting.popup();
+            var location = popup.getLocation();
+
+            // 매장 위치 링크 생성 (카카오맵)
+            String storeLocation = generateMapLink(location);
+
+            // 이메일 발송 요청 DTO 생성
+            var request = new WaitingEntryNotificationRequest(
+                    popup.getName(),                    // 스토어명
+                    waiting.waitingPersonName(),        // 대기자명
+                    waiting.peopleCount(),              // 대기자 수
+                    waiting.contactEmail(),             // 대기자 이메일
+                    waiting.registeredAt(),             // 대기 일자
+                    storeLocation                       // 매장 위치 링크
+            );
+
+            // 비동기로 이메일 발송
+            emailNotificationService.sendWaitingEntryNotificationAsync(request);
+
+        } catch (Exception e) {
+            log.error("입장 이메일 알림 발송 실패 - 대기 ID: {}", waiting.id(), e);
+        }
+    }
 
     /**
-     * 예상 입장 시간 계산 정책
-     * 정책: 현재 시간 + (앞의 대기팀 수 × 15분)
+     * 매장 위치 링크 생성 (카카오맵)
      */
-    private LocalDateTime calculateEstimatedEnterTime(Waiting waiting) {
-        int teamsAhead = waiting.waitingNumber() - 1;
-        int estimatedWaitMinutes = teamsAhead * AVERAGE_WAITING_TIME_MINUTES;
-        return waiting.registeredAt().plusMinutes(estimatedWaitMinutes);
+    private String generateMapLink(Location location) {
+        return String.format("https://map.kakao.com/link/map/%s,%s,%s",
+                location.addressName(),
+                location.latitude(),
+                location.longitude()
+        );
     }
 
     /**

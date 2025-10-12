@@ -65,7 +65,8 @@ public class WaitingDtoMapper {
                         formatPeriod(popup.getSchedule().dateRange()),
                         popupDtoMapper.toSearchTagsResponse(popup)
                 ),
-                waiting.registeredAt()
+                waiting.registeredAt(),
+                waiting.expectedWaitingTimeMinutes()
         );
     }
 

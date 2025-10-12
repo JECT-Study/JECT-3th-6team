@@ -7,6 +7,7 @@ import com.example.demo.domain.model.popup.Popup;
 import jakarta.validation.constraints.Email;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -25,7 +26,8 @@ public record Waiting(
         WaitingStatus status,
         LocalDateTime registeredAt,
         LocalDateTime enteredAt,
-        LocalDateTime canEnterAt
+        LocalDateTime canEnterAt,
+        Integer expectedWaitingTimeMinutes
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
@@ -79,7 +81,7 @@ public record Waiting(
             WaitingStatus status,
             LocalDateTime registeredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null, null);
     }
 
     /**
@@ -108,7 +110,7 @@ public record Waiting(
             LocalDateTime registeredAt,
             LocalDateTime enteredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null, null);
     }
 
 
@@ -124,8 +126,11 @@ public record Waiting(
         }
 
         if (waitingNumber != 0) {
-            throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호가 0이 아닙니다.");
+            throw new BusinessException(ErrorType.WAITING_NOT_READY, "대기 번호가 0이 아닙니다.");
         }
+
+        LocalDateTime enteredAt = LocalDateTime.now();
+        LocalDateTime canEnterAt = Optional.ofNullable(canEnterAt()).orElse(enteredAt); // canEnterAt이 null인 경우 현재 시간 사용
 
         return new Waiting(
                 id,
@@ -137,21 +142,20 @@ public record Waiting(
                 waitingNumber,
                 WaitingStatus.VISITED,
                 registeredAt,
-                LocalDateTime.now(),
-                canEnterAt
+                enteredAt,
+                canEnterAt,
+                expectedWaitingTimeMinutes
         );
     }
 
-    public Waiting minusWaitingNumber() {
+    public Waiting minusWaitingNumber(PopupWaitingStatistics waitingStatistics) {
         if (waitingNumber == 0) {
-            throw new BusinessException(ErrorType.INVALID_WAITING_NUMBER, "대기 번호는 0 이상이어야 합니다.");
+            throw new BusinessException(ErrorType.WAITING_NOT_READY, "대기 번호는 0 이상이어야 합니다.");
         }
 
         if (status != WaitingStatus.WAITING) {
             throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
         }
-
-        LocalDateTime canEnterAt = waitingNumber == 1 ? LocalDateTime.now() : null;
 
         return new Waiting(
                 id,
@@ -164,7 +168,55 @@ public record Waiting(
                 WaitingStatus.WAITING,
                 registeredAt,
                 enteredAt,
-                canEnterAt
+                canEnterAt,
+                waitingStatistics.calculateExpectedWaitingTime(waitingNumber - 1)
+        );
+    }
+
+    /**
+     * 노쇼 상태로 변경한다.
+     *
+     * @return 노쇼 상태로 변경된 새로운 Waiting 객체
+     */
+    public Waiting markAsNoShow() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.NO_SHOW,
+                registeredAt,
+                enteredAt,
+                canEnterAt,
+                expectedWaitingTimeMinutes
+        );
+    }
+
+    public Waiting markAsCanEnter() {
+        if (status != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, status.toString());
+        }
+
+        return new Waiting(
+                id,
+                popup,
+                waitingPersonName,
+                member,
+                contactEmail,
+                peopleCount,
+                waitingNumber,
+                WaitingStatus.WAITING,
+                registeredAt,
+                enteredAt,
+                LocalDateTime.now(),
+                expectedWaitingTimeMinutes
         );
     }
 }
