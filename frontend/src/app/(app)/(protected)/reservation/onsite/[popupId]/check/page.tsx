@@ -2,7 +2,7 @@
 
 import usePostReservation from '@/features/reservation/hook/usePostReservation';
 import { useReservationFormContext } from '@/features/reservation/lib/FormProvider';
-import { useRouter, useSelectedLayoutSegments } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { BottomButtonContainer, StandardButton } from '@/shared/ui';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
@@ -40,8 +40,8 @@ export default function Page() {
   const { formValue } = useReservationFormContext();
   const { mutate, isPending } = usePostReservation();
   const router = useRouter();
-  const segment = useSelectedLayoutSegments(); // ["reservation", "onsite", "3", "check"]
-  const popupId = ~~segment[3];
+  const params = useParams();
+  const popupId = Number(params.popupId);
   const [isScrollEnd, setIsScrollEnd] = useState(false);
 
   const handleSubmit = async () => {

@@ -16,8 +16,10 @@ export const useReservationFormContext = () => {
 
 export const ReservationFormProvider = ({
   children,
+  popupId,
 }: {
   children: React.ReactNode;
+  popupId: number;
 }) => {
   const initialForm: UseFormProps<'onsite-reservation'> = {
     formType: 'onsite-reservation',
@@ -31,6 +33,7 @@ export const ReservationFormProvider = ({
       headCount: '',
       email: '',
     },
+    formKey: popupId,
   };
   const form = useForm(initialForm);
   return (
