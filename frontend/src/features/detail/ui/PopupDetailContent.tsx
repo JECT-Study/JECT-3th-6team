@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/shared/ui/badge/Badge';
@@ -34,6 +33,10 @@ export default function PopupDetailContent({
 }: PopupDetailContentProps) {
   const router = useRouter();
 
+  const isWithinOperatingHours = useOperatingHours(
+    popupDetailData?.popupDetail
+  );
+
   const myLocationImageUrl = '/icons/Color/Icon_Map.svg';
   // 데이터가 없을 때 early return (Suspense에서 처리됨)
   if (!popupDetailData) {
@@ -56,14 +59,10 @@ export default function PopupDetailContent({
   const isVisited = status === 'VISITED';
   const isWaitingAvailable = status === 'NONE' || status === 'NO_SHOW';
 
-  const isWithinOperatingHours = useOperatingHours(popupDetail);
-
   const isReservationBanned =
     status === 'STORE_BAN' ||
     status === 'GLOBAL_BAN' ||
     !isWithinOperatingHours;
-
-  // console.log('isReservationBanned', isReservationBanned);
 
   let actionLabel = '';
   if (isWaiting) actionLabel = '예약중';

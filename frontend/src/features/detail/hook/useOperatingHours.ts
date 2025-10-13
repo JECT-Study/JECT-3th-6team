@@ -2,8 +2,9 @@ import { useMemo } from 'react';
 
 import { PopupDetailPopupDetail } from '@/entities/popup/detail/types/type';
 
+// 현재 팝업 영업 시간인지 확인하는 훅
 export function useOperatingHours(
-  popupDetail: PopupDetailPopupDetail
+  popupDetail?: PopupDetailPopupDetail
 ): boolean {
   return useMemo(() => {
     if (!popupDetail || !Array.isArray(popupDetail.dayOfWeeks)) {
