@@ -55,7 +55,7 @@ const PopupCardImage = ({
         key={key}
         src={src}
         alt={`${popupName}-popup-image`}
-        className="object-cover h-full group-hover:scale-105 transition-transform group-duration-200"
+        className="w-[140px] h-[144px] object-cover  group-hover:scale-105 transition-transform group-duration-200"
         width={140}
         height={144}
         onError={() => {
