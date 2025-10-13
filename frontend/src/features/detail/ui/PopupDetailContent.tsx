@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
-import { BottomButtonContainer, CircleMap } from '@/shared/ui';
+import { BottomButtonContainer, KakaoMap } from '@/shared/ui';
+import { MapMarker } from 'react-kakao-maps-sdk';
 import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
 import { MediumText } from '@/shared/ui/text/MediumText';
@@ -34,6 +35,7 @@ export default function PopupDetailContent({
   const router = useRouter();
   const [isQrGuideModalOpen, setIsQrGuideModalOpen] = useState(false);
 
+  const myLocationImageUrl = '/icons/Color/Icon_Map.svg';
   // 데이터가 없을 때 early return (Suspense에서 처리됨)
   if (!popupDetailData) {
     return null;
@@ -94,7 +96,9 @@ export default function PopupDetailContent({
     <div className="pb-36">
       <PageHeader title="상세 정보" />
       {/* Image Carousel */}
-      <ImageCarousel images={thumbnails} />
+      <ImageCarousel
+        images={thumbnails && thumbnails.length > 0 ? thumbnails : []}
+      />
 
       {/* Main Detail */}
       <div className="py-6 px-5">
@@ -147,12 +151,21 @@ export default function PopupDetailContent({
         </div>
         {/* Map */}
         <div className="mt-6.5">
-          <CircleMap
+          <KakaoMap
             center={{ lat: location.latitude, lng: location.longitude }}
             maxLevel={6}
             minLevel={6}
             onClick={handleClickMap}
-          />
+            className="w-full h-30 rounded-[10px]"
+          >
+            <MapMarker
+              position={{ lat: location.latitude, lng: location.longitude }}
+              image={{
+                src: myLocationImageUrl,
+                size: { width: 40, height: 40 },
+              }}
+            />
+          </KakaoMap>
         </div>
       </div>
 
