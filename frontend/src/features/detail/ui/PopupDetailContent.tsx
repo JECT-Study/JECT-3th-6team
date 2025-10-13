@@ -14,7 +14,7 @@ import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
 
 import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
 import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
-import QrScanGuideModal from '@/features/detail/ui/QrScanGuideModal';
+import { useOperatingHours } from '@/features/detail/hook/useOperatingHours';
 
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
@@ -33,7 +33,6 @@ export default function PopupDetailContent({
   popupId,
 }: PopupDetailContentProps) {
   const router = useRouter();
-  const [isQrGuideModalOpen, setIsQrGuideModalOpen] = useState(false);
 
   const myLocationImageUrl = '/icons/Color/Icon_Map.svg';
   // 데이터가 없을 때 early return (Suspense에서 처리됨)
@@ -53,6 +52,27 @@ export default function PopupDetailContent({
     popupDetail,
   } = popupDetailData;
 
+  const isWaiting = status === 'WAITING';
+  const isVisited = status === 'VISITED';
+  const isWaitingAvailable = status === 'NONE' || status === 'NO_SHOW';
+
+  const isWithinOperatingHours = useOperatingHours(popupDetail);
+
+  const isReservationBanned =
+    status === 'STORE_BAN' ||
+    status === 'GLOBAL_BAN' ||
+    !isWithinOperatingHours;
+
+  // console.log('isReservationBanned', isReservationBanned);
+
+  let actionLabel = '';
+  if (isWaiting) actionLabel = '예약중';
+  if (isWaitingAvailable) actionLabel = '웨이팅하기';
+  if (isVisited) actionLabel = '방문 완료';
+  if (isReservationBanned) actionLabel = '예약 불가';
+
+  const isDisabled = isWaiting || isVisited || isReservationBanned;
+
   const handleClickMap = () => {
     const lat = location.latitude;
     const lng = location.longitude;
@@ -60,19 +80,7 @@ export default function PopupDetailContent({
   };
 
   const handleWaitingClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (status === 'NONE') {
-      // setIsQrGuideModalOpen(true);
-      // try {
-      //   await requestCameraAccess(() => {});
-      // } catch (error) {
-      //   console.error('카메라 접근 실패:', error);
-      //   alert(
-      //     error instanceof Error
-      //       ? error.message
-      //       : '카메라에 접근할 수 없습니다.'
-      //   );
-      // }
-
+    if (isWaitingAvailable) {
       const { text, url } = extractLinkMetaFromButton(e);
       // GTM
       TagManager.dataLayer({
@@ -86,10 +94,6 @@ export default function PopupDetailContent({
 
       router.push(`/reservation/onsite/${popupId}`);
     }
-  };
-
-  const handleQrGuideClose = () => {
-    setIsQrGuideModalOpen(false);
   };
 
   return (
@@ -181,25 +185,13 @@ export default function PopupDetailContent({
       <BottomButtonContainer hasShadow={true}>
         <StandardButton
           onClick={handleWaitingClick}
-          disabled={status === 'WAITING' || status === 'VISITED'}
+          disabled={isDisabled}
           color="primary"
           className={'waiting-btn'}
         >
-          {status === 'WAITING'
-            ? '예약중'
-            : status === 'NONE'
-              ? '웨이팅하기'
-              : '방문 완료'}
+          {actionLabel}
         </StandardButton>
       </BottomButtonContainer>
-
-      {/* QR 스캔 안내 모달 */}
-      <div>
-        <QrScanGuideModal
-          isOpen={isQrGuideModalOpen}
-          onClose={handleQrGuideClose}
-        />
-      </div>
     </div>
   );
 }
