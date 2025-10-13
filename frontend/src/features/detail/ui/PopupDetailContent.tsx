@@ -5,12 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
-import {
-  BottomButtonContainer,
-  CircleMap,
-  KakaoMap,
-  MarkerClusterMap,
-} from '@/shared/ui';
+import { BottomButtonContainer, KakaoMap } from '@/shared/ui';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
