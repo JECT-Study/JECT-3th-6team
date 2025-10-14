@@ -4,7 +4,7 @@ import usePostReservation from '@/features/reservation/hook/usePostReservation';
 import { useReservationFormContext } from '@/features/reservation/lib/FormProvider';
 import { useParams, useRouter } from 'next/navigation';
 import { BottomButtonContainer, StandardButton } from '@/shared/ui';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 interface ContentBlockProps {
@@ -43,6 +43,7 @@ export default function Page() {
   const params = useParams();
   const popupId = Number(params.popupId);
   const [isScrollEnd, setIsScrollEnd] = useState(false);
+  const termsRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async () => {
     if (!isScrollEnd) {
@@ -78,6 +79,16 @@ export default function Page() {
     }
   };
 
+  useEffect(() => {
+    const el = termsRef.current;
+    if (!el) return;
+
+    // 스크롤 가능한 경우만 false, 그렇지 않으면 바로 true
+    if (el.scrollHeight <= el.clientHeight) {
+      setIsScrollEnd(true);
+    }
+  }, []);
+
   return (
     <div>
       <div className={'flex flex-col px-[20px] h-[calc(100vh-122px)] pt-8'}>
@@ -108,6 +119,7 @@ export default function Page() {
 
         {/*약관*/}
         <div
+          ref={termsRef}
           onScroll={handleScroll}
           className={'overflow-y-scroll flex-1 flex flex-col gap-[32px] '}
         >
