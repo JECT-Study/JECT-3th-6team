@@ -1,13 +1,16 @@
 package com.example.demo.presentation.controller.handler;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2FailureHandler {
@@ -21,6 +24,7 @@ public class OAuth2FailureHandler {
     }
 
     private String resolveReasonCode(Exception e) {
+        log.error(e.getMessage(), e);
         if (e instanceof HttpClientErrorException || e instanceof IllegalStateException) {
             return "token_exchange_failed";
         }
@@ -29,10 +33,10 @@ public class OAuth2FailureHandler {
 
     private void redirectToFail(HttpServletResponse response, String reasonCode) throws IOException {
         String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl)
-            .path("/login/fail")
-            .queryParam("reason", reasonCode)
-            .build()
-            .toUriString();
+                .path("/login/fail")
+                .queryParam("reason", reasonCode)
+                .build()
+                .toUriString();
         response.sendRedirect(redirectUrl);
     }
 }
