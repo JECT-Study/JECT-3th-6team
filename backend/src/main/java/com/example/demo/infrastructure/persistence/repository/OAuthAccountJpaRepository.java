@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface OAuthAccountJpaRepository extends JpaRepository<OAuthAccountEntity, Long> {
 
     Optional<OAuthAccountEntity> findByProviderAndProviderId(OAuthProvider provider, String providerId);
+
+    void deleteByMemberId(Long memberId);
 } 
