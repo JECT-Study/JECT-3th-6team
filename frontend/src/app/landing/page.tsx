@@ -10,6 +10,6 @@ export default async function LandingPage({
   const params = await searchParams;
   const device = params?.device;
 
-  if (device === 'DESKTOP') return <DesktopLanding />;
+  if (device === 'DESKTOP' || device === 'TABLET') return <DesktopLanding />;
   if (device === 'MOBILE') return <MobileLanding />;
 }
