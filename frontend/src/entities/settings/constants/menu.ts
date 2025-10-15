@@ -1,6 +1,7 @@
 export type MenuType = {
   title: string;
-  link: string;
+  link?: string;
+  modalType?: 'logout' | 'withdraw';
 };
 
 export const PublicSettingMenu: Array<MenuType> = [
@@ -16,4 +17,5 @@ export const PublicSettingMenu: Array<MenuType> = [
 export const PrivateSettingMenu: Array<MenuType> = [
   ...PublicSettingMenu,
   { title: '알림 설정', link: '/setting/notification' },
+  { title: '탈퇴하기', modalType: 'withdraw' },
 ] as const;
