@@ -13,9 +13,11 @@ export default function SettingPage() {
 
   const menu = isLoggedIn ? PrivateSettingMenu : PublicSettingMenu;
   return (
-    <div className={'w-full h-full flex flex-col px-5 pt-[26px]'}>
+    <div className={'w-full h-screen flex flex-col px-5 pt-[26px] pb-20'}>
       <UserStateCard />
-      <MenuList menu={menu} />
+      <div className="flex-1 flex flex-col">
+        <MenuList menu={menu} />
+      </div>
     </div>
   );
 }

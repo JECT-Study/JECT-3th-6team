@@ -177,7 +177,7 @@
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari 최적화 */
   .sticky {
-    position: -webkit-sticky;
+    position: sticky;
   }
 }
 

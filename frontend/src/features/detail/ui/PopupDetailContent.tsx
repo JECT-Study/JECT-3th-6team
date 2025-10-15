@@ -68,7 +68,7 @@ export default function PopupDetailContent({
   if (isWaiting) actionLabel = '예약중';
   if (isWaitingAvailable) actionLabel = '웨이팅하기';
   if (isVisited) actionLabel = '방문 완료';
-  if (isReservationBanned) actionLabel = '예약 불가';
+  if (isReservationBanned) actionLabel = '준비 중이에요';
 
   const isDisabled = isWaiting || isVisited || isReservationBanned;
 
