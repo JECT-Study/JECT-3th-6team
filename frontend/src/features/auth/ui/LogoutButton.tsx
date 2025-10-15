@@ -1,14 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import { StandardButton } from '@/shared/ui';
-import { useLogout } from '@/features/auth/hook/useLogout';
+import { LogoutConfirmModal } from '@/features/auth/ui/LogoutConfirmModal';
 
 export const LogoutButton = () => {
-  const logout = useLogout();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
-    <StandardButton onClick={logout} color="secondary" disabled={false}>
-      로그아웃
-    </StandardButton>
+    <>
+      <StandardButton
+        onClick={() => {
+          setIsOpen(true);
+        }}
+        color="secondary"
+        disabled={false}
+      >
+        로그아웃
+      </StandardButton>
+
+      <LogoutConfirmModal open={isOpen} onClose={() => setIsOpen(false)} />
+    </>
   );
 };
