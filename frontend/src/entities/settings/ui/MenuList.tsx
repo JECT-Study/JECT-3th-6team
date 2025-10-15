@@ -21,11 +21,21 @@ export default function MenuList({ menu }: { menu: MenuType[] }) {
             >
               {menu.title}
             </span>
-            <IconBracketRight
-              width={20}
-              height={20}
-              fill={'var(--color-gray80)'}
-            />
+            {menu.title === '고객센터' ? (
+              <span
+                className={
+                  'text-gray60 text-sm underline flex justify-center items-center '
+                }
+              >
+                스팟잇 카카오톡 채널
+              </span>
+            ) : (
+              <IconBracketRight
+                width={20}
+                height={20}
+                fill={'var(--color-gray80)'}
+              />
+            )}
           </Link>
         );
       })}

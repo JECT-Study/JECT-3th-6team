@@ -17,22 +17,32 @@ export default function MobileLandingStart({
         'bg-[#F4F4F4]  flex flex-col justify-center items-center gap-y-[10px]'
       }
     >
+      <Image
+        src={'/images/landing/LANDING_LOGO_BIG.svg'}
+        width={67}
+        height={87}
+        alt={'logo-big'}
+        className={'absolute top-[40px] left-1/2 -translate-x-1/2'}
+        priority
+        fetchPriority="high"
+      />
       <p
         className={
-          'w-[500px] text-[14px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[60px] left-1/2 -translate-x-1/2 select-none'
+          'w-[500px] text-[14px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[120px] left-1/2 -translate-x-1/2 select-none'
         }
       >
-        팝업스토어 정보 확인부터 실시간 웨이팅까지, <br />한 번에 해결하는
-        <em className={'text-main not-italic'}> ‘Spot it!’ </em>
+        팝업스토어 정보를 모아보고, 실시간 웨이팅까지 <br />
+        가능한 통합 플랫폼
+        <em className={'text-main not-italic'}> ‘Spot it!’ </em> 을 알아볼까요?
       </p>
 
       <Image
         src={'/images/landing/LANDING_START_PHONE.png'}
-        width={315}
-        height={362}
+        width={250}
+        height={315}
         alt={'service-landing-image'}
         className={
-          'object-fill w-[315x] absolute top-[150px] left-1/2 -translate-x-1/2'
+          'object-fill w-[250x] absolute top-[220px] left-1/2 -translate-x-1/2'
         }
         priority
         fetchPriority="high"
