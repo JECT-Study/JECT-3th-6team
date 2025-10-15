@@ -1,7 +1,6 @@
 'use client';
 
 import ModalContainer from '@/shared/ui/modal/ModalContainer';
-import Button from '@/components/ui/button';
 import { StandardButton } from '@/shared/ui';
 
 interface WithdrawalConfirmModalProps {
@@ -38,6 +37,7 @@ export default function WithdrawalConfirmModal({
           <StandardButton
             color="white"
             onClick={onClose}
+            disabled={false}
             className="flex-1 cursor-pointer"
           >
             아니오
@@ -45,6 +45,7 @@ export default function WithdrawalConfirmModal({
           <StandardButton
             color="primary"
             onClick={handleConfirm}
+            disabled={false}
             className="flex-1 cursor-pointer"
           >
             네

@@ -3,7 +3,7 @@ import { ApiError } from '@/shared/type/api';
 
 export default async function deleteUserApi() {
   try {
-    const builder = await APIBuilder.delete('/auth/me', {})
+    const builder = await APIBuilder.delete('/auth/me')
       .auth()
       .timeout(5000)
       .withCredentials(true)
