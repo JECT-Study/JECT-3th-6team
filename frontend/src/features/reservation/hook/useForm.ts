@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useDebounce } from '@/shared/lib';
+import { logger, useDebounce } from '@/shared/lib';
 import { FormValidate } from '@/features/reservation/model/FormValidate';
 import { ERROR_CODE_MAP } from '@/features/reservation/model/ErrorCodeMap';
 import { DEBOUNCE_DELAY_MS } from '@/shared/constant';
 import { storage } from '@/shared/lib/localStorage';
+import { FORM_STORAGE_KEY } from '@/features/reservation/constants/formStorageKey';
 
 type FormType = 'onsite-reservation';
 
@@ -42,7 +43,7 @@ export default function useForm<T extends FormType>({
   initialError,
   formKey,
 }: UseFormProps<T>) {
-  const storageKey = `${formType}-${formKey}`;
+  const storageKey = FORM_STORAGE_KEY({ formType, formKey });
   const [formValue, setFormValue] = useState<FormValueMap[T]>(initialFormValue);
   const [error, setError] = useState<FormErrorMap[T]>(initialError);
   const [currentValue, setCurrentValue] = useState<string | number>('');
@@ -88,10 +89,10 @@ export default function useForm<T extends FormType>({
         const parsed = JSON.parse(saved);
         setFormValue(parsed);
       } catch (e) {
-        console.error('폼 복원 실패', e);
+        logger.error('폼 복원 실패', e);
       }
     }
-    setIsInitialized(true); // ✅ 복원 완료
+    setIsInitialized(true);
   }, [storageKey]);
 
   // 폼 자동저장
