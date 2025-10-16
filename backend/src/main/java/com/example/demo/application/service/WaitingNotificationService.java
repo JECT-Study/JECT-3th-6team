@@ -100,7 +100,7 @@ public class WaitingNotificationService {
         String content = "누적 노쇼로 인해 3일간 모든 팝업 예약이 제한됩니다.";
 
         // 글로벌 밴 알림은 대기 정보가 없으므로 간단한 알림 생성
-        WaitingDomainEvent event = new WaitingDomainEvent(null, WaitingEventType.NO_SHOW_GLOBAL_BAN);
+        WaitingDomainEvent event = new WaitingDomainEvent(null, WaitingEventType.NOSHOW_GLOBAL_BAN);
         Notification notification = Notification.builder()
                 .member(new Member(memberId, null, null))
                 .event(event)
@@ -120,7 +120,7 @@ public class WaitingNotificationService {
                 입장 시간 10분 초과로 미방문 처리되었습니다. 해당 팝업의 웨이팅 기회가 1회 남았어요.
                 """;
 
-        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NO_SHOW_FIRST);
+        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NOSHOW_FIRST);
         Notification notification = Notification.builder()
                 .member(waiting.member())
                 .event(event)
@@ -140,7 +140,7 @@ public class WaitingNotificationService {
                 오늘의 모든 웨이팅 기회를 소진하여 해당 팝업에 대한 이용이 제한되었어요. 내일 다시 이용해주세요!
                 """;
 
-        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NO_SHOW_SECOND);
+        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.NOSHOW_SECOND);
         Notification notification = Notification.builder()
                 .member(waiting.member())
                 .event(event)
