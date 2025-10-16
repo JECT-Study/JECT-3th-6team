@@ -5,7 +5,6 @@ export type MenuType = {
 };
 
 export const PublicSettingMenu: Array<MenuType> = [
-  { title: '개선안 제안', link: '/setting/suggest' },
   { title: '공지사항', link: '/setting/announcement' },
   { title: '약관 및 정책', link: '/setting/agreement' },
   {
