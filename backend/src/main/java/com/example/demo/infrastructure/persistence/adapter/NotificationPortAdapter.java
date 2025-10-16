@@ -73,6 +73,7 @@ public class NotificationPortAdapter implements NotificationPort {
 
         List<Notification> notifications = entities.stream()
                 .map(this::entityToDomain)
+                .filter(notification -> notification.getEvent().getSource() != null) // 소스가 없는 알림은 제외
                 .collect(Collectors.toList());
 
         return new CursorResult<>(notifications, hasNext);
@@ -181,7 +182,7 @@ public class NotificationPortAdapter implements NotificationPort {
         return byQuery
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(key.sourceId())));
+                .orElse(null);
     }
 
     /**
