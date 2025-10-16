@@ -17,6 +17,7 @@ import KeywordFilterPreview, {
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
 import useSearchMyLocation from '@/features/map/hook/useSearchMyLocation';
 import useMapSearch from '@/features/map/hook/useMapSearch';
+import { useGetMapBounds, useDebounce } from '@/shared/lib';
 
 import { getMapPopupListApi } from '@/entities/map/api';
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
@@ -24,7 +25,7 @@ import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 import { PopupItemType } from '@/entities/popup/types/PopupListItem';
 
 export default function FilterGroupMapContainer() {
-  // 기본 위치 (서울숲 4번출구 앞)
+  // 로딩 완료 시 지도 중심 위치 (서울숲 4번출구 앞)
   const defaultCenter = { lat: 37.544643, lng: 127.044368 };
   const [center, setCenter] = useState(defaultCenter);
   const [selectedPopupId, setSelectedPopupId] = useState<number | null>(null);
@@ -37,6 +38,17 @@ export default function FilterGroupMapContainer() {
     lat: number;
     lng: number;
   } | null>(null);
+
+  // 지도 범위 상태 (실시간 업데이트)
+  const [mapBounds, setMapBounds] = useState<{
+    minLatitude: number;
+    maxLatitude: number;
+    minLongitude: number;
+    maxLongitude: number;
+  } | null>(null);
+
+  // 디바운스된 지도 범위 (API 호출용)
+  const debouncedMapBounds = useDebounce(mapBounds, 500);
 
   const { filter, tempState, isOpen, handleOpen, handleDeleteKeyword } =
     useFilterContext();
@@ -106,34 +118,6 @@ export default function FilterGroupMapContainer() {
       }
     } catch (error) {
       console.error('❌ 팝업 데이터 조회 실패, 목 데이터 사용:', error);
-
-      const mockPopupData = {
-        popupId: popupId,
-        popupName: `팝업 스토어 ${popupId}`,
-        location: {
-          addressName: '서울특별시 강남구 청담동',
-          region1depthName: '서울특별시',
-          region2depthName: '강남구',
-          region3depthName: '청담동',
-          latitude: 37.543401,
-          longitude: 127.04452,
-        },
-        rating: {
-          averageStar: 4.5,
-          reviewCount: 123,
-        },
-        period: '2025.01.01 ~ 2025.12.31',
-        dDay: 365,
-        popupImageUrl: '/images/popup-ex.png',
-        searchTags: {
-          type: '체험형',
-          category: ['패션'],
-        },
-        tag: 'DEFAULT' as const,
-        waitingCount: 3,
-      };
-
-      setSelectedPopupData(mockPopupData);
     }
   };
 
@@ -142,54 +126,68 @@ export default function FilterGroupMapContainer() {
   // 2. 로딩 완료 후 기본 위치(서울숲역 4번출구) 사용
   // 3. 내위치찾기 버튼 클릭 시 현재 위치 추적 - 이때 권한설정 팝업
 
-  // 임시 목 데이터 (MSW 대신 사용)
-  const mockPopupList = {
-    popupList: [
-      {
-        id: 7,
-        latitude: 37.545681758279,
-        longitude: 127.04442401847,
-      },
-      {
-        id: 2,
-        latitude: 37.545470791421,
-        longitude: 127.04324359055,
-      },
-    ],
-  };
-
-  console.log('isSearchFocused', isSearchFocused);
+  // 지도 범위 업데이트 함수
+  const updateMapBounds = useCallback(() => {
+    if (mapRef.current) {
+      const bounds = useGetMapBounds(mapRef);
+      if (bounds) {
+        setMapBounds(bounds);
+      }
+    }
+  }, []);
 
   const { data: popupList, isLoading: isPopupListLoading } = useQuery({
-    queryKey: ['mapPopupList', popupType, category],
+    queryKey: ['mapPopupList', popupType, category, debouncedMapBounds],
     queryFn: async () => {
       try {
-        const result = await getMapPopupListApi({
+        // 디바운스된 지도 범위가 없으면 기본 범위 사용
+        const bounds = debouncedMapBounds || {
           minLatitude: 37.541673,
           maxLatitude: 37.545894,
           minLongitude: 127.041309,
           maxLongitude: 127.047804,
+        };
+
+        const result = await getMapPopupListApi({
+          ...bounds,
           type: popupType.length > 0 ? popupType.join(',') : undefined,
           category: category.length > 0 ? category.join(',') : undefined,
         });
-        return result;
+        return { popupList: result };
       } catch (error) {
-        console.error('❌ API 실패, 목 데이터 사용:', error);
-        return mockPopupList; // API 실패 시 목 데이터 반환
+        console.error('❌ API 실패:', error);
+        return { popupList: [] }; // API 실패 시 빈 배열 반환 => 지도는 그대로 로드됨(마커x)
       }
     },
+    // 디바운스된 범위가 있을 때만 실행 (초기 로드 제외)
+    enabled: !!debouncedMapBounds || !mapBounds,
+    // 캐시 설정: 새로운 데이터를 위해 짧은 캐시 시간 설정
+    staleTime: 30000, // 30초
+    cacheTime: 60000, // 1분
   });
 
-  // API 요청이 완료되면 1초 후에 지도를 표시
+  // 팝업 데이터가 로드되면 지도 표시 (초기 로드만)
   useEffect(() => {
-    if (!isPopupListLoading && popupList) {
+    if (!isPopupListLoading && popupList && !isMapReady) {
       const timer = setTimeout(() => {
         setIsMapReady(true);
       }, 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [isPopupListLoading, popupList]);
+  }, [isPopupListLoading, popupList, isMapReady]);
+
+  // 지도가 로드되면 실제 범위로 업데이트
+  useEffect(() => {
+    if (isMapReady && mapRef.current) {
+      // 지도 로드 후 약간의 지연을 두고 범위 업데이트
+      const timer = setTimeout(() => {
+        updateMapBounds();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isMapReady, updateMapBounds]);
 
   return (
     <div className="w-full h-[calc(100vh-120px)] relative overflow-hidden">
@@ -291,14 +289,13 @@ export default function FilterGroupMapContainer() {
               level={3}
               className="w-full h-full"
               myLocationMarker={myLocationMarker}
+              onBoundsChanged={updateMapBounds}
             >
               {(() => {
-                const markerData =
-                  popupList?.popupList || mockPopupList.popupList;
+                const markerData = popupList?.popupList;
 
-                if (isPopupListLoading) {
-                  return null;
-                }
+                console.log('마커 데이터:', markerData);
+                console.log('팝업 리스트:', popupList);
 
                 if (!markerData || markerData.length === 0) {
                   return null;

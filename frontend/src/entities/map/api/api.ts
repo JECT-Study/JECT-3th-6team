@@ -12,7 +12,7 @@ export const getMapPopupListApi = async (
   try {
     const response = await APIBuilder.get(MAP_ENDPOINTS.GET_POPUP_LIST)
       .timeout(5000)
-      .setCache('force-cache')
+      .setCache('no-store')
       .params({ ...params })
       .build()
       .call<MapPopupListResponseDto>();
