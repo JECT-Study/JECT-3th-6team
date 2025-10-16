@@ -3,7 +3,5 @@ export default function LandingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen w-full bg-black text-white">{children}</div>
-  );
+  return <div className="bg-black text-white">{children}</div>;
 }
