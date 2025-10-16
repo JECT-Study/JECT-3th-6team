@@ -181,7 +181,7 @@ public class NotificationPortAdapter implements NotificationPort {
         return byQuery
                 .stream()
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(key.sourceId())));
     }
 
     /**

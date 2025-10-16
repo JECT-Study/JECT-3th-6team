@@ -21,7 +21,3 @@ VALUES (1, '리빙/인테리어'),
        (16, '도서/음반'),
        (17, '플리마켓'),
        (18, '기타');
-
-INSERT INTO members (id, name, email, created_at, modified_at)
-VALUES (1000, 'test', 'test@test.com', '2025-05-05T06:10:11', '2025-05-05T06:10:11');
-
