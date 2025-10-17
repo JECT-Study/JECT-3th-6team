@@ -1,12 +1,14 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.dto.waiting.*;
+import com.example.demo.application.dto.waiting.VisitHistoryCursorResponse;
+import com.example.demo.application.dto.waiting.WaitingCreateRequest;
+import com.example.demo.application.dto.waiting.WaitingCreateResponse;
+import com.example.demo.application.dto.waiting.WaitingResponse;
 import com.example.demo.application.mapper.WaitingDtoMapper;
 import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.ban.BanQuery;
-import com.example.demo.domain.model.waiting.PopupWaitingStatistics;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
@@ -102,7 +104,8 @@ public class WaitingService {
                 requestTime,
                 null,
                 null,
-                expectedWaitingTime
+                expectedWaitingTime,
+                nextWaitingNumber
         );
 
 

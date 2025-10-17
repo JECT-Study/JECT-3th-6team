@@ -27,7 +27,8 @@ public record Waiting(
         LocalDateTime registeredAt,
         LocalDateTime enteredAt,
         LocalDateTime canEnterAt,
-        Integer expectedWaitingTimeMinutes
+        Integer expectedWaitingTimeMinutes,
+        Integer initialWaitingNumber
 ) {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9][a-zA-Z가-힣0-9]*$");
 
@@ -81,7 +82,7 @@ public record Waiting(
             WaitingStatus status,
             LocalDateTime registeredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, null, null, null, null);
     }
 
     /**
@@ -110,7 +111,7 @@ public record Waiting(
             LocalDateTime registeredAt,
             LocalDateTime enteredAt
     ) {
-        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null, null);
+        this(id, popup, waitingPersonName, member, contactEmail, peopleCount, waitingNumber, status, registeredAt, enteredAt, null, null, null);
     }
 
 
@@ -144,7 +145,8 @@ public record Waiting(
                 registeredAt,
                 enteredAt,
                 canEnterAt,
-                expectedWaitingTimeMinutes
+                expectedWaitingTimeMinutes,
+                initialWaitingNumber
         );
     }
 
@@ -169,7 +171,8 @@ public record Waiting(
                 registeredAt,
                 enteredAt,
                 canEnterAt,
-                waitingStatistics.calculateExpectedWaitingTime(waitingNumber - 1)
+                waitingStatistics.calculateExpectedWaitingTime(waitingNumber - 1),
+                initialWaitingNumber
         );
     }
 
@@ -195,7 +198,8 @@ public record Waiting(
                 registeredAt,
                 enteredAt,
                 canEnterAt,
-                expectedWaitingTimeMinutes
+                expectedWaitingTimeMinutes,
+                initialWaitingNumber
         );
     }
 
@@ -216,7 +220,8 @@ public record Waiting(
                 registeredAt,
                 enteredAt,
                 LocalDateTime.now(),
-                expectedWaitingTimeMinutes
+                expectedWaitingTimeMinutes,
+                initialWaitingNumber
         );
     }
 }

@@ -145,7 +145,7 @@ class WaitingServiceTest {
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, nextWaitingNumber,
                     WaitingStatus.WAITING, registeredAt,
-                    null, null, 30
+                    null, null, 30, null
             );
             Location location = validPopup.getLocation();
             LocationResponse locationResponse = new LocationResponse(

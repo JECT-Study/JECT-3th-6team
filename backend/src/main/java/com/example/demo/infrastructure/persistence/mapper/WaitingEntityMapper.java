@@ -34,7 +34,8 @@ public class WaitingEntityMapper {
                 entity.getCreatedAt(),
                 entity.getEnteredAt(),
                 entity.getCanEnterAt(),
-                entity.getExpectedWaitingTimeMinutes()
+                entity.getExpectedWaitingTimeMinutes(),
+                entity.getInitialWaitingNumber()
         );
     }
 
@@ -68,6 +69,7 @@ public class WaitingEntityMapper {
                 .canEnterAt(waiting.canEnterAt())
                 .expectedWaitingTimeMinutes(waiting.expectedWaitingTimeMinutes())
                 .createdAt(waiting.registeredAt())
+                .initialWaitingNumber(waiting.initialWaitingNumber())
                 .build();
     }
 } 
