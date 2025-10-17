@@ -12,6 +12,7 @@ import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import com.example.demo.domain.port.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -132,7 +134,9 @@ public class WaitingService {
                 throw new BusinessException(ErrorType.ACCESS_DENIED_WAITING, String.valueOf(waitingId));
             }
 
-            WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting);
+            // 해당 팝업의 대기중인 팀 수 조회
+            int waitingCount = waitingPort.findByQuery(WaitingQuery.forPopup(waiting.popup().getId(), WaitingStatus.WAITING)).size();
+            WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting, waitingCount);
             return new VisitHistoryCursorResponse(List.of(waitingResponse), waitingId, false);
         }
 
@@ -146,57 +150,108 @@ public class WaitingService {
         boolean hasNext = waitings.size() == size;
         Long lastId = waitings.isEmpty() ? null : waitings.getLast().id();
 
-        // 4. DTO 변환
+        // 4. DTO 변환 (각 팝업별 대기중인 팀 수 포함)
         List<WaitingResponse> waitingResponses = waitings.stream()
-                .map(waitingDtoMapper::toResponse)
+                .map(waiting -> {
+                    // 해당 팝업의 대기중인 팀 수 조회
+                    int waitingCount = waitingPort.findByQuery(WaitingQuery.forPopup(waiting.popup().getId(), WaitingStatus.WAITING)).size();
+                    return waitingDtoMapper.toResponse(waiting, waitingCount);
+                })
                 .toList();
 
         return new VisitHistoryCursorResponse(waitingResponses, lastId, hasNext);
     }
 
     /**
-     * 대기열 입장 처리
+     * 대기열 입장 처리 (관리자용)
+     * 0번 대기자만 입장 가능하며, 입장 후 나머지 대기자들의 번호를 감소시킨다.
+     *
+     * @param waitingId 입장 처리할 대기 ID
+     * @throws BusinessException 대기 정보를 찾을 수 없거나, 입장 조건을 만족하지 않는 경우
      */
-    //TODO 관리자 페이지에서 이거 사용하도록 수정하거나 삭제
     @Transactional
-    public void makeVisit(WaitingMakeVisitRequest request) {
+    public void enterWaiting(Long waitingId) {
         // 1. 대기 정보 조회
-        WaitingQuery query = WaitingQuery.forWaitingId(request.waitingId());
-        Waiting waiting = waitingPort.findByQuery(query)
+        Waiting waiting = waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId))
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(request.waitingId())));
+                .orElseThrow(() -> new BusinessException(ErrorType.WAITING_NOT_FOUND, String.valueOf(waitingId)));
 
-        // 2. 입장 처리
+        // 2. 대기 번호 검증 (0번만 입장 가능)
+        if (waiting.waitingNumber() != 0) {
+            throw new BusinessException(ErrorType.WAITING_NOT_READY);
+        }
+
+        // 3. 상태 검증 (WAITING 상태만 입장 가능)
+        if (waiting.status() != WaitingStatus.WAITING) {
+            throw new BusinessException(ErrorType.INVALID_WAITING_STATUS, waiting.status().name());
+        }
+
+        // 4. 입장 처리
         Waiting enteredWaiting = waiting.enter();
-
-        // 3. 입장 처리된 대기 저장
         waitingPort.save(enteredWaiting);
 
-        // 5. 같은 팝업의 나머지 대기자들 순번 앞당기기 및 예상 대기시간 업데이트
-        reorderWaitingNumbersAndUpdateExpectedTime(waiting.popup().getId());
+        // 5. 나머지 대기자들의 번호 감소 및 예상 시간 업데이트
+        decrementWaitingNumbers(waiting.popup().getId());
     }
 
     /**
-     * 특정 팝업의 대기 순번을 앞당기고 예상 대기시간을 업데이트한다.
+     * 특정 팝업의 대기 순번을 감소시키고 예상 대기시간을 업데이트한다.
+     * N+1 문제 방지를 위해 배치 저장 사용
      *
      * @param popupId 팝업 ID
      */
-    private void reorderWaitingNumbersAndUpdateExpectedTime(Long popupId) {
+    private void decrementWaitingNumbers(Long popupId) {
         // 1. 해당 팝업의 모든 대기중인 대기 조회
-        WaitingQuery popupQuery = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
-        List<Waiting> waitingList = waitingPort.findByQuery(popupQuery);
+        WaitingQuery query = WaitingQuery.forPopup(popupId, WaitingStatus.WAITING);
+        List<Waiting> waitings = waitingPort.findByQuery(query);
 
-        // 2. 최신 통계 데이터 조회
-        PopupWaitingStatistics updatedStatistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
+        // 2. 팝업 통계 조회
+        var statistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
+        Double avgTimePerPerson = statistics.calculateAverageTimePerPerson();
 
-        // 3. 순번 앞당기기
-        List<Waiting> reorderedWaitings = waitingList.stream()
-                .filter(w -> w.waitingNumber() > 0)
-                .map(waiting -> waiting.minusWaitingNumber(updatedStatistics))
-                .toList();
+        log.info("[입장 처리] 예상 대기 시간 업데이트 시작 - popupId: {}, 평균 대기시간: {}분/팀, 대기자 수: {}",
+                popupId, avgTimePerPerson, waitings.size());
 
-        // 4. 배치로 저장
-        waitingPort.saveAll(reorderedWaitings);
+        Waiting newFirstWaiting = null;
+        Waiting new3rdWaiting = null;
+        List<Waiting> decrementedWaitings = new java.util.ArrayList<>();
+
+        // 3. 대기 중인 모든 대기자의 번호를 1씩 감소
+        for (Waiting waiting : waitings) {
+            if (waiting.waitingNumber() > 0) {
+                Waiting decremented = waiting.minusWaitingNumber(statistics);
+                decrementedWaitings.add(decremented);
+
+                log.debug("[입장 처리] 예상 대기 시간 업데이트 - waitingId: {}, 대기번호: {}번->{}번, 예상시간: {}분",
+                        waiting.id(), waiting.waitingNumber(), decremented.waitingNumber(),
+                        decremented.expectedWaitingTimeMinutes());
+
+                // 새로 0번이 된 사람 (기존 1번)
+                if (decremented.waitingNumber() == 0) {
+                    newFirstWaiting = decremented;
+                }
+                // 새로 3번이 된 사람 (기존 4번)
+                else if (decremented.waitingNumber() == 3) {
+                    new3rdWaiting = decremented;
+                }
+            }
+        }
+
+        // 4. 배치로 한 번에 저장 (N+1 문제 해결)
+        if (!decrementedWaitings.isEmpty()) {
+            waitingPort.saveAll(decrementedWaitings);
+            log.info("[입장 처리] 예상 대기 시간 업데이트 완료 - {} 건 일괄 저장", decrementedWaitings.size());
+        }
+
+        // 5. 새로 0번이 된 사람에게 입장 알림 발송 (SSE + 이메일)
+        if (newFirstWaiting != null) {
+            waitingNotificationService.sendEnterNowNotification(newFirstWaiting);
+        }
+
+        // 6. 새로 3번이 된 사람에게 3팀 전 알림 발송 (SSE)
+        if (new3rdWaiting != null) {
+            waitingNotificationService.sendEnter3TeamsBeforeNotification(new3rdWaiting);
+        }
     }
 } 

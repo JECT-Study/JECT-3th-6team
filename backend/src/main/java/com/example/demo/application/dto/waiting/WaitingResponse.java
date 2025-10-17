@@ -16,6 +16,7 @@ public record WaitingResponse(
         String contactEmail, // 예약 이메일
         PopupSummaryResponse popup,
         LocalDateTime registeredAt,
-        Integer expectedWaitingTimeMinutes // 예상 대기 시간 (분)
+        Integer expectedWaitingTimeMinutes, // 예상 대기 시간 (분)
+        Integer waitingCount // 해당 팝업의 대기중인 팀 수
 ) {
 }
