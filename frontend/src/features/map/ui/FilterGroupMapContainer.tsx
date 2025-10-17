@@ -119,14 +119,14 @@ export default function FilterGroupMapContainer() {
     queryFn: async () => {
       try {
         const result = await getMapPopupListApi({
-          minLatitude: 37.541673,
-          maxLatitude: 37.545894,
-          minLongitude: 127.041309,
-          maxLongitude: 127.047804,
+          minLatitude: 33.12,
+          maxLatitude: 38.58,
+          minLongitude: 125.11,
+          maxLongitude: 131.86,
           type: popupType.length > 0 ? popupType.join(',') : undefined,
           category: category.length > 0 ? category.join(',') : undefined,
         });
-
+        console.log('result', result);
         return { popupList: result };
       } catch (error) {
         console.error('❌ API 실패', error);
