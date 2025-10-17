@@ -9,7 +9,6 @@ import com.example.demo.domain.model.waiting.WaitingDomainEvent;
 import com.example.demo.domain.model.waiting.WaitingEventType;
 import com.example.demo.domain.port.NotificationEventPort;
 import com.example.demo.domain.port.NotificationPort;
-import com.example.demo.domain.port.ScheduledNotificationPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 public class WaitingNotificationService {
 
     private final NotificationPort notificationPort;
-    private final ScheduledNotificationPort scheduledNotificationPort;
     private final NotificationEventPort notificationEventPort;
     private final EmailNotificationService emailNotificationService;
 
