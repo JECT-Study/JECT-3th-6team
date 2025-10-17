@@ -13,7 +13,7 @@ export default function MobileLandingStart({
   return (
     <div
       className={
-        'w-[100vw] h-[100vh] relative ' +
+        'w-screen h-screen relative ' +
         'bg-[#F4F4F4]  flex flex-col justify-center items-center gap-y-[10px]'
       }
     >
@@ -28,7 +28,7 @@ export default function MobileLandingStart({
       />
       <p
         className={
-          'w-[500px] text-[14px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[120px] left-1/2 -translate-x-1/2 select-none'
+          'w-[300px] text-[14px] text-[#4A4A4A] font-medium text-center mt-[20px] absolute top-[120px] left-1/2 -translate-x-1/2 select-none'
         }
       >
         팝업스토어 정보를 모아보고, 실시간 웨이팅까지 <br />

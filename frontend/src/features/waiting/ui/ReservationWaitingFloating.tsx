@@ -52,9 +52,10 @@ export default function ReservationWaitingFloating() {
           <div className={'flex flex-col'}>
             <p className={'font-medium text-[16px]'}>{data.popup.popupName}</p>
             <span className={'font-regular text-gray80 text-[14px]'}>
-              예상 대기 시간 :{' '}
+              예상 대기 시간 :
               <strong className={'text-main'}>
-                {data.expectedWaitingTimeMinutes}분
+                {data.waitingNumber === 0 ? 0 : data.expectedWaitingTimeMinutes}
+                분
               </strong>
             </span>
           </div>

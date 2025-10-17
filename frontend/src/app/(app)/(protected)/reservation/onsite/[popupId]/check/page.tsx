@@ -38,10 +38,10 @@ const SubTitle = ({ title }: { title: string }) => (
 
 export default function Page() {
   const { formValue } = useReservationFormContext();
-  const { mutate, isPending } = usePostReservation();
   const router = useRouter();
   const params = useParams();
   const popupId = Number(params.popupId);
+  const { mutate, isPending } = usePostReservation({ popupId });
   const [isScrollEnd, setIsScrollEnd] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
 
