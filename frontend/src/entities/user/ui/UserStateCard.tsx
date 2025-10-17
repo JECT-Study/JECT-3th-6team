@@ -33,8 +33,8 @@ const LoginStateCard = () => {
 
   return (
     <div className={'flex flex-col gap-y-3'}>
-      <Link
-        href={'/setting/mypage'}
+      <div
+        // href={'/setting/mypage'}
         className={
           'bg-white border border-main rounded-[10px] px-4 py-6 shadow-card flex items-center justify-between hover:bg-sub2 transition-all duration-350'
         }
@@ -55,7 +55,7 @@ const LoginStateCard = () => {
           </div>
         </div>
         <IconBracketRight width={20} height={20} fill={'var(--color-gray80)'} />
-      </Link>
+      </div>
       <LogoutButton />
     </div>
   );

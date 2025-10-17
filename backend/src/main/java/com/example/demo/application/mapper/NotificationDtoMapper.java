@@ -13,6 +13,7 @@ import com.example.demo.domain.model.waiting.Waiting;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -23,11 +24,12 @@ public class NotificationDtoMapper {
 
     // 대기 도메인 이벤트 타입별 리소스 변환 전략
     private static final Map<String, Function<Waiting, List<RelatedResourceResponse>>> WAITING_EVENT_STRATEGIES = Map.of(
-            "REVIEW_REQUEST", waiting -> createReviewRequestResources(waiting),
-            "WAITING_CONFIRMED", waiting -> createWaitingConfirmedResources(waiting),
-            "ENTER_3TEAMS_BEFORE", waiting -> createEnterNotificationResources(waiting),
-            "ENTER_NOW", waiting -> createEnterNotificationResources(waiting),
-            "ENTER_TIME_OVER", waiting -> createEnterNotificationResources(waiting)
+            "WAITING_CONFIRMED", NotificationDtoMapper::createWaitingConfirmedResources,
+            "ENTER_3TEAMS_BEFORE", NotificationDtoMapper::createEnterNotificationResources,
+            "ENTER_NOW", NotificationDtoMapper::createEnterNotificationResources,
+            "ENTER_TIME_OVER", NotificationDtoMapper::createEnterNotificationResources,
+            "NOSHOW_FIRST", NotificationDtoMapper::createNoShowFirstResources,
+            "NOSHOW_SECOND", NotificationDtoMapper::createNoShowSecondResources
     );
 
     public NotificationListResponse toCursorResponse(CursorResult<Notification> cursorResult) {
@@ -61,7 +63,8 @@ public class NotificationDtoMapper {
 
         return switch (source) { // Java 17의 Pattern Matching Switch 문법
             case Waiting waiting -> processWaitingEvent(waiting, eventType);
-            default -> throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, source.getClass().getSimpleName());
+            default ->
+                    throw new BusinessException(ErrorType.UNSUPPORTED_NOTIFICATION_TYPE, source.getClass().getSimpleName());
         };
     }
 
@@ -70,33 +73,10 @@ public class NotificationDtoMapper {
                 .apply(waiting);
     }
 
-    // 리뷰 요청 알림: Popup 정보가 필요 (스토어명, 주소 등)
-    private static List<RelatedResourceResponse> createReviewRequestResources(Waiting waiting) {
-        List<RelatedResourceResponse> resources = new ArrayList<>();
-        
-        // Popup 리소스 추가
-        Popup popup = waiting.popup();
-        if (popup != null) {
-            resources.add(new RelatedResourceResponse("POPUP", Map.of(
-                    "id", popup.getId(),
-                    "storeName", popup.getName(),
-                    "address", popup.getLocation().addressName()
-            )));
-        }
-        
-        // Waiting 리소스 추가 (대기 번호 등)
-        resources.add(new RelatedResourceResponse("WAITING", Map.of(
-                "id", waiting.id(),
-                "waitingNumber", waiting.waitingNumber()
-        )));
-        
-        return resources;
-    }
-
     // 대기 확정 알림: Waiting과 Popup 정보 모두 필요
     private static List<RelatedResourceResponse> createWaitingConfirmedResources(Waiting waiting) {
         List<RelatedResourceResponse> resources = new ArrayList<>();
-        
+
         // Popup 리소스 추가 (스토어명)
         Popup popup = waiting.popup();
         if (popup != null) {
@@ -105,21 +85,21 @@ public class NotificationDtoMapper {
                     "storeName", popup.getName()
             )));
         }
-        
+
         // Waiting 리소스 추가 (대기 번호, 등록 시간 등)
         resources.add(new RelatedResourceResponse("WAITING", Map.of(
                 "id", waiting.id(),
                 "waitingNumber", waiting.waitingNumber(),
                 "registeredAt", waiting.registeredAt()
         )));
-        
+
         return resources;
     }
 
     // 입장 관련 알림: Waiting과 Popup 정보 필요
     private static List<RelatedResourceResponse> createEnterNotificationResources(Waiting waiting) {
         List<RelatedResourceResponse> resources = new ArrayList<>();
-        
+
         // Popup 리소스 추가
         Popup popup = waiting.popup();
         if (popup != null) {
@@ -129,13 +109,38 @@ public class NotificationDtoMapper {
                     "address", popup.getLocation().addressName()
             )));
         }
-        
+
         // Waiting 리소스 추가
         resources.add(new RelatedResourceResponse("WAITING", Map.of(
                 "id", waiting.id(),
                 "waitingNumber", waiting.waitingNumber()
         )));
-        
+
         return resources;
+    }
+
+    private static List<RelatedResourceResponse> createNoShowFirstResources(Waiting waiting) {
+        List<RelatedResourceResponse> resources = new ArrayList<>();
+        // Popup 리소스 추가
+        Popup popup = waiting.popup();
+        if (popup != null) {
+            resources.add(new RelatedResourceResponse("POPUP", Map.of(
+                    "id", popup.getId(),
+                    "storeName", popup.getName(),
+                    "address", popup.getLocation().addressName()
+            )));
+        }
+
+        // Waiting 리소스 추가
+        resources.add(new RelatedResourceResponse("WAITING", Map.of(
+                "id", waiting.id(),
+                "waitingNumber", waiting.waitingNumber()
+        )));
+
+        return resources;
+    }
+
+    private static List<RelatedResourceResponse> createNoShowSecondResources(Waiting waiting) {
+        return Collections.emptyList();
     }
 }

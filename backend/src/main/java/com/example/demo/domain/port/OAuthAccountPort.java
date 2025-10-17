@@ -10,4 +10,6 @@ public interface OAuthAccountPort {
     Optional<OAuthAccount> findByProviderAndProviderId(OAuthProvider provider, String providerId);
 
     OAuthAccount save(OAuthAccount oAuthAccount);
+
+    void deleteByMemberId(Long memberId);
 } 

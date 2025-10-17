@@ -13,7 +13,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     show-sql: false
     properties:
       hibernate:
@@ -33,3 +33,5 @@ custom:
   metrics:
     userName: ${METRICS_USER}
     password: ${METRICS_PASSWORD}
+  app:
+    cors-allowed-origins: ${CORS_ALLOWED_ORIGINS}

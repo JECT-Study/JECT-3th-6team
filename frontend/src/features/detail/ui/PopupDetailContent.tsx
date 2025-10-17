@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Tag } from '@/shared/ui/tag/Tag';
-import { BottomButtonContainer, CircleMap } from '@/shared/ui';
+import { BottomButtonContainer, KakaoMap } from '@/shared/ui';
+import { MapMarker } from 'react-kakao-maps-sdk';
 import PageHeader from '@/shared/ui/header/PageHeader';
 import StandardButton from '@/shared/ui/button/StandardButton';
 import { MediumText } from '@/shared/ui/text/MediumText';
@@ -13,7 +13,7 @@ import { SemiBoldText } from '@/shared/ui/text/SemiBoldText';
 
 import { DescriptionTab } from '@/features/detail/ui/DescriptionTab';
 import { ImageCarousel } from '@/features/detail/ui/ImageCarousel';
-import QrScanGuideModal from '@/features/detail/ui/QrScanGuideModal';
+import { useOperatingHours } from '@/features/detail/hook/useOperatingHours';
 
 import IconClock from '@/assets/icons/Normal/Icon_Clock.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
@@ -32,8 +32,12 @@ export default function PopupDetailContent({
   popupId,
 }: PopupDetailContentProps) {
   const router = useRouter();
-  const [isQrGuideModalOpen, setIsQrGuideModalOpen] = useState(false);
 
+  const isWithinOperatingHours = useOperatingHours(
+    popupDetailData?.popupDetail
+  );
+
+  const myLocationImageUrl = '/icons/Color/Icon_Map.svg';
   // 데이터가 없을 때 early return (Suspense에서 처리됨)
   if (!popupDetailData) {
     return null;
@@ -51,6 +55,34 @@ export default function PopupDetailContent({
     popupDetail,
   } = popupDetailData;
 
+  const isWaiting = status === 'WAITING';
+  const isVisited = status === 'VISITED';
+  const isWaitingAvailable = status === 'NONE' || status === 'NO_SHOW';
+  const isReservationBanned = status === 'STORE_BAN' || status === 'GLOBAL_BAN';
+  const isOutsideOperatingHours = !isWithinOperatingHours;
+
+  /* 팝업 운영 상태 및 유저 상태에 따른 버튼 라벨
+  팝업 운영시간 외 : 준비 중이에요
+  팝업 운영시간 내이면서 예약 가능 : 웨이팅하기 ( 예약 전, 노쇼 1회 )
+  방문 했었던 팝업 : 방문 완료
+  노쇼2회 이상 혹은 10회 이상으로 전체 밴 : 오늘은 이용이 어려워요
+*/
+
+  let actionLabel = '';
+  if (dDay < 0) actionLabel = '운영 종료';
+  else if (isWaiting) actionLabel = '예약중';
+  else if (isReservationBanned) actionLabel = '오늘은 이용이 어려워요';
+  else if (isOutsideOperatingHours) actionLabel = '준비 중이에요';
+  else if (isVisited) actionLabel = '방문 완료';
+  else if (isWaitingAvailable) actionLabel = '웨이팅하기';
+
+  const isDisabled =
+    dDay < 0 ||
+    isWaiting ||
+    isVisited ||
+    isReservationBanned ||
+    isOutsideOperatingHours;
+
   const handleClickMap = () => {
     const lat = location.latitude;
     const lng = location.longitude;
@@ -58,19 +90,7 @@ export default function PopupDetailContent({
   };
 
   const handleWaitingClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (status === 'NONE') {
-      // setIsQrGuideModalOpen(true);
-      // try {
-      //   await requestCameraAccess(() => {});
-      // } catch (error) {
-      //   console.error('카메라 접근 실패:', error);
-      //   alert(
-      //     error instanceof Error
-      //       ? error.message
-      //       : '카메라에 접근할 수 없습니다.'
-      //   );
-      // }
-
+    if (isWaitingAvailable) {
       const { text, url } = extractLinkMetaFromButton(e);
       // GTM
       TagManager.dataLayer({
@@ -86,15 +106,13 @@ export default function PopupDetailContent({
     }
   };
 
-  const handleQrGuideClose = () => {
-    setIsQrGuideModalOpen(false);
-  };
-
   return (
     <div className="pb-36">
       <PageHeader title="상세 정보" />
       {/* Image Carousel */}
-      <ImageCarousel images={thumbnails} />
+      <ImageCarousel
+        images={thumbnails && thumbnails.length > 0 ? thumbnails : []}
+      />
 
       {/* Main Detail */}
       <div className="py-6 px-5">
@@ -147,12 +165,21 @@ export default function PopupDetailContent({
         </div>
         {/* Map */}
         <div className="mt-6.5">
-          <CircleMap
+          <KakaoMap
             center={{ lat: location.latitude, lng: location.longitude }}
             maxLevel={6}
             minLevel={6}
             onClick={handleClickMap}
-          />
+            className="w-full h-30 rounded-[10px]"
+          >
+            <MapMarker
+              position={{ lat: location.latitude, lng: location.longitude }}
+              image={{
+                src: myLocationImageUrl,
+                size: { width: 40, height: 40 },
+              }}
+            />
+          </KakaoMap>
         </div>
       </div>
 
@@ -168,25 +195,13 @@ export default function PopupDetailContent({
       <BottomButtonContainer hasShadow={true}>
         <StandardButton
           onClick={handleWaitingClick}
-          disabled={status === 'WAITING' || status === 'VISITED'}
+          disabled={isDisabled}
           color="primary"
           className={'waiting-btn'}
         >
-          {status === 'WAITING'
-            ? '예약중'
-            : status === 'NONE'
-              ? '웨이팅하기'
-              : '방문 완료'}
+          {actionLabel}
         </StandardButton>
       </BottomButtonContainer>
-
-      {/* QR 스캔 안내 모달 */}
-      <div>
-        <QrScanGuideModal
-          isOpen={isQrGuideModalOpen}
-          onClose={handleQrGuideClose}
-        />
-      </div>
     </div>
   );
 }

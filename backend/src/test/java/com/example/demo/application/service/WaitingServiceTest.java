@@ -11,14 +11,11 @@ import com.example.demo.domain.model.DateRange;
 import com.example.demo.domain.model.Location;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.popup.*;
+import com.example.demo.domain.model.waiting.PopupWaitingStatistics;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
-import com.example.demo.domain.port.MemberPort;
-import com.example.demo.domain.port.NotificationPort;
-import com.example.demo.domain.port.PopupPort;
-import com.example.demo.domain.port.WaitingPort;
-import org.junit.jupiter.api.Disabled;
+import com.example.demo.domain.port.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,12 +56,19 @@ class WaitingServiceTest {
     @Mock
     private NotificationPort notificationPort;
 
+    @Mock
+    private BanPort banPort;
+
+    @Mock
+    private WaitingStatisticsPort waitingStatisticsPort;
+
     @InjectMocks
     private WaitingService waitingService;
 
     @Nested
     @DisplayName("createWaiting 테스트")
     class Test01 {
+        LocalDateTime now = LocalDateTime.of(2024, 6, 10, 10, 0);
         // 테스트용 유효한 데이터
         private final Popup validPopup = Popup.builder()
                 .id(1L)
@@ -82,15 +86,15 @@ class WaitingServiceTest {
                 .schedule(
                         new PopupSchedule(
                                 new DateRange(
-                                        LocalDate.now(),
-                                        LocalDate.now().plusDays(30)
+                                        now.toLocalDate(),
+                                        now.toLocalDate().plusDays(30)
                                 ),
                                 new WeeklyOpeningHours(
                                         List.of(
                                                 new OpeningHours(
                                                         DayOfWeek.MONDAY,
-                                                        LocalTime.now(),
-                                                        LocalTime.now().plusHours(1)
+                                                        now.toLocalTime(),
+                                                        now.toLocalTime().plusHours(1)
                                                 )
                                         )
                                 )
@@ -123,10 +127,25 @@ class WaitingServiceTest {
             // given
             Integer nextWaitingNumber = 5;
             LocalDateTime registeredAt = LocalDateTime.now();
+
+            // Mock: 제재 없음
+            when(banPort.findByQuery(any())).thenReturn(List.of());
+
+            // Mock: 당일 중복 신청 없음
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
+                    .thenReturn(List.of());
+
+            // Mock: 예상 대기시간 계산
+            PopupWaitingStatistics mockStatistics = mock(PopupWaitingStatistics.class);
+            when(mockStatistics.calculateExpectedWaitingTime(nextWaitingNumber)).thenReturn(30);
+            when(waitingStatisticsPort.findCompletedStatisticsByPopupId(1L))
+                    .thenReturn(mockStatistics);
+
             Waiting savedWaiting = new Waiting(
                     1L, validPopup, "홍길동", validMember,
                     "hong@example.com", 2, nextWaitingNumber,
-                    WaitingStatus.WAITING, registeredAt
+                    WaitingStatus.WAITING, registeredAt,
+                    null, null, 30, null
             );
             Location location = validPopup.getLocation();
             LocationResponse locationResponse = new LocationResponse(
@@ -149,7 +168,7 @@ class WaitingServiceTest {
             when(waitingDtoMapper.toCreateResponse(savedWaiting)).thenReturn(expectedResponse);
 
             // when
-            WaitingCreateResponse response = waitingService.createWaiting(validRequest);
+            WaitingCreateResponse response = waitingService.createWaiting(validRequest, now);
 
             // then
             assertNotNull(response);
@@ -157,8 +176,11 @@ class WaitingServiceTest {
 
             // verify
             verify(popupPort).findById(1L);
+            verify(banPort, times(2)).findByQuery(any());
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort).findById(1L);
+            verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(1L);
             verify(waitingPort).save(any(Waiting.class));
             verify(waitingDtoMapper).toCreateResponse(savedWaiting);
         }
@@ -176,7 +198,7 @@ class WaitingServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> waitingService.createWaiting(invalidRequest)
+                    () -> waitingService.createWaiting(invalidRequest, now)
             );
 
             assertEquals(ErrorType.POPUP_NOT_FOUND, exception.getErrorType());
@@ -191,7 +213,6 @@ class WaitingServiceTest {
 
         @Test
         @DisplayName("존재하지 않는 회원으로 대기 신청 시 예외 발생")
-        @Disabled
         public void test03() {
             // given
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
@@ -205,7 +226,7 @@ class WaitingServiceTest {
             // when & then
             BusinessException exception = assertThrows(
                     BusinessException.class,
-                    () -> waitingService.createWaiting(invalidRequest)
+                    () -> waitingService.createWaiting(invalidRequest, now)
             );
 
             assertEquals(ErrorType.MEMBER_NOT_FOUND, exception.getErrorType());
@@ -222,18 +243,35 @@ class WaitingServiceTest {
         @DisplayName("대기 정보 저장 시 예외 발생")
         public void test04() {
             // given
+
+            // Mock: 제재 없음
+            when(banPort.findByQuery(any())).thenReturn(List.of());
+
+            // Mock: 당일 중복 신청 없음
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
+                    .thenReturn(List.of());
+
+            // Mock: 예상 대기시간 계산
+            PopupWaitingStatistics mockStatistics = mock(PopupWaitingStatistics.class);
+            when(mockStatistics.calculateExpectedWaitingTime(anyInt())).thenReturn(30);
+            when(waitingStatisticsPort.findCompletedStatisticsByPopupId(1L))
+                    .thenReturn(mockStatistics);
+
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenReturn(5);
             when(memberPort.findById(1L)).thenReturn(Optional.of(validMember));
             when(waitingPort.save(any(Waiting.class))).thenThrow(new RuntimeException("저장 실패"));
 
             // when & then
-            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest));
+            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest, now));
 
             // verify
             verify(popupPort).findById(1L);
+            verify(banPort, times(2)).findByQuery(any());
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort).findById(1L);
+            verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(1L);
             verify(waitingPort).save(any(Waiting.class));
             verify(waitingDtoMapper, never()).toCreateResponse(any());
         }
@@ -242,16 +280,27 @@ class WaitingServiceTest {
         @DisplayName("대기 번호 조회 시 예외 발생")
         public void test05() {
             // given
+
+            // Mock: 제재 없음
+            when(banPort.findByQuery(any())).thenReturn(List.of());
+
+            // Mock: 당일 중복 신청 없음
+            when(waitingPort.findByQuery(argThat(query -> query.getDate() != null)))
+                    .thenReturn(List.of());
+
             when(popupPort.findById(1L)).thenReturn(Optional.of(validPopup));
             when(waitingPort.getNextWaitingNumber(1L)).thenThrow(new RuntimeException("대기 번호 조회 실패"));
 
             // when & then
-            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest));
+            assertThrows(RuntimeException.class, () -> waitingService.createWaiting(validRequest, now));
 
             // verify
             verify(popupPort).findById(1L);
+            verify(banPort, times(2)).findByQuery(any());
+            verify(waitingPort).findByQuery(argThat(query -> query.getDate() != null));
             verify(waitingPort).getNextWaitingNumber(1L);
             verify(memberPort, never()).findById(any());
+            verify(waitingStatisticsPort, never()).findCompletedStatisticsByPopupId(anyLong());
             verify(waitingPort, never()).save(any());
             verify(waitingDtoMapper, never()).toCreateResponse(any());
         }
@@ -339,7 +388,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
-                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now
+                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null, 5
             );
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
@@ -350,12 +399,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
-                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now
+                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now, null, 3
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
-            when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse1, waitingResponse2);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -367,9 +415,8 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting1);
-            verify(waitingDtoMapper).toResponse(waiting2);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -392,7 +439,7 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일",
                     new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
-            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now);
+            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null, 5);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
@@ -400,11 +447,10 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일",
                     new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
-            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1));
+            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1), null, 3);
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
-            when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse1, waitingResponse2);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -416,9 +462,8 @@ class WaitingServiceTest {
             assertTrue(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting1);
-            verify(waitingDtoMapper).toResponse(waiting2);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -443,8 +488,8 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -472,11 +517,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now
+                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now, null, 5
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -487,8 +532,8 @@ class WaitingServiceTest {
             assertEquals("WAITING", response.content().getFirst().status());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -516,11 +561,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now
+                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now, null, 5
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -531,8 +576,8 @@ class WaitingServiceTest {
             assertEquals(response.content().getLast().waitingId(), response.lastWaitingId());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -550,7 +595,7 @@ class WaitingServiceTest {
 
             // verify
             verify(waitingPort, never()).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -573,11 +618,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now
+                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now, null, 5
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
-            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId);
@@ -590,8 +635,8 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
-            verify(waitingDtoMapper).toResponse(waiting);
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -608,8 +653,8 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -633,14 +678,14 @@ class WaitingServiceTest {
             );
 
             // verify
-            verify(waitingPort).findByQuery(new WaitingQuery(waitingId, null, null, null, null, null));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
     }
 
-    @DisplayName("makeVisit 메서드 테스트")
+    @DisplayName("enterWaiting 메서드 테스트")
     @Nested
-    class MakeVisitTest {
+    class EnterWaitingTest {
         private final Popup validPopup = Popup.builder()
                 .id(1L)
                 .name("테스트 팝업")
@@ -690,7 +735,7 @@ class WaitingServiceTest {
 
         @Test
         @DisplayName("존재하지 않는 대기 ID로 입장 처리 시 WAITING_NOT_FOUND 예외")
-        void makeVisit_WaitingNotFound() {
+        void enterWaiting_WaitingNotFound() {
             // given
             Long waitingId = 999L;
             WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
@@ -700,7 +745,7 @@ class WaitingServiceTest {
 
             // when & then
             BusinessException exception = assertThrows(BusinessException.class,
-                    () -> waitingService.makeVisit(request));
+                    () -> waitingService.enterWaiting(request.waitingId()));
 
             assertEquals(ErrorType.WAITING_NOT_FOUND, exception.getErrorType());
             assertEquals(String.valueOf(waitingId), exception.getAdditionalInfo());
@@ -708,7 +753,7 @@ class WaitingServiceTest {
 
         @Test
         @DisplayName("이미 방문 완료된 대기에서 입장 처리 시 INVALID_WAITING_STATUS 예외")
-        void makeVisit_AlreadyVisited() {
+        void enterWaiting_AlreadyVisited() {
             // given
             Long waitingId = 1L;
             WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
@@ -724,14 +769,14 @@ class WaitingServiceTest {
 
             // when & then
             BusinessException exception = assertThrows(BusinessException.class,
-                    () -> waitingService.makeVisit(request));
+                    () -> waitingService.enterWaiting(request.waitingId()));
 
             assertEquals(ErrorType.INVALID_WAITING_STATUS, exception.getErrorType());
         }
 
         @Test
         @DisplayName("취소된 대기에서 입장 처리 시 INVALID_WAITING_STATUS 예외")
-        void makeVisit_CanceledWaiting() {
+        void enterWaiting_CanceledWaiting() {
             // given
             Long waitingId = 1L;
             WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
@@ -747,14 +792,14 @@ class WaitingServiceTest {
 
             // when & then
             BusinessException exception = assertThrows(BusinessException.class,
-                    () -> waitingService.makeVisit(request));
+                    () -> waitingService.enterWaiting(request.waitingId()));
 
             assertEquals(ErrorType.INVALID_WAITING_STATUS, exception.getErrorType());
         }
 
         @Test
         @DisplayName("중간 순번 입장 시 WAITING_NOT_READY 예외 발생")
-        void makeVisit_ReorderMiddleNumber() {
+        void enterWaiting_ReorderMiddleNumber() {
             // given
             Long waitingId = 3L;
             WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
@@ -793,14 +838,14 @@ class WaitingServiceTest {
 
             // when & then
             BusinessException exception = assertThrows(BusinessException.class,
-                    () -> waitingService.makeVisit(request));
+                    () -> waitingService.enterWaiting(request.waitingId()));
 
             assertEquals(ErrorType.WAITING_NOT_READY, exception.getErrorType());
         }
 
         @Test
         @DisplayName("첫 번째 순번 입장 시 모든 뒤 순번들이 앞당겨짐")
-        void makeVisit_ReorderFirstNumber() {
+        void enterWaiting_ReorderFirstNumber() {
             // given
             Long waitingId = 1L;
             WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
@@ -829,6 +874,12 @@ class WaitingServiceTest {
                     LocalDateTime.now()
             );
 
+            // Mock: 예상 대기시간 계산
+            PopupWaitingStatistics mockStatistics = mock(PopupWaitingStatistics.class);
+            when(mockStatistics.calculateExpectedWaitingTime(anyInt())).thenReturn(30);
+            when(waitingStatisticsPort.findCompletedStatisticsByPopupId(validPopup.getId()))
+                    .thenReturn(mockStatistics);
+
             when(waitingPort.findByQuery(WaitingQuery.forWaitingId(waitingId)))
                     .thenReturn(List.of(targetWaiting));
 
@@ -836,16 +887,18 @@ class WaitingServiceTest {
                     .thenReturn(List.of(waiting2, waiting3, waiting4));
 
             // when
-            waitingService.makeVisit(request);
+            waitingService.enterWaiting(request.waitingId());
 
             // then
-            // 입장 처리된 대기 1번 + 순번 변경된 대기 3번 = 총 4번 save 호출
-            verify(waitingPort, org.mockito.Mockito.times(4)).save(any(Waiting.class));
+            // 입장 처리된 대기 1번 save + 순번 변경된 대기들 saveAll 1번 = 총 2번 호출
+            verify(waitingPort, times(1)).save(any(Waiting.class));
+            verify(waitingPort, times(1)).saveAll(anyList());
+            verify(waitingStatisticsPort).findCompletedStatisticsByPopupId(validPopup.getId());
         }
 
         @Test
         @DisplayName("단일 대기 입장 시 순번 재배치 없음")
-        void makeVisit_SingleWaiting() {
+        void enterWaiting_SingleWaiting() {
             // given
             Long waitingId = 1L;
             WaitingMakeVisitRequest request = new WaitingMakeVisitRequest(waitingId);
@@ -862,12 +915,16 @@ class WaitingServiceTest {
             when(waitingPort.findByQuery(WaitingQuery.forPopup(validPopup.getId(), WaitingStatus.WAITING)))
                     .thenReturn(List.of()); // 다른 대기 없음
 
+            when(waitingStatisticsPort.findCompletedStatisticsByPopupId(validPopup.getId()))
+                    .thenReturn(new PopupWaitingStatistics(validPopup.getId(), List.of()));
+
             // when
-            waitingService.makeVisit(request);
+            waitingService.enterWaiting(request.waitingId());
 
             // then
-            // 입장 처리된 대기만 저장
-            verify(waitingPort, org.mockito.Mockito.times(1)).save(any(Waiting.class));
+            // 입장 처리된 대기 1번 save (다른 대기가 없으므로 saveAll은 호출되지 않음)
+            verify(waitingPort, times(1)).save(any(Waiting.class));
+            verify(waitingPort, never()).saveAll(anyList());
         }
     }
 }

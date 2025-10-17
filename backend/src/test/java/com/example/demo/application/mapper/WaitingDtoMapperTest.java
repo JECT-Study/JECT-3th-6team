@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class WaitingDtoMapperTest {
 
@@ -85,7 +86,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingCreateResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toCreateResponse(waiting);
+            WaitingCreateResponse result = new WaitingDtoMapper(mock(PopupDtoMapper.class)).toCreateResponse(waiting);
 
             // then
             assertNotNull(result);
@@ -109,7 +110,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingCreateResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toCreateResponse(waiting);
+            WaitingCreateResponse result = new WaitingDtoMapper(mock(PopupDtoMapper.class)).toCreateResponse(waiting);
 
             // then
             assertNotNull(result);
@@ -185,7 +186,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toResponse(waiting);
+            WaitingResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toResponse(waiting, 5);
 
             // then
             assertNotNull(result);
@@ -255,7 +256,7 @@ class WaitingDtoMapperTest {
             );
 
             // when
-            WaitingResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toResponse(waiting);
+            WaitingResponse result = new WaitingDtoMapper(new PopupDtoMapper()).toResponse(waiting, 5);
 
             // then
             assertNotNull(result);

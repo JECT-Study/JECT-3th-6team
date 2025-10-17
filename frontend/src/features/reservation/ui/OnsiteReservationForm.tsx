@@ -27,7 +27,7 @@ interface OnsiteReservationFormProps {
   ) => void;
   handleReset: () => void;
   isFormValid: boolean;
-  handleModalOpen: () => void;
+  handleCheck: () => void;
 }
 
 export default function OnsiteReservationForm({
@@ -36,7 +36,7 @@ export default function OnsiteReservationForm({
   handleChange,
   handleReset,
   isFormValid,
-  handleModalOpen,
+  handleCheck,
 }: OnsiteReservationFormProps) {
   const headcountError =
     formValue.headCount >= MAX_HEAD_COUNT
@@ -94,7 +94,7 @@ export default function OnsiteReservationForm({
         </StandardButton>
 
         <StandardButton
-          onClick={handleModalOpen}
+          onClick={handleCheck}
           disabled={!isFormValid}
           size={'full'}
           color={'primary'}

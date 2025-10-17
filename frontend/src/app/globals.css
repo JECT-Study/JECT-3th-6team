@@ -177,7 +177,7 @@
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari 최적화 */
   .sticky {
-    position: -webkit-sticky;
+    position: sticky;
   }
 }
 
@@ -261,5 +261,24 @@ body {
     width: 100%;
     max-width: 430px;
     z-index: 50;
+  }
+}
+
+@layer components {
+  .terms-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .terms-table th,
+  .terms-table td {
+    @apply min-w-[130px] py-3 px-4 text-left border-b border-gray-200 ;
+  }
+
+  .terms-table th {
+    @apply bg-gray-100 font-semibold text-gray-800;
+  }
+
+  .terms-table tbody tr:last-child td {
+    border-bottom: none;
   }
 }

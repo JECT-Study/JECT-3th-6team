@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,6 +42,7 @@ public class SecurityConfig {
     private final AppProperties appProperties;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final Environment environment;
     @Value("${custom.metrics.userName:username}")
     private String metricUsername;
     @Value("${custom.metrics.password:password}")
@@ -67,8 +70,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // application.yml에서 설정된 frontend-url 사용
-        configuration.setAllowedOrigins(Arrays.asList(appProperties.getFrontendUrl(), "https://api.spotit.co.kr"));
+        // application.yml에서 설정된 CORS 허용 도메인들 사용
+        configuration.setAllowedOrigins(appProperties.getCorsAllowedOrigins());
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -106,12 +109,18 @@ public class SecurityConfig {
                                 "/uploads/**", // 업로드된 이미지 파일 접근 허용
                                 "/index.html",
                                 "/index.js",
+                                // 관리자 페이지들 (자체 세션 토큰 인증 사용)
+                                "/admin-login.html",
+                                "/admin-popup.html",
                                 "/admin-popup-create.html",
-                                "/admin-popup-create.js"
+                                "/admin-popup-create.js",
+                                "/admin-waiting.html"
                         ).permitAll()
+                                // Swagger UI 관련 경로 허용 (dev 환경에서만)
+                                .requestMatchers(request -> environment.acceptsProfiles(Profiles.of("dev")) && isSwaggerPath(request.getRequestURI())).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/popups/**").permitAll() // GET 요청 허용
-                        .requestMatchers(HttpMethod.POST, "/api/popups").permitAll() // 임시: 팝업 생성 무인증 허용
-                        .requestMatchers(HttpMethod.POST, "/api/images/upload").permitAll() // 임시: 이미지 업로드 무인증 허용
+                        // 관리자 API - 자체 세션 토큰 인증 사용 (Spring Security 인증 제외)
+                        .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ACTUATOR")
                         .anyRequest().authenticated()
                 )
@@ -122,5 +131,15 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+
+    /**
+     * Swagger 관련 경로인지 확인
+     */
+    private boolean isSwaggerPath(String requestURI) {
+        return requestURI.startsWith("/swagger-ui") || 
+               requestURI.startsWith("/v3/api-docs") || 
+               requestURI.equals("/swagger-ui.html");
     }
 } 

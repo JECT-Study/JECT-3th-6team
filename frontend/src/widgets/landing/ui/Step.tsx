@@ -1,16 +1,24 @@
-import { StepType } from '@/app/landing/page';
 import { StandardButton } from '@/shared/ui';
 import Image from 'next/image';
 import SSRImage from '@/widgets/landing/ui/SSRImage';
-import LandingTitle, { GuideStepType } from '@/widgets/landing/ui/LandingTitle';
+import {
+  DesktopGuideStepType,
+  DesktopStepType,
+} from '@/widgets/landing/type/type';
+import LandingTitle from '@/widgets/landing/ui/LandingTitle';
 
 interface StepProps {
-  currentStep: StepType;
+  currentStep: DesktopStepType;
   onNext: () => void;
-  onStepChange: (step: StepType) => void;
+  onStepChange: (step: DesktopStepType) => void;
 }
 
-const guideSteps: StepType[] = ['GUIDE_1', 'GUIDE_2', 'GUIDE_3', 'GUIDE_4'];
+const guideSteps: DesktopStepType[] = [
+  'GUIDE_1',
+  'GUIDE_2',
+  'GUIDE_3',
+  'GUIDE_4',
+];
 
 export default function Step(props: StepProps) {
   const { currentStep, onNext, onStepChange } = props;
@@ -18,8 +26,14 @@ export default function Step(props: StepProps) {
     <div className={'grid grid-cols-[1fr_170px] gap-x-9 '}>
       <div className={'relative '}>
         {/*가이드이미지*/}
-        <LandingTitle step={currentStep as GuideStepType} />
-        <SSRImage step={currentStep} />
+        <LandingTitle
+          step={currentStep as DesktopGuideStepType}
+          device={'DESKTOP'}
+        />
+        <SSRImage
+          step={currentStep as DesktopGuideStepType}
+          device={'DESKTOP'}
+        />
 
         {/* 인디케이터 */}
         <div className="absolute -bottom-5 left-1/2 -translate-x-1/2  flex items-center gap-x-3 bg-white rounded-full w-[452px] h-[48px] justify-around">

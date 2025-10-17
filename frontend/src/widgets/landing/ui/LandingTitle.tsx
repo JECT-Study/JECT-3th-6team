@@ -1,11 +1,22 @@
-import { StepType } from '@/app/landing/page';
+import {
+  DesktopGuideStepType,
+  MobileGuideStepType,
+} from '@/widgets/landing/type/type';
 
-export type GuideStepType = Exclude<StepType, 'START' | 'END'>;
-interface Props {
-  step: GuideStepType;
-}
+type Props =
+  | {
+      device: 'MOBILE';
+      step: MobileGuideStepType;
+    }
+  | {
+      device: 'DESKTOP';
+      step: DesktopGuideStepType;
+    };
 
-const MESSAGE: Record<GuideStepType, { gray: string; main: string }> = {
+const DESKTOP_MESSAGE: Record<
+  DesktopGuideStepType,
+  { gray: string; main: string }
+> = {
   GUIDE_1: {
     gray: '원하는 날짜와 지역, 필터를 선택하고,',
     main: '딱 맞는 팝업스토어를 찾아보세요!',
@@ -24,34 +35,70 @@ const MESSAGE: Record<GuideStepType, { gray: string; main: string }> = {
   },
 } as const;
 
-const Badge: Record<GuideStepType, string> = {
+const MOBILE_MESSAGE: Record<
+  MobileGuideStepType,
+  { first: string; second: string }
+> = {
+  GUIDE_1: {
+    first: '원하는 날짜와 지역, 필터를 선택하고,',
+    second: '원하는 팝업스토어를 찾을 수 있어요.',
+  },
+  GUIDE_2: {
+    first: '원하는 팝업 스토어에 미리',
+    second: '웨이팅을 등록할 수 있어요.',
+  },
+  GUIDE_3: {
+    first: '실시간 웨이팅을 하고',
+    second: '입장 알림에 따라 입장해주세요.',
+  },
+} as const;
+
+const Badge: Record<DesktopGuideStepType, string> = {
   GUIDE_1: 'Guide 1',
   GUIDE_2: 'Guide 2',
   GUIDE_3: 'Guide 3',
   GUIDE_4: 'Guide 4',
 } as const;
 
-export default function LandingTitle({ step }: Props) {
+export default function LandingTitle({ step, device }: Props) {
   return (
     <div
       className={
-        'w-fit flex gap-x-[20px] absolute top-[65px] left-1/2 transform -translate-x-1/2'
+        'w-fit flex gap-x-[20px] items-center justify-center select-none '
       }
     >
-      <div
-        className={
-          'text-[20px] font-semibold text-main bg-white  h-[46px] w-[119px] flex justify-center items-center rounded-[8px] select-none'
-        }
-      >
-        {Badge[step]}
-      </div>
-      <div
-        className={
-          'font-medium text-[24px] w-fit whitespace-nowrap flex items-center gap-x-[5px] select-none'
-        }
-      >
-        <span className={'text-[#4A4A4A]'}>{MESSAGE[step].gray} </span>
-        <span className={'text-main'}>{MESSAGE[step].main}</span>
+      {device === 'DESKTOP' && (
+        <div
+          className={
+            'text-[20px] font-semibold text-main bg-white  h-[46px] w-[119px] flex justify-center items-center rounded-[8px] select-none'
+          }
+        >
+          {Badge[step]}
+        </div>
+      )}
+
+      <div className={'w-fit whitespace-nowrap select-none'}>
+        {device === 'DESKTOP' && (
+          <div
+            className={'font-medium text-[24px] flex items-center gap-x-[5px]'}
+          >
+            <span className={'text-[#4A4A4A]'}>
+              {DESKTOP_MESSAGE[step].gray}{' '}
+            </span>
+            <span className={'text-main'}>{DESKTOP_MESSAGE[step].main}</span>
+          </div>
+        )}
+
+        {device === 'MOBILE' && (
+          <div
+            className={
+              'font-medium text-[16px] flex flex-col gap-y-[10px] items-center justify-center'
+            }
+          >
+            <span className={'text-gray80'}>{MOBILE_MESSAGE[step].first}</span>
+            <span className={'text-gray80'}>{MOBILE_MESSAGE[step].second}</span>
+          </div>
+        )}
       </div>
     </div>
   );

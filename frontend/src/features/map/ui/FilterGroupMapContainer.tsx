@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapMarker } from 'react-kakao-maps-sdk';
 import { useQuery } from '@tanstack/react-query';
 
@@ -8,6 +8,7 @@ import { KakaoMap } from '@/shared/ui';
 import SearchInput from '@/shared/ui/input/SearchInput';
 import MyLocationButton from '@/shared/ui/map/MyLocationButton';
 import LoadingFallback from '@/shared/ui/loading/LoadingFallback';
+import IconBracketLeft from '@/assets/icons/Normal/Icon_Bracket_Left.svg';
 
 import { useFilterContext } from '@/features/filtering/lib/FilterContext';
 import KeywordFilterPreview, {
@@ -129,6 +130,7 @@ export default function FilterGroupMapContainer() {
           category: ['패션'],
         },
         tag: 'DEFAULT' as const,
+        waitingCount: 3,
       };
 
       setSelectedPopupData(mockPopupData);
@@ -155,6 +157,8 @@ export default function FilterGroupMapContainer() {
       },
     ],
   };
+
+  console.log('isSearchFocused', isSearchFocused);
 
   const { data: popupList, isLoading: isPopupListLoading } = useQuery({
     queryKey: ['mapPopupList', popupType, category],
@@ -195,23 +199,47 @@ export default function FilterGroupMapContainer() {
           {/* 검색 입력창과 결과를 포함하는 컨테이너 */}
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 w-[400px] max-w-[90vw]">
             {/* 검색 입력창 */}
-            <div className="rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 mb-3">
-              <SearchInput
-                id={'search-input'}
-                value={searchValue}
-                onChange={handleChange}
-                onFocus={handleSearchFocus}
-                onBlur={handleSearchBlur}
-                onKeyDown={handleKeyDown}
-              />
+            <div className="rounded-2xl bg-white shadow-[0_2px_10px_0_rgba(0,0,0,0.05)] backdrop-blur-[5px] p-3 mb-3 relative flex items-center">
+              <button
+                onClick={() => handleSearchBlur()}
+                className="flex-shrink-0 mr-2 cursor-pointer"
+              >
+                <IconBracketLeft
+                  width={24}
+                  height={24}
+                  fill={'var(--color-gray60)'}
+                />
+              </button>
+              <div className="flex-grow">
+                <SearchInput
+                  value={searchValue}
+                  onChange={handleChange}
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
             </div>
 
             {/* 검색 결과 표시 */}
             {searchResponse?.content && searchResponse.content.length > 0 && (
-              <div className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2  bg-white  p-3">
+              <div
+                className="max-h-[calc(100vh-200px)] overflow-y-auto space-y-2 bg-white p-3"
+                onMouseDown={e => {
+                  // blur이벤트 방지 - popupcard선택 시 지도 페이지로 이동하는 오류 수정
+                  e.preventDefault();
+                }}
+              >
                 {searchResponse.content.map(popup => {
                   return (
-                    <div key={popup.popupId}>
+                    <div
+                      key={popup.popupId}
+                      onClick={() => {
+                        // 상세 페이지로 이동
+                        window.location.href = `/detail/${popup.popupId}`;
+                      }}
+                      className="cursor-pointer"
+                    >
                       <BadgedPopupCard {...popup} />
                     </div>
                   );
@@ -286,7 +314,10 @@ export default function FilterGroupMapContainer() {
                           selectedPopupId === popup.id
                             ? selectedPopupIconSrc
                             : popupListIconSrc,
-                        size: { width: 32, height: 32 },
+                        size:
+                          selectedPopupId === popup.id
+                            ? { width: 52, height: 52 }
+                            : { width: 32, height: 32 },
                       }}
                       zIndex={selectedPopupId === popup.id ? 9 : 1}
                       onClick={() => handleClickMarker(popup.id)}
@@ -304,10 +335,8 @@ export default function FilterGroupMapContainer() {
           handleMoveToCurrentLocation(mapRef, setCenter, setMyLocationMarker)
         }
       />
-      {selectedPopupData && (
+      {!isSearchFocused && selectedPopupData && (
         <div className="absolute bottom-10 left-0 right-0 z-50">
-          {/* <div className="absolute bottom-[140px] md:bottom-[140px] left-0 right-0 z-50"> */}
-          {/* <div className="absolute bottom-[140px] left-0 right-0 z-50"> */}
           <div className="w-full max-w-sm mx-auto transform scale-100">
             <BadgedPopupCard {...selectedPopupData} />
           </div>

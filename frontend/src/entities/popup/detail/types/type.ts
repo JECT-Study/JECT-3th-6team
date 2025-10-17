@@ -37,7 +37,13 @@ export interface PopupDetailPopupDetail {
   descriptions: string[];
 }
 
-type PopupDetailStatus = 'NONE' | 'WAITING' | 'VISITED';
+type PopupDetailStatus =
+  | 'NONE'
+  | 'WAITING'
+  | 'VISITED'
+  | 'NO_SHOW'
+  | 'STORE_BAN'
+  | 'GLOBAL_BAN';
 
 export interface PopupDetailResponseDto {
   id: number;

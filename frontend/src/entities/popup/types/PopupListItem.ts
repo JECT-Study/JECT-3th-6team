@@ -48,6 +48,7 @@ export interface RawPopupListItemType {
   dDay: number;
   popupImageUrl: string;
   searchTags: searchTagType;
+  waitingCount: number;
 }
 
 /**
@@ -64,6 +65,8 @@ export interface RawPopupHistoryListItemType {
   peopleCount: number;
   contactEmail: string;
   registeredAt: string;
+  waitingCount: number;
+  expectedWaitingTimeMinutes: number;
   popup: {
     popupId: number;
     popupName: string;
@@ -82,7 +85,14 @@ export interface RawPopupHistoryListItemType {
   };
 }
 
+/**
+ * =========================
+ *   팝업 카드 랜더링용 데이터
+ * =========================
+ */
+
 export interface PopupCardViewProps {
+  type: 'HOME' | 'HISTORY';
   popupId: number;
   popupName: string;
   popupImageUrl: string;
@@ -90,6 +100,9 @@ export interface PopupCardViewProps {
   period: string;
   linkTo: string;
   searchTags: string;
+  dDay: number;
+  registeredAt?: string;
+  waitingCount?: number;
   hasRightBar?: boolean;
   Badge?: React.ReactElement;
   rating?: ratingType;

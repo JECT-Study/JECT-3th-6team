@@ -1,15 +1,26 @@
 'use client';
 
-import Link from 'next/link';
 import IconHome from '@/assets/icons/Navigation/Icon_Home.svg';
 import IconMap from '@/assets/icons/Normal/Icon_map.svg';
 import IconMyHistory from '@/assets/icons/Navigation/Icon_My_History.svg';
 import IconSetting from '@/assets/icons/Navigation/Icon_Setting.svg';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Suspense } from 'react';
 
 export default function Navbar() {
+  return (
+    <Suspense fallback={null}>
+      <Navigation />
+    </Suspense>
+  );
+}
+
+function Navigation() {
+  const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams.toString());
 
   const navItems = [
     {
@@ -22,6 +33,10 @@ export default function Navbar() {
     { label: '설정', path: '/setting', icon: IconSetting },
   ];
 
+  const handleClick = (path: string) => {
+    const queryParams = params.toString();
+    router.push(queryParams ? `${path}?${queryParams}` : path);
+  };
   return (
     <div
       className={
@@ -37,8 +52,8 @@ export default function Navbar() {
         const isActive = pathname === item.path;
         const color = isActive ? 'var(--color-main)' : 'var(--color-black)';
         return (
-          <Link
-            href={item.path}
+          <div
+            onClick={() => handleClick(item.path)}
             key={index}
             className={'flex-col items-center justify-center'}
           >
@@ -56,7 +71,7 @@ export default function Navbar() {
             >
               {item.label}
             </span>
-          </Link>
+          </div>
         );
       })}
     </div>

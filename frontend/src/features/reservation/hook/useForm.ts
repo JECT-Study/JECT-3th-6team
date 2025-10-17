@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useDebounce } from '@/shared/lib';
+import { logger, useDebounce } from '@/shared/lib';
 import { FormValidate } from '@/features/reservation/model/FormValidate';
 import { ERROR_CODE_MAP } from '@/features/reservation/model/ErrorCodeMap';
 import { DEBOUNCE_DELAY_MS } from '@/shared/constant';
+import { storage } from '@/shared/lib/localStorage';
+import { FORM_STORAGE_KEY } from '@/features/reservation/constants/formStorageKey';
 
 type FormType = 'onsite-reservation';
 
@@ -28,17 +30,20 @@ export type OnsiteReservationFormError = {
   email: string;
 };
 
-interface UseFormProps<T extends FormType> {
+export interface UseFormProps<T extends FormType> {
   formType: T;
   initialFormValue: FormValueMap[T];
   initialError: FormErrorMap[T];
+  formKey?: string | number; // 각 폼을 구분하는 변수
 }
 
 export default function useForm<T extends FormType>({
   formType,
   initialFormValue,
   initialError,
+  formKey,
 }: UseFormProps<T>) {
+  const storageKey = FORM_STORAGE_KEY({ formType, formKey });
   const [formValue, setFormValue] = useState<FormValueMap[T]>(initialFormValue);
   const [error, setError] = useState<FormErrorMap[T]>(initialError);
   const [currentValue, setCurrentValue] = useState<string | number>('');
@@ -46,6 +51,8 @@ export default function useForm<T extends FormType>({
     keyof FormValueMap[T] | null
   >(null);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const validateField = (
     field: keyof FormValueMap[T],
     value: string | number
@@ -74,6 +81,26 @@ export default function useForm<T extends FormType>({
     }
   }, [debouncedValue, currentField]);
 
+  // 폼 복원
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFormValue(parsed);
+      } catch (e) {
+        logger.error('폼 복원 실패', e);
+      }
+    }
+    setIsInitialized(true);
+  }, [storageKey]);
+
+  // 폼 자동저장
+  useEffect(() => {
+    if (!isInitialized) return;
+    storage.setJSON(storageKey, formValue);
+  }, [formValue, storageKey]);
+
   const handleChange = (
     field: keyof FormValueMap[T],
     value: string | number
@@ -94,6 +121,7 @@ export default function useForm<T extends FormType>({
   const handleReset = () => {
     setFormValue(initialFormValue);
     setError(initialError);
+    storage.clear(storageKey);
   };
 
   // 폼 전체 유효성 검증,

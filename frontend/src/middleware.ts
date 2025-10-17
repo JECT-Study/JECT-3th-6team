@@ -1,6 +1,6 @@
 // src/middleware.ts
 import { type NextRequest, NextResponse } from 'next/server';
-import { isDesktopUA } from '@/shared/lib/isDesktopUA';
+import { checkDeviceUA } from '@/shared/lib/checkDeviceUA';
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -9,22 +9,12 @@ export function middleware(req: NextRequest) {
   if (pathname === '/') {
     const seen = req.cookies.get('seenLanding')?.value === '1';
     const ua = req.headers.get('user-agent') || '';
-    const isDesktop = isDesktopUA(ua);
+    const device = checkDeviceUA(ua);
 
-    if (!seen && isDesktop) {
+    if (!seen) {
       const url = req.nextUrl.clone();
       url.pathname = '/landing';
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // 모바일/태블릿은 랜딩 접근 금지 (직접 접근 방어)
-  if (pathname === '/landing') {
-    const ua = req.headers.get('user-agent') || '';
-    const isDesktop = isDesktopUA(ua);
-    if (!isDesktop) {
-      const url = req.nextUrl.clone();
-      url.pathname = '/';
+      url.searchParams.set('device', device.toUpperCase());
       return NextResponse.redirect(url);
     }
   }

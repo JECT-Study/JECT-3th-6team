@@ -20,7 +20,7 @@ public class OAuthAccountPortAdapter implements OAuthAccountPort {
     @Override
     public Optional<OAuthAccount> findByProviderAndProviderId(OAuthProvider provider, String providerId) {
         return oAuthAccountJpaRepository.findByProviderAndProviderId(provider, providerId)
-            .map(oAuthAccountEntityMapper::toDomain);
+                .map(oAuthAccountEntityMapper::toDomain);
     }
 
     @Override
@@ -28,5 +28,10 @@ public class OAuthAccountPortAdapter implements OAuthAccountPort {
         var entity = oAuthAccountEntityMapper.toEntity(oAuthAccount);
         var savedEntity = oAuthAccountJpaRepository.save(entity);
         return oAuthAccountEntityMapper.toDomain(savedEntity);
+    }
+
+    @Override
+    public void deleteByMemberId(Long memberId) {
+        oAuthAccountJpaRepository.deleteByMemberId(memberId);
     }
 } 
