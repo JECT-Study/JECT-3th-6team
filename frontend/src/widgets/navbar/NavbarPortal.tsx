@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Navbar } from '@/widgets';
 
-function NavbarPortal() {
+export default function NavbarPortal() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
