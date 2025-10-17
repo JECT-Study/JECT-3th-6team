@@ -22,7 +22,7 @@ export function StepIndicator({
   const currentIndex = guideSteps.indexOf(currentStep);
 
   return (
-    <div className="flex items-center justify-center gap-2 absolute bottom-[127px]">
+    <div className="flex items-center justify-center gap-2 ">
       {guideSteps.map((_, idx) => (
         <div
           key={idx}
@@ -48,7 +48,7 @@ export default function MobileStep(props: StepProps) {
   return (
     <div
       className={
-        'w-[100vw] h-[100vh] relative bg-[#F4F4F4]  flex flex-col justify-center items-center'
+        'w-[100vw] h-[100vh] relative bg-[#F4F4F4]  flex flex-col justify-center items-center gap-y-[20px]'
       }
     >
       {/*가이드이미지*/}
@@ -67,7 +67,7 @@ export default function MobileStep(props: StepProps) {
         disabled={false}
         color={'primary'}
         size={'full'}
-        className={'w-[334px] absolute bottom-10'}
+        className={'w-[90vw] max-w-[334px] '}
       >
         {currentStep === 'GUIDE_3' ? '시작하기' : '다음'}
       </StandardButton>
