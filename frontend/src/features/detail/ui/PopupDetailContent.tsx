@@ -58,19 +58,30 @@ export default function PopupDetailContent({
   const isWaiting = status === 'WAITING';
   const isVisited = status === 'VISITED';
   const isWaitingAvailable = status === 'NONE' || status === 'NO_SHOW';
+  const isReservationBanned = status === 'STORE_BAN' || status === 'GLOBAL_BAN';
+  const isOutsideOperatingHours = !isWithinOperatingHours;
 
-  const isReservationBanned =
-    status === 'STORE_BAN' ||
-    status === 'GLOBAL_BAN' ||
-    !isWithinOperatingHours;
+  /* 팝업 운영 상태 및 유저 상태에 따른 버튼 라벨
+  팝업 운영시간 외 : 준비 중이에요
+  팝업 운영시간 내이면서 예약 가능 : 웨이팅하기 ( 예약 전, 노쇼 1회 )
+  방문 했었던 팝업 : 방문 완료
+  노쇼2회 이상 혹은 10회 이상으로 전체 밴 : 오늘은 이용이 어려워요
+*/
 
   let actionLabel = '';
-  if (isWaiting) actionLabel = '예약중';
-  if (isWaitingAvailable) actionLabel = '웨이팅하기';
-  if (isVisited) actionLabel = '방문 완료';
-  if (isReservationBanned) actionLabel = '준비 중이에요';
+  if (dDay < 0) actionLabel = '운영 종료';
+  else if (isWaiting) actionLabel = '예약중';
+  else if (isReservationBanned) actionLabel = '오늘은 이용이 어려워요';
+  else if (isOutsideOperatingHours) actionLabel = '준비 중이에요';
+  else if (isVisited) actionLabel = '방문 완료';
+  else if (isWaitingAvailable) actionLabel = '웨이팅하기';
 
-  const isDisabled = isWaiting || isVisited || isReservationBanned;
+  const isDisabled =
+    dDay < 0 ||
+    isWaiting ||
+    isVisited ||
+    isReservationBanned ||
+    isOutsideOperatingHours;
 
   const handleClickMap = () => {
     const lat = location.latitude;
