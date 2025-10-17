@@ -76,6 +76,9 @@ public class WaitingPortAdapter implements WaitingPort {
                 if (q.getStatus() != null) {
                     builder.and(waitingEntity.status.eq(q.getStatus()));
                 }
+                if (q.getStatus() == null) {
+                    builder.and(waitingEntity.status.ne(WaitingStatus.NO_SHOW));
+                }
                 waitingEntities = jpaQueryFactory.selectFrom(waitingEntity)
                         .where(builder)
                         .orderBy(waitingEntity.waitingNumber.asc())
