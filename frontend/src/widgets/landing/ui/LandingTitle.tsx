@@ -64,7 +64,7 @@ export default function LandingTitle({ step, device }: Props) {
   return (
     <div
       className={
-        'w-fit flex gap-x-[20px] absolute top-[65px] left-1/2 transform -translate-x-1/2'
+        'w-fit flex gap-x-[20px] items-center justify-center select-none '
       }
     >
       {device === 'DESKTOP' && (
