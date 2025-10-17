@@ -22,6 +22,7 @@ import { getMapPopupListApi } from '@/entities/map/api';
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
 import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 import { PopupItemType } from '@/entities/popup/types/PopupListItem';
+import { MapPopupItem } from '@/entities/map/types/type';
 
 export default function FilterGroupMapContainer() {
   // 기본 위치 (서울숲 4번출구 앞)
@@ -126,7 +127,7 @@ export default function FilterGroupMapContainer() {
           type: popupType.length > 0 ? popupType.join(',') : undefined,
           category: category.length > 0 ? category.join(',') : undefined,
         });
-        console.log('result', result);
+
         return { popupList: result };
       } catch (error) {
         console.error('❌ API 실패', error);
@@ -248,13 +249,20 @@ export default function FilterGroupMapContainer() {
               myLocationMarker={myLocationMarker}
             >
               {(() => {
-                const markerData = popupList?.popupList;
-
-                if (!markerData || markerData.length === 0) {
+                if (
+                  !popupList?.popupList ||
+                  !Array.isArray(popupList.popupList)
+                ) {
                   return null;
                 }
 
-                return markerData.map(popup => {
+                const markerData = popupList.popupList;
+
+                if (markerData.length === 0) {
+                  return null;
+                }
+
+                return markerData.map((popup: MapPopupItem) => {
                   return (
                     <MapMarker
                       key={popup.id}
