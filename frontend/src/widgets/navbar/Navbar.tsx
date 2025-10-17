@@ -40,7 +40,7 @@ function Navigation() {
   return (
     <div
       className={
-        'bg-white w-full max-w-[430px] min-w-[320px] py-[34px] fixed bottom-0 flex justify-around pt-1 '
+        'bg-white w-full max-w-[430px] min-w-[320px] py-[34px] fixed bottom-0 flex justify-around pt-1 z-100'
       }
       style={{
         // 모바일에서 안전 영역 고려
