@@ -1,4 +1,4 @@
-import { Navbar } from '@/widgets';
+import NavbarPortal from '@/widgets/navbar/NavbarPortal';
 
 export default function Layout({
   children,
@@ -8,7 +8,7 @@ export default function Layout({
   return (
     <div className={'w-full'}>
       {children}
-      <Navbar />
+      <NavbarPortal />
     </div>
   );
 }
