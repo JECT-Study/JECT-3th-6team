@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -35,9 +34,6 @@ public class WaitingService {
     private final WaitingNotificationService waitingNotificationService;
     private final BanPort banPort;
     private final WaitingStatisticsPort waitingStatisticsPort;
-
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM.dd");
-    private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("E");
 
     /**
      * 현장 대기 신청
@@ -115,7 +111,15 @@ public class WaitingService {
         // 7. 확인 알림 발송
         waitingNotificationService.sendWaitingConfirmedNotification(savedWaiting);
 
-        // 8. 응답 생성
+        // 8. 대기 번호에 따른 알림 발송
+        if (nextWaitingNumber == 0) {
+            waitingNotificationService.sendEnterNowNotification(savedWaiting);
+        }
+        if (nextWaitingNumber == 3) {
+            waitingNotificationService.sendEnter3TeamsBeforeNotification(savedWaiting);
+        }
+
+        // 9. 응답 생성
         return waitingDtoMapper.toCreateResponse(savedWaiting);
     }
 
