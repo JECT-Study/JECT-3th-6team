@@ -20,8 +20,8 @@ import { MapPopupListRequestDto } from '@/entities/map/types/type';
  * };
  * ```
  */
-export const useGetMapBounds = (
-  mapRef: React.RefObject<kakao.maps.Map>
+export const getMapBounds = (
+  mapRef: React.RefObject<kakao.maps.Map | null>
 ): Pick<
   MapPopupListRequestDto,
   'minLatitude' | 'maxLatitude' | 'minLongitude' | 'maxLongitude'

@@ -17,7 +17,7 @@ import KeywordFilterPreview, {
 import toKeywordChips from '@/features/filtering/lib/makeKeywordChip';
 import useSearchMyLocation from '@/features/map/hook/useSearchMyLocation';
 import useMapSearch from '@/features/map/hook/useMapSearch';
-import { useGetMapBounds, useDebounce } from '@/shared/lib';
+import { getMapBounds } from '@/shared/lib';
 
 import { getMapPopupListApi } from '@/entities/map/api';
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
@@ -47,13 +47,10 @@ export default function FilterGroupMapContainer() {
     maxLongitude: number;
   } | null>(null);
 
-  // 디바운스된 지도 범위 (API 호출용)
-  const debouncedMapBounds = useDebounce(mapBounds, 500);
-
   const { filter, tempState, isOpen, handleOpen, handleDeleteKeyword } =
     useFilterContext();
   const { popupType, category } = filter.keyword;
-  const mapRef = useRef<kakao.maps.Map>(null);
+  const mapRef = useRef<kakao.maps.Map | null>(null);
   const { handleMoveToCurrentLocation } = useSearchMyLocation();
   const {
     searchValue,
@@ -129,7 +126,7 @@ export default function FilterGroupMapContainer() {
   // 지도 범위 업데이트 함수
   const updateMapBounds = useCallback(() => {
     if (mapRef.current) {
-      const bounds = useGetMapBounds(mapRef);
+      const bounds = getMapBounds(mapRef);
       if (bounds) {
         setMapBounds(bounds);
       }
@@ -137,11 +134,11 @@ export default function FilterGroupMapContainer() {
   }, []);
 
   const { data: popupList, isLoading: isPopupListLoading } = useQuery({
-    queryKey: ['mapPopupList', popupType, category, debouncedMapBounds],
+    queryKey: ['mapPopupList', popupType, category, mapBounds],
     queryFn: async () => {
       try {
-        // 디바운스된 지도 범위가 없으면 기본 범위 사용
-        const bounds = debouncedMapBounds || {
+        // 지도 범위가 없으면 기본 범위 사용
+        const bounds = mapBounds || {
           minLatitude: 37.541673,
           maxLatitude: 37.545894,
           minLongitude: 127.041309,
@@ -159,11 +156,11 @@ export default function FilterGroupMapContainer() {
         return { popupList: [] }; // API 실패 시 빈 배열 반환 => 지도는 그대로 로드됨(마커x)
       }
     },
-    // 디바운스된 범위가 있을 때만 실행 (초기 로드 제외)
-    enabled: !!debouncedMapBounds || !mapBounds,
+    // 지도 범위가 있을 때만 실행
+    enabled: !!mapBounds,
     // 캐시 설정: 새로운 데이터를 위해 짧은 캐시 시간 설정
     staleTime: 30000, // 30초
-    cacheTime: 60000, // 1분
+    gcTime: 60000, // 1분
   });
 
   // 팝업 데이터가 로드되면 지도 표시 (초기 로드만)
@@ -294,10 +291,11 @@ export default function FilterGroupMapContainer() {
               {(() => {
                 const markerData = popupList?.popupList;
 
-                console.log('마커 데이터:', markerData);
-                console.log('팝업 리스트:', popupList);
-
-                if (!markerData || markerData.length === 0) {
+                if (
+                  !markerData ||
+                  !Array.isArray(markerData) ||
+                  markerData.length === 0
+                ) {
                   return null;
                 }
 
