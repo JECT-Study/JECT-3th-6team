@@ -222,6 +222,12 @@ body {
   overflow-scrolling: touch;
 }
 
+pre {
+  font-family: 'Pretendard', sans-serif; /* 원하는 폰트 지정 */
+  line-height: 1; /* 직접 설정 */
+  white-space: pre-wrap; /* 줄바꿈 유지하면서 폭 맞추기 */
+}
+
 /* 하드웨어 가속 활성화 */
 .transform-gpu {
   transform: translateZ(0);
@@ -271,7 +277,7 @@ body {
 
   .terms-table th,
   .terms-table td {
-    @apply min-w-[130px] py-3 px-4 text-left border-b border-gray-200 ;
+    @apply min-w-[130px] py-3 px-4 text-left border-b border-gray-200;
   }
 
   .terms-table th {
