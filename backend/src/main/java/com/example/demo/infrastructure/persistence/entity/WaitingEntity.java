@@ -3,10 +3,7 @@ package com.example.demo.infrastructure.persistence.entity;
 import com.example.demo.common.entity.BaseEntity;
 import com.example.demo.domain.model.waiting.WaitingStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -47,6 +44,7 @@ public class WaitingEntity extends BaseEntity {
     private Integer waitingNumber;
 
     @Column(name = "initial_waiting_number")
+    @Setter(AccessLevel.PUBLIC) // 시간 없어 임시 아니 이게 어쩔 수 없음
     private Integer initialWaitingNumber;
 
     @Enumerated(EnumType.STRING)

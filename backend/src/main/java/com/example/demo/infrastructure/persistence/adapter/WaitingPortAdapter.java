@@ -36,6 +36,10 @@ public class WaitingPortAdapter implements WaitingPort {
     @Override
     public Waiting save(Waiting waiting) {
         WaitingEntity entity = waitingEntityMapper.toEntity(waiting);
+
+        if (entity.getId() == null) {
+            entity.setInitialWaitingNumber(entity.getWaitingNumber());
+        }
         WaitingEntity savedEntity = waitingJpaRepository.save(entity);
 
         // 저장된 엔티티를 도메인 모델로 변환
