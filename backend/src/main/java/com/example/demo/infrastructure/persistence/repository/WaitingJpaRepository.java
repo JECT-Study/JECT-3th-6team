@@ -25,7 +25,7 @@ public interface WaitingJpaRepository extends JpaRepository<WaitingEntity, Long>
      * @param pageable 페이징 정보
      * @return 대기 엔티티 목록
      */
-    @Query("SELECT w FROM WaitingEntity w WHERE w.memberId = :memberId ORDER BY " +
+    @Query("SELECT w FROM WaitingEntity w WHERE w.memberId = :memberId and w.status != com.example.demo.domain.model.waiting.WaitingStatus.NO_SHOW ORDER BY " +
             "CASE WHEN w.status = :reservedStatus THEN 0 ELSE 1 END, " +
             "w.createdAt DESC")
     List<WaitingEntity> findByMemberIdOrderByStatusReservedFirstThenCreatedAtDesc(
