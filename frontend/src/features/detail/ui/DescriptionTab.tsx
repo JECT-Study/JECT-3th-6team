@@ -80,11 +80,11 @@ export function DescriptionTab({
       <div className="mt-4.5 flex flex-col gap-2">
         <RegularText className="text-[15px] text-black">콘텐츠</RegularText>
         {popupDetail.descriptions.map((description, index) => (
-          <pre
-            key={index}
-            className="text-sm text-black whitespace-pre-wrap"
-            style={{ lineHeight: '1' }}
-          >
+        <pre
+        key={index}
+        className="text-sm text-black whitespace-pre-wrap font-pretendard"
+        style={{ lineHeight: '1.5rem', padding: '0 1rem 0 0.5rem' }}
+      >
             {description}
           </pre>
         ))}

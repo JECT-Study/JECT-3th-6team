@@ -22,6 +22,7 @@ import { getMapPopupListApi } from '@/entities/map/api';
 import getPopupListApi from '@/entities/popup/api/getPopupListApi';
 import BadgedPopupCard from '@/entities/popup/ui/BadgedPopupCard';
 import { PopupItemType } from '@/entities/popup/types/PopupListItem';
+import { MapPopupItem } from '@/entities/map/types/type';
 
 export default function FilterGroupMapContainer() {
   // 기본 위치 (서울숲 4번출구 앞)
@@ -105,35 +106,7 @@ export default function FilterGroupMapContainer() {
         setSelectedPopupData(popupData.content[0]);
       }
     } catch (error) {
-      console.error('❌ 팝업 데이터 조회 실패, 목 데이터 사용:', error);
-
-      const mockPopupData = {
-        popupId: popupId,
-        popupName: `팝업 스토어 ${popupId}`,
-        location: {
-          addressName: '서울특별시 강남구 청담동',
-          region1depthName: '서울특별시',
-          region2depthName: '강남구',
-          region3depthName: '청담동',
-          latitude: 37.543401,
-          longitude: 127.04452,
-        },
-        rating: {
-          averageStar: 4.5,
-          reviewCount: 123,
-        },
-        period: '2025.01.01 ~ 2025.12.31',
-        dDay: 365,
-        popupImageUrl: '/images/popup-ex.png',
-        searchTags: {
-          type: '체험형',
-          category: ['패션'],
-        },
-        tag: 'DEFAULT' as const,
-        waitingCount: 3,
-      };
-
-      setSelectedPopupData(mockPopupData);
+      console.error('❌ 팝업 데이터 조회 실패', error);
     }
   };
 
@@ -142,40 +115,23 @@ export default function FilterGroupMapContainer() {
   // 2. 로딩 완료 후 기본 위치(서울숲역 4번출구) 사용
   // 3. 내위치찾기 버튼 클릭 시 현재 위치 추적 - 이때 권한설정 팝업
 
-  // 임시 목 데이터 (MSW 대신 사용)
-  const mockPopupList = {
-    popupList: [
-      {
-        id: 7,
-        latitude: 37.545681758279,
-        longitude: 127.04442401847,
-      },
-      {
-        id: 2,
-        latitude: 37.545470791421,
-        longitude: 127.04324359055,
-      },
-    ],
-  };
-
-  console.log('isSearchFocused', isSearchFocused);
-
   const { data: popupList, isLoading: isPopupListLoading } = useQuery({
     queryKey: ['mapPopupList', popupType, category],
     queryFn: async () => {
       try {
         const result = await getMapPopupListApi({
-          minLatitude: 37.541673,
-          maxLatitude: 37.545894,
-          minLongitude: 127.041309,
-          maxLongitude: 127.047804,
+          minLatitude: 33.12,
+          maxLatitude: 38.58,
+          minLongitude: 125.11,
+          maxLongitude: 131.86,
           type: popupType.length > 0 ? popupType.join(',') : undefined,
           category: category.length > 0 ? category.join(',') : undefined,
         });
-        return result;
+
+        return { popupList: result };
       } catch (error) {
-        console.error('❌ API 실패, 목 데이터 사용:', error);
-        return mockPopupList; // API 실패 시 목 데이터 반환
+        console.error('❌ API 실패', error);
+        return { popupList: [] };
       }
     },
   });
@@ -293,18 +249,20 @@ export default function FilterGroupMapContainer() {
               myLocationMarker={myLocationMarker}
             >
               {(() => {
-                const markerData =
-                  popupList?.popupList || mockPopupList.popupList;
-
-                if (isPopupListLoading) {
+                if (
+                  !popupList?.popupList ||
+                  !Array.isArray(popupList.popupList)
+                ) {
                   return null;
                 }
 
-                if (!markerData || markerData.length === 0) {
+                const markerData = popupList.popupList;
+
+                if (markerData.length === 0) {
                   return null;
                 }
 
-                return markerData.map(popup => {
+                return markerData.map((popup: MapPopupItem) => {
                   return (
                     <MapMarker
                       key={popup.id}
