@@ -9,6 +9,7 @@ import com.example.demo.common.exception.BusinessException;
 import com.example.demo.common.exception.ErrorType;
 import com.example.demo.domain.model.Member;
 import com.example.demo.domain.model.ban.BanQuery;
+import com.example.demo.domain.model.ban.BanType;
 import com.example.demo.domain.model.waiting.Waiting;
 import com.example.demo.domain.model.waiting.WaitingQuery;
 import com.example.demo.domain.model.waiting.WaitingStatus;
@@ -51,7 +52,7 @@ public class WaitingService {
 
         // 제재 여부 확인
         boolean notPopupBan = banPort.findByQuery(BanQuery.byMemberAndPopup(request.memberId(), request.popupId())).isEmpty();
-        boolean notGlobalBan = banPort.findByQuery(BanQuery.byMemberIdFromAll(request.memberId())).isEmpty();
+        boolean notGlobalBan = banPort.findByQuery(BanQuery.byBanTypeAndMemberIdAndIsActive(BanType.GLOBAL, request.memberId(), true)).isEmpty();
 
         if (!notPopupBan || !notGlobalBan) {
             throw new BusinessException(ErrorType.BANNED_MEMBER, String.valueOf(request.memberId()));
