@@ -182,6 +182,9 @@ public class ScheduledNoShowProcessService {
                 .toList();
 
         PopupWaitingStatistics popupWaitingStatistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
+        Double avgTimePerPerson = popupWaitingStatistics.calculateAverageTimePerPerson();
+        log.info("[노쇼 처리] 예상 대기 시간 업데이트 시작 - popupId: {}, 평균 대기시간: {}분/팀, 대기자 수: {}", 
+                popupId, avgTimePerPerson, sortedWaitings.size());
 
         // 순번 재정렬 (0번부터 순차적으로)
         for (int i = 0; i < sortedWaitings.size(); i++) {
@@ -189,6 +192,10 @@ public class ScheduledNoShowProcessService {
 
             // 대기 번호와 canEnterAt을 업데이트한 새로운 Waiting 객체 생성
             Waiting updatedWaiting = waiting.minusWaitingNumber(popupWaitingStatistics);
+
+            log.debug("[노쇼 처리] 예상 대기 시간 업데이트 - waitingId: {}, 대기번호: {}번->{}번, 예상시간: {}분", 
+                    waiting.id(), waiting.waitingNumber(), updatedWaiting.waitingNumber(), 
+                    updatedWaiting.expectedWaitingTimeMinutes());
 
             waitingPort.save(updatedWaiting);
 
@@ -198,6 +205,8 @@ public class ScheduledNoShowProcessService {
                 case 3 -> sendEnter3TeamsBeforeNotification(updatedWaiting);
             }
         }
+        
+        log.info("[노쇼 처리] 예상 대기 시간 업데이트 완료 - {} 건 저장", sortedWaitings.size());
     }
 
     /**

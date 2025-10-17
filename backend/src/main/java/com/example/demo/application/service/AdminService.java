@@ -197,6 +197,9 @@ public class AdminService {
         
         // 팝업 통계 조회
         var statistics = waitingStatisticsPort.findCompletedStatisticsByPopupId(popupId);
+        Double avgTimePerPerson = statistics.calculateAverageTimePerPerson();
+        log.info("[입장 처리] 예상 대기 시간 업데이트 시작 - popupId: {}, 평균 대기시간: {}분/팀, 대기자 수: {}", 
+                popupId, avgTimePerPerson, waitings.size());
 
         Waiting newFirstWaiting = null;
         Waiting new3rdWaiting = null;
@@ -207,6 +210,10 @@ public class AdminService {
             if (waiting.waitingNumber() > 0) {
                 Waiting decremented = waiting.minusWaitingNumber(statistics);
                 decrementedWaitings.add(decremented);
+                
+                log.debug("[입장 처리] 예상 대기 시간 업데이트 - waitingId: {}, 대기번호: {}번->{}번, 예상시간: {}분", 
+                        waiting.id(), waiting.waitingNumber(), decremented.waitingNumber(), 
+                        decremented.expectedWaitingTimeMinutes());
                 
                 // 새로 0번이 된 사람 (기존 1번)
                 if (decremented.waitingNumber() == 0) {
@@ -222,7 +229,7 @@ public class AdminService {
         // 배치로 한 번에 저장 (N+1 문제 해결)
         if (!decrementedWaitings.isEmpty()) {
             waitingPort.saveAll(decrementedWaitings);
-            log.debug("대기 번호 일괄 갱신 완료: {} 건", decrementedWaitings.size());
+            log.info("[입장 처리] 예상 대기 시간 업데이트 완료 - {} 건 일괄 저장", decrementedWaitings.size());
         }
         
         // 새로 0번이 된 사람에게 입장 알림 발송 (SSE + 이메일)
