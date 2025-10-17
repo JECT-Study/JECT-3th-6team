@@ -388,7 +388,7 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse1 = new WaitingResponse(
-                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null
+                    1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null, 5
             );
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
@@ -399,12 +399,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse2 = new WaitingResponse(
-                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now, null
+                    2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now, null, 3
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
-            when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse1, waitingResponse2);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -416,9 +415,8 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting1);
-            verify(waitingDtoMapper).toResponse(waiting2);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -441,7 +439,7 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일",
                     new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
-            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null);
+            WaitingResponse waitingResponse1 = new WaitingResponse(1L, 1, "RESERVED", "홍길동", 2, "hong@example.com", popupDto1, now, null, 5);
 
             PopupSummaryResponse popupDto2 = new PopupSummaryResponse(
                     1L, "테스트 팝업", "thumbnail1.jpg",
@@ -449,11 +447,10 @@ class WaitingServiceTest {
                     5L, "6월 10일 ~ 6월 20일",
                     new SearchTagsResponse("체험형", List.of("패션", "예술"))
             );
-            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1), null);
+            WaitingResponse waitingResponse2 = new WaitingResponse(2L, 2, "COMPLETED", "김철수", 3, "kim@example.com", popupDto2, now.minusDays(1), null, 3);
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting1)).thenReturn(waitingResponse1);
-            when(waitingDtoMapper.toResponse(waiting2)).thenReturn(waitingResponse2);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse1, waitingResponse2);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -465,9 +462,8 @@ class WaitingServiceTest {
             assertTrue(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting1);
-            verify(waitingDtoMapper).toResponse(waiting2);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -492,8 +488,8 @@ class WaitingServiceTest {
             assertFalse(response.hasNext());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -521,11 +517,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now, null
+                    1L, 1, status, "홍길동", 2, "hong@example.com", popupDto, now, null, 5
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -536,8 +532,8 @@ class WaitingServiceTest {
             assertEquals("WAITING", response.content().getFirst().status());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -565,11 +561,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now, null
+                    6L, 6, "RESERVED", "홍길동", 2, "hong@example.com", popupDto, now, null, 5
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(waitings);
-            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), size, lastWaitingId, status, null);
@@ -580,8 +576,8 @@ class WaitingServiceTest {
             assertEquals(response.content().getLast().waitingId(), response.lastWaitingId());
 
             // verify
-            verify(waitingPort).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper).toResponse(waiting);
+            verify(waitingPort, atLeast(1)).findByQuery(any(WaitingQuery.class));
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -599,7 +595,7 @@ class WaitingServiceTest {
 
             // verify
             verify(waitingPort, never()).findByQuery(any(WaitingQuery.class));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -622,11 +618,11 @@ class WaitingServiceTest {
             );
 
             WaitingResponse waitingResponse = new WaitingResponse(
-                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now, null
+                    waitingId, 1, "WAITING", "홍길동", 2, "hong@example.com", popupDto, now, null, 5
             );
 
             when(waitingPort.findByQuery(any(WaitingQuery.class))).thenReturn(List.of(waiting));
-            when(waitingDtoMapper.toResponse(waiting)).thenReturn(waitingResponse);
+            when(waitingDtoMapper.toResponse(any(Waiting.class), any(Integer.class))).thenReturn(waitingResponse);
 
             // when
             VisitHistoryCursorResponse response = waitingService.getVisitHistory(validMember.id(), 10, null, null, waitingId);
@@ -640,7 +636,7 @@ class WaitingServiceTest {
 
             // verify
             verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
-            verify(waitingDtoMapper).toResponse(waiting);
+            verify(waitingDtoMapper, atLeast(1)).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -658,7 +654,7 @@ class WaitingServiceTest {
 
             // verify
             verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
 
         @Test
@@ -683,7 +679,7 @@ class WaitingServiceTest {
 
             // verify
             verify(waitingPort).findByQuery(WaitingQuery.forWaitingId(waitingId));
-            verify(waitingDtoMapper, never()).toResponse(any());
+            verify(waitingDtoMapper, never()).toResponse(any(Waiting.class), any(Integer.class));
         }
     }
 

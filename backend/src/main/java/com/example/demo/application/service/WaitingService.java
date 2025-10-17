@@ -132,7 +132,9 @@ public class WaitingService {
                 throw new BusinessException(ErrorType.ACCESS_DENIED_WAITING, String.valueOf(waitingId));
             }
 
-            WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting);
+            // 해당 팝업의 대기중인 팀 수 조회
+            int waitingCount = waitingPort.findByQuery(WaitingQuery.forPopup(waiting.popup().getId(), WaitingStatus.WAITING)).size();
+            WaitingResponse waitingResponse = waitingDtoMapper.toResponse(waiting, waitingCount);
             return new VisitHistoryCursorResponse(List.of(waitingResponse), waitingId, false);
         }
 
@@ -146,9 +148,13 @@ public class WaitingService {
         boolean hasNext = waitings.size() == size;
         Long lastId = waitings.isEmpty() ? null : waitings.getLast().id();
 
-        // 4. DTO 변환
+        // 4. DTO 변환 (각 팝업별 대기중인 팀 수 포함)
         List<WaitingResponse> waitingResponses = waitings.stream()
-                .map(waitingDtoMapper::toResponse)
+                .map(waiting -> {
+                    // 해당 팝업의 대기중인 팀 수 조회
+                    int waitingCount = waitingPort.findByQuery(WaitingQuery.forPopup(waiting.popup().getId(), WaitingStatus.WAITING)).size();
+                    return waitingDtoMapper.toResponse(waiting, waitingCount);
+                })
                 .toList();
 
         return new VisitHistoryCursorResponse(waitingResponses, lastId, hasNext);

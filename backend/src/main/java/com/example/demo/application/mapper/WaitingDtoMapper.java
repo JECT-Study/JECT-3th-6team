@@ -41,9 +41,9 @@ public class WaitingDtoMapper {
     }
 
     /**
-     * Waiting 도메인 모델을 WaitingResponse DTO로 변환
+     * Waiting 도메인 모델을 WaitingResponse DTO로 변환 (팀 수 포함)
      */
-    public WaitingResponse toResponse(Waiting waiting) {
+    public WaitingResponse toResponse(Waiting waiting, Integer waitingCount) {
         Popup popup = waiting.popup();
         LocalDate popupEndDate = popup.getSchedule().dateRange().endDate();
         LocalDate now = LocalDate.now();
@@ -66,7 +66,8 @@ public class WaitingDtoMapper {
                         popupDtoMapper.toSearchTagsResponse(popup)
                 ),
                 waiting.registeredAt(),
-                waiting.expectedWaitingTimeMinutes()
+                waiting.expectedWaitingTimeMinutes(),
+                waitingCount
         );
     }
 
