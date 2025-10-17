@@ -190,6 +190,25 @@ public class WaitingNotificationService {
     }
 
     /**
+     * 입장 시간 초과 알림 발송
+     */
+    @Transactional
+    public void sendEnterTimeOverNotification(Waiting waiting) {
+        log.info("입장 시간 초과 알림 발송 - 대기 ID: {}, 회원 ID: {}", waiting.id(), waiting.member().id());
+
+        String content = "입장 시간이 초과되었습니다. 빠른 입장 부탁드립니다! 입장이 지연될 경우 웨이팅이 취소될 수 있습니다.";
+
+        WaitingDomainEvent event = new WaitingDomainEvent(waiting, WaitingEventType.ENTER_TIME_OVER);
+        Notification notification = Notification.builder()
+                .member(waiting.member())
+                .event(event)
+                .content(content)
+                .build();
+
+        sendNotification(notification);
+    }
+
+    /**
      * 입장 알림 이메일 발송
      */
     private void sendEntryEmailNotification(Waiting waiting) {
