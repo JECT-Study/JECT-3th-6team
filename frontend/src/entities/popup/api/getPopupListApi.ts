@@ -4,6 +4,7 @@ import {
   RawPopupListItemType,
 } from '@/entities/popup/types/PopupListItem';
 import { tagPopupItem } from '@/entities/popup/lib/tagPopupItem';
+import { POPUP_ENDPOINTS } from '@/entities/popup/api/endpoints';
 import { ApiError } from 'next/dist/server/api-utils';
 
 export interface PopupListRequest {
@@ -35,7 +36,7 @@ export default async function getPopupListApi(
 ): Promise<TaggedPopupListResponse> {
   try {
     const response = await (
-      await APIBuilder.get('/popups')
+      await APIBuilder.get(POPUP_ENDPOINTS.GET_POPUP_LIST)
         .timeout(5000)
         .params({ ...request })
         .buildAsync()
