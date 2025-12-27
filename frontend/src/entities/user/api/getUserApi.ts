@@ -1,11 +1,12 @@
 import { APIBuilder, logError } from '@/shared/lib';
 import { ApiError } from '@/shared/type/api';
 import { UserResponse } from '@/entities/user/type/UserResponse';
+import { USER_ENDPOINTS } from '@/entities/user/api/endpoints';
 
 export default async function getUserApi() {
   try {
     const response = await (
-      await APIBuilder.get('/auth/me')
+      await APIBuilder.get(USER_ENDPOINTS.GET_USER)
         .timeout(5000)
         .withCredentials(true)
         .auth()
