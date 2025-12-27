@@ -1,4 +1,4 @@
-export { default as useDebounce } from './useDebounce';
+export { default as useDebounce } from '../hook/useDebounce';
 export { useGeolocation } from './useGeolocation';
 export { default as API } from './API';
 export { default as APIBuilder } from './APIBuilder';
